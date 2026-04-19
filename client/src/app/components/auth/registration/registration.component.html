@@ -1,0 +1,34 @@
+<app-box-container3>
+  <ng-container boxLabel>
+    {{ "AUTH.SIGN_IN.TITLE" | translate }}
+  </ng-container>
+
+  <ng-container boxContent>
+    <form class="space-y-4 md:space-y-6" [formGroup]="form" (submit)="sendRegistrationForm()">
+      <button hidden></button>
+      <formly-form [form]="form" [fields]="fields" (submit)="sendRegistrationForm()"></formly-form>
+      <div class="py-2" *ngIf="formLevelErrors.length > 0">
+        <ng-container *ngFor="let error of formLevelErrors">
+          <mat-error>{{ error | translate }}</mat-error>
+        </ng-container>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container boxAction>
+    <button mat-raised-button
+            (click)="sendRegistrationForm()"
+            color="primary">
+      {{ "AUTH.REGISTRATION.BUTTON.CREATE_ACCOUNT" | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container boxLinks>
+    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+      {{ "AUTH.REGISTRATION.NO_ACCOUNT" | translate }}
+      <a routerLink="/registration" class="font-medium text-primary-600 hover:underline dark:text-primary-500">
+        {{ "AUTH.REGISTRATION.LINK.CREATE_ONE" | translate }}
+      </a>
+    </p>
+  </ng-container>
+</app-box-container3>

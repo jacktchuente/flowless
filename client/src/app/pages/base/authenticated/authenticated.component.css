@@ -1,0 +1,27 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.left-sidenav-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 250px;
+}
+
+/*.left-sidenav-container {*/
+/*  padding-top: 64px;*/
+/*}*/
+
+.toolbar-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.footer-fixed {
+  position: absolute;
+  bottom: 0;
+  z-index: 1000;
+}

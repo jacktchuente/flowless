@@ -1,0 +1,19 @@
+<div class="max-w-2xl">
+  <ng-container *ngIf="initialObject ? updateForm : updateForm as form">
+    <ng-container *ngIf="updateFields as fields">
+      <form [formGroup]="form" (ngSubmit)="submitForm()">
+        <formly-form
+          [form]="form"
+          [fields]="fields"
+          [model]="initialObject">
+        </formly-form>
+        <button mat-raised-button
+                (click)="submitForm()"
+                color="primary">{{ "Enregistrer" | translate }}
+        </button>
+      </form>
+    </ng-container>
+  </ng-container>
+
+
+</div>

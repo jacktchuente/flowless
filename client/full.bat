@@ -1,0 +1,1 @@
+ng g @kwyxyz/ngx-request:crud-component --name %1Read --object-name %2 --method r %3 %4 %5 %6 %7 %8 %9 && ng g @kwyxyz/ngx-request:crud-component --name %1List --object-name %2 --method l %3 %4 %5 %6 %7 %8 %9 && ng g @kwyxyz/ngx-request:crud-component --name %1CreateUpdate --object-name %2 --method cu %3 %4 %5 %6 %7 %8 %9

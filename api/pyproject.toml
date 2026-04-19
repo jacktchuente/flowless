@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = ""
+authors = ["jack <jack>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Django = "^5.2"
+djangorestframework = "^3.16.0"
+djangorestframework-simplejwt = "^5.5.0"
+django-cors-headers = "^4.7.0"
+psycopg2 = "^2.9.10"
+djx-account = "^0.3.3"
+djx-cmds = "^0.2.2"
+django-filter = "^25.1"
+celery = "^5.5.2"
+gevent = "^25.4.2"
+djx-websocket = "0.2.0"
+django-anymail = {extras = ["sendinblue"], version = "^13.0"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+

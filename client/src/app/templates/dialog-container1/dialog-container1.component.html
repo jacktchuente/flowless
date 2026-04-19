@@ -1,0 +1,19 @@
+<div mat-dialog-title class="dialog-title">
+  <h1 style="font-size: 21px">
+    <ng-content select="[dialogTitle]"></ng-content>
+  </h1>
+  <span style="flex: 1 0"></span>
+  <ng-content select="[dialogClose]">
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </ng-content>
+
+</div>
+<mat-dialog-content class="mat-typography">
+  <ng-content select="[dialogContent]"></ng-content>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <ng-content select="[dialogActions]"></ng-content>
+
+</mat-dialog-actions>

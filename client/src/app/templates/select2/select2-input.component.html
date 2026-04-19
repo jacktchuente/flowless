@@ -1,0 +1,13 @@
+<ng-select
+  appendTo="html"
+  [items]="items | async"
+  (scrollToEnd)="scrollToEnd($event)"
+  (search)="search($event)"
+  [multiple]="multiple"
+  [bindLabel]="labelKey"
+  [bindValue]="valueKey"
+  [placeholder]="field.props.placeholder || ''"
+  [clearable]="clearable"
+  [formControl]="formControl"
+  [formlyAttributes]="field">
+</ng-select>

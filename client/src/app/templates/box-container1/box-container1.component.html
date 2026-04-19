@@ -1,0 +1,18 @@
+<div class="bg-teal-700 p-4 rounded-md text-white flex items-center"  style="width: 100%">
+  <div class="flex-1" style="max-width: 60px">
+    <span class="material-icons text-white text-4xl">
+        <ng-content select="[boxIcon]"></ng-content>
+    </span>
+  </div>
+  <div class="flex-2 pl-4" >
+    <div class="text-xs uppercase">
+      <ng-content select="[boxTitle]"></ng-content>
+    </div>
+    <div class="text-2xl mt-1">
+      <ng-content select="[boxValue]"></ng-content>
+    </div>
+    <div class="text-xs mt-1 text-teal-100">
+      <ng-content select="[boxSubValue]"></ng-content>
+    </div>
+  </div>
+</div>

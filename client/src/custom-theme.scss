@@ -1,0 +1,27 @@
+@use '@angular/material' as mat;
+@use '@ng-matero/extensions' as mtx;
+
+$config: (
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+  )
+);
+$theme: mat.private-deep-merge-all(
+    mat.define-theme($config),
+    mtx.define-theme($config)
+);
+
+body {
+  @include mat.all-component-themes($theme);
+
+}
+
+html {
+  @include mtx.all-component-themes($theme);
+
+}
+
+@include mat.core();
+@include mat.color-variants-backwards-compatibility($theme);

@@ -1,0 +1,13 @@
+<div style=" background-color: var(--dark)">
+  <mat-dialog-content>
+    <div style="padding: 10px;">
+      <p style="text-align: center; color: white">{{ confirmationMessage | translate }}</p>
+      <div style="display: flex; justify-content: space-around">
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button (click)="confirm()" color="warn" mat-button>{{"Oui" | translate}}</button>
+    <button (click)="cancel()" color="primary" mat-button>{{"Non" | translate}}</button>
+  </mat-dialog-actions>
+</div>
