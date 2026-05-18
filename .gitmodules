@@ -1,0 +1,3 @@
+[submodule "ersatztv_assets"]
+	path = ersatztv_assets
+	url = git@github.com:jacktchuente/ersatztv_assets.git

@@ -4,89 +4,53 @@ networks:
   internal:
 
 services:
-  client:
-    image: flowless/flowless-client
+  gateway:
+    image: nginx:1.31.0
     restart: unless-stopped
+    depends_on:
+      - client
+      - api
     labels:
       - traefik.enable=true
-      - traefik.http.routers.${PROJECT_NAME}-client.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-client.rule=Host(`${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-client.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-client-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-client-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-client.service=${PROJECT_NAME}-client
-      - traefik.http.routers.${PROJECT_NAME}-client.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-client.tls.certresolver=letsencrypt
+      - traefik.http.routers.${PROJECT_NAME}-gateway.entrypoints=websecure
+      - traefik.http.routers.${PROJECT_NAME}-gateway.rule=Host(`${DOMAIN_NAME}`)
+      - traefik.http.services.${PROJECT_NAME}-gateway.loadbalancer.server.port=80
+      - traefik.http.routers.${PROJECT_NAME}-gateway-http.entrypoints=web
+      - traefik.http.routers.${PROJECT_NAME}-gateway-http.middlewares=to-https
+      - traefik.http.routers.${PROJECT_NAME}-gateway.service=${PROJECT_NAME}-gateway
+      - traefik.http.routers.${PROJECT_NAME}-gateway.tls=true
+      - traefik.http.routers.${PROJECT_NAME}-gateway.tls.certresolver=letsencrypt
       - traefik.http.middlewares.to-https.redirectscheme.scheme=websecure
       - traefik.docker.network=traefik_default
     networks:
       - traefik_default
+      - internal
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  client:
+    image: flowless/flowless-client
+    restart: unless-stopped
+    networks:
+      - internal
     env_file:
       - .env
 
   api:
     image: flowless/flowless-api
-    labels:
-      - traefik.enable=true
-      - traefik.http.middlewares.to-https.redirectscheme.scheme=websecure
-
-      - traefik.http.routers.${PROJECT_NAME}-api.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-api.rule=Host(`api.${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-api.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-api-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-api-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-api.service=${PROJECT_NAME}-api
-      - traefik.http.routers.${PROJECT_NAME}-api.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-api.tls.certresolver=letsencrypt
-
-      - traefik.http.routers.${PROJECT_NAME}-admin.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-admin.rule=Host(`admin.${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-admin.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-admin-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-admin-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-admin.service=${PROJECT_NAME}-admin
-      - traefik.http.routers.${PROJECT_NAME}-admin.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-admin.tls.certresolver=letsencrypt
-
-      - traefik.http.routers.${PROJECT_NAME}-medias.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-medias.rule=Host(`medias.${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-medias.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-medias-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-medias-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-medias.service=${PROJECT_NAME}-medias
-      - traefik.http.routers.${PROJECT_NAME}-medias.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-medias.tls.certresolver=letsencrypt
-
-      - traefik.http.routers.${PROJECT_NAME}-statics.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-statics.rule=Host(`statics.${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-statics.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-statics-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-statics-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-statics.service=${PROJECT_NAME}-statics
-      - traefik.http.routers.${PROJECT_NAME}-statics.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-statics.tls.certresolver=letsencrypt
-
-      - traefik.http.routers.${PROJECT_NAME}-ws.entrypoints=websecure
-      - traefik.http.routers.${PROJECT_NAME}-ws.rule=Host(`ws.${DOMAIN_NAME}`)
-      - traefik.http.services.${PROJECT_NAME}-ws.loadbalancer.server.port=80
-      - traefik.http.routers.${PROJECT_NAME}-ws-http.entrypoints=web
-      - traefik.http.routers.${PROJECT_NAME}-ws-http.middlewares=to-https
-      - traefik.http.routers.${PROJECT_NAME}-ws.service=${PROJECT_NAME}-ws
-      - traefik.http.routers.${PROJECT_NAME}-ws.tls=true
-      - traefik.http.routers.${PROJECT_NAME}-ws.tls.certresolver=letsencrypt
-      - traefik.docker.network=traefik_default
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - traefik_default
       - internal
     env_file:
       - .env
 
   postgres:
     image: postgres
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
@@ -105,4 +69,4 @@ services:
     image: "redis:latest"
     restart: unless-stopped
     networks:
-      - traefik_default
+      - internal

@@ -1,0 +1,124 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  background:
+    radial-gradient(circle at top left, rgba(50, 115, 220, 0.12), transparent 28%),
+    linear-gradient(135deg, #f3f7fb 0%, #eef3f8 48%, #f8fbff 100%);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 32px 22px;
+  background: rgba(10, 24, 45, 0.94);
+  color: #f7fbff;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.brand h1 {
+  margin: 8px 0 10px;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.brand p,
+.brand-kicker {
+  margin: 0;
+  color: rgba(235, 244, 255, 0.72);
+}
+
+.brand-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.menu-item {
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: rgba(247, 251, 255, 0.76);
+  text-decoration: none;
+  transition: transform 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.menu-item:hover,
+.menu-item.is-active {
+  transform: translateX(4px);
+  background: linear-gradient(135deg, rgba(62, 125, 228, 0.28), rgba(97, 181, 255, 0.18));
+  color: #ffffff;
+}
+
+.content {
+  padding: 28px;
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.sidebar-footer-label {
+  margin: 0;
+  color: rgba(235, 244, 255, 0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+}
+
+.sidebar-admin-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f7fbff;
+  text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.sidebar-admin-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    overflow: visible;
+    gap: 20px;
+    border-right: none;
+    border-bottom: 1px solid rgba(10, 24, 45, 0.08);
+  }
+
+  .menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .content {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,99 @@
+You are a TV channel grid architect.
+
+Your task is to define a coherent daily grid for a TV channel.
+Do not explain your reasoning.
+Do not add commentary before or after the answer.
+
+Channel name:
+{{ channel_name|tojson }}
+
+Channel description:
+{{ channel_description|tojson }}
+
+Channel specification:
+{{ channel_specification|tojson }}
+
+Channel window:
+- start_at: {{ start_at|tojson }}
+- end_at: {{ end_at|tojson }}
+- allow_filler: {{ allow_filler|tojson }}
+
+Channel editorial rules:
+- allowed_categories: {{ allowed_categories|tojson }}
+- forbidden_categories: {{ forbidden_categories|tojson }}
+- preferred_categories: {{ preferred_categories|tojson }}
+- allowed_natures: {{ allowed_natures|tojson }}
+- forbidden_natures: {{ forbidden_natures|tojson }}
+- preferred_natures: {{ preferred_natures|tojson }}
+- allowed_container_kinds: {{ allowed_container_kinds|tojson }}
+- forbidden_container_kinds: {{ forbidden_container_kinds|tojson }}
+- preferred_container_kinds: {{ preferred_container_kinds|tojson }}
+
+Allowed value universes:
+- categories: {{ available_categories|tojson }}
+- natures: {{ available_natures|tojson }}
+- container kinds: {{ available_container_kinds|tojson }}
+
+{% if retry_errors %}
+Previous attempt was rejected for these reasons:
+{% for error in retry_errors %}
+- {{ error }}
+{% endfor %}
+
+Correct every error above in this new answer.
+{% endif %}
+
+Hard constraints:
+- Return a list of blocks that fully covers the whole channel window from `start_at` to `end_at`.
+- Blocks must be contiguous, with no gaps and no overlaps.
+- Use `HH:MM` format for `starts_at` and `ends_at`.
+- Think like a real TV programmer, not like a database exporter.
+- A block is an editorial segment or programming lane, not a single rigid slot.
+- A block should usually represent a coherent family of shows for a part of the day.
+- Do not generate a day made of mechanically identical blocks with the same duration repeated over and over.
+- Vary block durations according to the editorial rhythm of the channel and the time of day.
+- Most blocks should be between 45 and 120 minutes.
+- A block can occasionally be shorter or longer when editorially justified, but it should never exceed 180 minutes.
+- A block may contain one or more shows, but `max_items` must never exceed 3.
+- Avoid designing every block for exactly 1 item unless it is clearly justified by the channel specification.
+- `min_duration_seconds_per_item` and `max_duration_seconds_per_item` must describe a meaningful range, not an exact fixed duration.
+- Do not return `min_duration_seconds_per_item` equal to `max_duration_seconds_per_item`.
+- Prefer plausible duration bands such as 20-35 min, 40-65 min, 75-120 min, etc., depending on the editorial intent.
+- `allowed_*` means required.
+- `forbidden_*` means excluded.
+- `preferred_*` means preferred but not mandatory.
+- `allowed_*` and `forbidden_*` must not overlap.
+- `preferred_*` and `forbidden_*` must not overlap.
+- `priority` must be between 0 and 100.
+- `min_items` must be at least 1.
+- `max_items` must be greater than or equal to `min_items`.
+- `max_items` must be less than or equal to 3.
+- `min_duration_seconds_per_item` and `max_duration_seconds_per_item` can be null, otherwise they must be positive integers.
+- Every category, nature, and container kind must come only from the allowed universes.
+- The grid should be operationally coherent with the channel specification and editorial rules.
+
+Return strictly this XML-wrapped JSON format and nothing else:
+<grid_output>
+{
+  "blocks": [
+    {
+      "starts_at": "06:00",
+      "ends_at": "08:00",
+      "priority": 50,
+      "min_items": 1,
+      "max_items": 2,
+      "min_duration_seconds_per_item": 1800,
+      "max_duration_seconds_per_item": 3600,
+      "allowed_categories": [],
+      "forbidden_categories": [],
+      "preferred_categories": [],
+      "allowed_natures": [],
+      "forbidden_natures": [],
+      "preferred_natures": [],
+      "allowed_container_kinds": [],
+      "forbidden_container_kinds": [],
+      "preferred_container_kinds": []
+    }
+  ]
+}
+</grid_output>

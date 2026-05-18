@@ -1,1 +1,1 @@
-celery -A celery_tasks worker -l info -P gevent
+celery -A celery_tasks worker -l info -P solo

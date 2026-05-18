@@ -1,0 +1,30 @@
+.detail-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-row {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(245, 248, 252, 0.92);
+  border: 1px solid rgba(122, 145, 174, 0.16);
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #617288;
+}
+
+.detail-value {
+  color: #0f223c;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.is-empty .detail-value {
+  color: #7d8da0;
+}

@@ -1,0 +1,8 @@
+.dialog-form {
+  min-width: min(560px, 100%);
+}
+
+.error-message {
+  color: #b42318;
+  margin: 12px 0 0;
+}

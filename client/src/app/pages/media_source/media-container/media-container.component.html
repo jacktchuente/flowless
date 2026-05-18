@@ -1,0 +1,131 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">{{ 'MEDIA_CONTAINER.EYEBROW' | translate }}</span>
+        <h2>{{ 'MEDIA_CONTAINER.TITLE' | translate }}</h2>
+        <p>{{ 'MEDIA_CONTAINER.SUBTITLE' | translate }}</p>
+    </div>
+
+    <button mat-flat-button color="primary" (click)="analyzeAll()">
+        <mat-icon>playlist_play</mat-icon>
+        {{ 'MEDIA_CONTAINER.ANALYZE_ALL' | translate }}
+    </button>
+</section>
+
+<section class="toolbar">
+    <label class="filter-field">
+        <span>{{ 'MEDIA_CONTAINER.FILTER_TITLE' | translate }}</span>
+        <input type="text" [(ngModel)]="filters.title" (keyup.enter)="applyFilters()">
+    </label>
+
+    <label class="filter-field">
+        <span>{{ 'COMMON.STATUS_LABEL' | translate }}</span>
+        <select [(ngModel)]="filters.status">
+            <option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </label>
+
+    <label class="filter-field">
+        <span>{{ 'MEDIA_CONTAINER.FILTER_CATEGORY' | translate }}</span>
+        <input type="text" [(ngModel)]="filters.category" (keyup.enter)="applyFilters()">
+    </label>
+
+    <label class="filter-field">
+        <span>{{ 'MEDIA_COLLECTION.NATURE' | translate }}</span>
+        <select [(ngModel)]="filters.nature">
+            <option *ngFor="let option of natureOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </label>
+
+    <label class="filter-field">
+        <span>{{ 'MEDIA_COLLECTION.CONTAINER_KIND' | translate }}</span>
+        <select [(ngModel)]="filters.container_kind">
+            <option *ngFor="let option of containerKindOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </label>
+
+    <label class="filter-field page-size-field">
+        <span>{{ 'MEDIA_CONTAINER.PAGE_SIZE' | translate }}</span>
+        <select [value]="pageSize" (change)="onPageSizeChange($any($event.target).value)">
+            <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</option>
+        </select>
+    </label>
+
+    <div class="toolbar-actions">
+        <button mat-stroked-button (click)="resetFilters()">{{ 'COMMON.RESET' | translate }}</button>
+        <button mat-flat-button color="primary" (click)="applyFilters()">{{ 'COMMON.FILTER' | translate }}</button>
+    </div>
+</section>
+
+<section class="table-card" *ngIf="containers.length; else emptyState">
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>{{ 'MEDIA_CONTAINER.COLUMN_TITLE' | translate }}</th>
+                <th>{{ 'COMMON.STATUS_LABEL' | translate }}</th>
+                <th>{{ 'MEDIA_CONTAINER.COLUMN_ANALYZED_AT' | translate }}</th>
+                <th>{{ 'MEDIA_CONTAINER.COLUMN_ITEM_COUNT' | translate }}</th>
+                <th>{{ 'MEDIA_COLLECTION.NATURE' | translate }}</th>
+                <th>{{ 'MEDIA_COLLECTION.CONTAINER_KIND' | translate }}</th>
+                <th>{{ 'MEDIA_CONTAINER.COLUMN_MISSING' | translate }}</th>
+                <th>{{ 'COMMON.ACTION' | translate }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="data-row" *ngFor="let container of containers" (click)="openDetail(container)">
+                <td class="title-cell">
+                    <strong>{{ container.title }}</strong>
+                </td>
+                <td>
+          <span class="status-pill"
+                [class.is-analyzing]="getStatusClass(container) === 'is-analyzing'"
+                [class.is-complete]="getStatusClass(container) === 'is-complete'"
+                [class.is-warning]="getStatusClass(container) === 'is-warning'">
+            {{ getStatusLabel(container) }}
+          </span>
+                </td>
+                <td>{{ container.analyzed_at ? (container.analyzed_at | date:'dd/MM/yyyy HH:mm') : ('COMMON.NEVER' | translate) }}</td>
+                <td>{{ container.item_count ?? ('COMMON.EMPTY' | translate) }}</td>
+                <td>{{ getNatureLabel(container) }}</td>
+                <td>{{ getContainerKindLabel(container) }}</td>
+                <td>
+          <span class="missing-pill" [class.is-missing]="container.is_missing">
+            {{ container.is_missing ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}
+          </span>
+                </td>
+                <td class="action-cell" (click)="$event.stopPropagation()">
+                    <button
+                            mat-stroked-button
+                            (click)="analyze(container, $event)"
+                            [disabled]="syncingIds.has(container.id.toString())"
+                    >
+                        <mat-icon>psychology</mat-icon>
+                        {{ 'MEDIA_CONTAINER.ANALYZE' | translate }}
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="pagination-bar" *ngIf="containers.length">
+    <button mat-stroked-button (click)="previousPage()" [disabled]="currentPage <= 1 || isLoading">
+        {{ 'COMMON.PREVIOUS' | translate }}
+    </button>
+    <span>{{ 'COMMON.PAGE' | translate }} {{ currentPage }} / {{ totalPages }}</span>
+    <button mat-stroked-button (click)="nextPage()" [disabled]="currentPage >= totalPages || isLoading">
+        {{ 'COMMON.NEXT' | translate }}
+    </button>
+</section>
+
+<ng-template #emptyState>
+    <section class="empty-state">
+        <h3>{{ 'MEDIA_CONTAINER.EMPTY_TITLE' | translate }}</h3>
+        <p>{{ 'MEDIA_CONTAINER.EMPTY_HELP' | translate }}</p>
+    </section>
+</ng-template>
+
+<div class="page-loading-overlay" *ngIf="isPageLoading">
+    <mat-spinner diameter="64"></mat-spinner>
+</div>

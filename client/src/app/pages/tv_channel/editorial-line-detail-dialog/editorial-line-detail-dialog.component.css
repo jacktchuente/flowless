@@ -1,0 +1,37 @@
+.detail-grid {
+  display: grid;
+  gap: 10px;
+  min-width: min(760px, 84vw);
+}
+
+.detail-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4b5c72;
+  min-height: 120px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 34, 60, 0.04);
+}
+
+.detail-label {
+  color: #4b5c72;
+  font-weight: 600;
+}
+
+.detail-value {
+  color: #132742;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.is-empty .detail-value {
+  color: #7a889b;
+}

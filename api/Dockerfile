@@ -19,10 +19,10 @@ RUN apt-get update \
 RUN curl -sSL https://install.python-poetry.org | python3
 
 WORKDIR /usr/src/app
-COPY temp/pyproject.toml .
+COPY pyproject.toml .
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction  --no-root
 RUN rm -rf /root/.cache/pypoetry
-COPY temp .
+COPY . .
 RUN python manage.py collectstatic --noinput
 CMD sh ./docker/runme.sh

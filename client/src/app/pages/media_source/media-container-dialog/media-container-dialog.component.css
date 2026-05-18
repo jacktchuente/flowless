@@ -1,0 +1,70 @@
+.dialog-shell {
+  min-width: min(1040px, 94vw);
+  padding-top: 4px;
+}
+
+.loading-shell {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.summary-card,
+.detail-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f4f8fd;
+  border: 1px solid rgba(102, 127, 156, 0.16);
+}
+
+.summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #5f6f84;
+  font-size: 0.84rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detail-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.detail-card p,
+.detail-card pre {
+  margin: 0;
+  color: #33445d;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detail-card p + p {
+  margin-top: 6px;
+}
+
+.detail-card-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .dialog-shell {
+    min-width: min(94vw, 94vw);
+  }
+
+  .summary-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

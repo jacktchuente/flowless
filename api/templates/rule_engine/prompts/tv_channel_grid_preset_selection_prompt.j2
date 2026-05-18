@@ -1,0 +1,28 @@
+You are a TV channel scheduling architect.
+
+Choose exactly one preset for this channel.
+Do not explain your reasoning.
+Do not output anything before the marker.
+
+Channel:
+- name: {{ channel_name|tojson }}
+- description: {{ channel_description|tojson }}
+- specification: {{ channel_specification|tojson }}
+
+Available presets:
+{% for preset in available_presets %}
+- id={{ preset.id }}, name={{ preset.name|tojson }}, description={{ preset.description|tojson }}
+{% endfor %}
+
+{% if retry_errors %}
+Previous attempt failed for these reasons:
+{% for error in retry_errors %}
+- {{ error }}
+{% endfor %}
+{% endif %}
+
+Return your answer strictly after this marker.
+After `###response###`, write the chosen preset id as the first number in the answer.
+
+###response###
+1

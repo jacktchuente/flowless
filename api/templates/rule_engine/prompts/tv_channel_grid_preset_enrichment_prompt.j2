@@ -1,0 +1,58 @@
+You are a TV channel scheduling architect.
+
+You must enrich each preset block with editorial filters for this channel.
+Do not change the number of blocks.
+Do not change block times or block order.
+Do not output anything before the marker.
+For each block, you must return every field in the exact order shown below.
+If a field should be empty, write `none`.
+Only use values from the available options. Do not invent labels.
+
+Channel:
+- name: {{ channel_name|tojson }}
+- description: {{ channel_description|tojson }}
+- specification: {{ channel_specification|tojson }}
+
+Preset:
+- id: {{ preset_id }}
+- name: {{ preset_name|tojson }}
+- description: {{ preset_description|tojson }}
+
+Available categories:
+{{ available_categories|tojson }}
+
+Available natures:
+{{ available_natures|tojson }}
+
+Available container kinds:
+{{ available_container_kinds|tojson }}
+
+Preset blocks:
+{% for block in preset_blocks %}
+- block {{ block.index }}: starts_at={{ block.starts_at }}, ends_at={{ block.ends_at }}, priority={{ block.priority }}, min_items={{ block.min_items }}, max_items={{ block.max_items }}, min_duration_seconds_per_item={{ block.min_duration_seconds_per_item }}, max_duration_seconds_per_item={{ block.max_duration_seconds_per_item }}
+{% endfor %}
+
+{% if retry_errors %}
+Previous attempt failed for these reasons:
+{% for error in retry_errors %}
+- {{ error }}
+{% endfor %}
+{% endif %}
+
+Return your answer strictly after this marker.
+After `###response###`, use exactly this structure for every block:
+
+block 1
+allowed_categories: value1, value2
+forbidden_categories: none
+preferred_categories: value3
+allowed_natures: Fiction
+forbidden_natures: none
+preferred_natures: Fiction
+allowed_container_kinds: Series
+forbidden_container_kinds: none
+preferred_container_kinds: Series
+
+Then block 2 with the same field order, and so on until the last block.
+
+###response###

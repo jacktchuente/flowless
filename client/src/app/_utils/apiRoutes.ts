@@ -1,3 +1,9 @@
 export const apiRoutes = {
     userPreference: "user-preference",
+    mediaSource: "media-source",
+    mediaCollection: "media-collection",
+    mediaContainer: "media-container",
+    catalog: "catalog",
+    tvChannel: "tv-channel",
+    gridBlock: "grid-block",
 }

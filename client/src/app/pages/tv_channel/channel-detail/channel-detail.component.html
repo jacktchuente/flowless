@@ -1,0 +1,209 @@
+<section class="page-shell" *ngIf="channel; else loadingOrEmpty">
+  <section class="page-head">
+    <a class="back-link" routerLink="/app/channels">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'CHANNEL_DETAIL.BACK' | translate }}
+    </a>
+    <div class="channel-hero">
+      <div class="channel-logo-frame" aria-hidden="true">
+        <img
+          *ngIf="channel.logo && !logoLoadFailed; else logoPlaceholder"
+          class="channel-logo-image"
+          [src]="channel.logo"
+          [alt]="('CHANNEL_DETAIL.LOGO_ALT' | translate) + ' ' + channel.name"
+          (error)="logoLoadFailed = true"
+        >
+        <ng-template #logoPlaceholder>
+          <div class="channel-logo-placeholder">
+            <mat-icon>image</mat-icon>
+          </div>
+        </ng-template>
+        <button mat-mini-fab type="button" class="logo-upload-button" (click)="triggerLogoUpload()">
+          <mat-icon>upload</mat-icon>
+        </button>
+        <input
+          #logoUploadInput
+          class="logo-upload-input"
+          type="file"
+          accept="image/*"
+          (change)="onLogoSelected($event)"
+        >
+      </div>
+
+      <div class="channel-hero-body">
+        <h2>{{ channel.name }}</h2>
+        <p class="channel-description">{{ channel.description || ('CHANNEL_DETAIL.NO_DESCRIPTION' | translate) }}</p>
+        <p class="channel-description" *ngIf="channel.specification">{{ channel.specification }}</p>
+        <div class="head-actions">
+          <button mat-stroked-button (click)="openEditChannelDialog()">
+            <mat-icon>edit</mat-icon>
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button mat-stroked-button (click)="generateBlueprint()">
+            <mat-icon>auto_awesome</mat-icon>
+            {{ 'CHANNELS.GENERATE_BLUEPRINT' | translate }}
+          </button>
+          <button mat-stroked-button (click)="downloadLogoPrompt()">
+            <mat-icon>download</mat-icon>
+            {{ 'CHANNEL_DETAIL.DOWNLOAD_LOGO_PROMPT' | translate }}
+          </button>
+          <button mat-flat-button color="primary" (click)="openGeneratePlayoutDialog()">
+            <mat-icon>schedule</mat-icon>
+            {{ 'CHANNELS.GENERATE_PLAYOUT' | translate }}
+          </button>
+          <button mat-stroked-button (click)="pushChannel()">
+            <mat-icon>publish</mat-icon>
+            {{ 'CHANNEL_DETAIL.PUSH' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="panel-label">{{ 'CHANNEL_DETAIL.CHANNEL' | translate }}</span>
+      <h3>{{ 'CHANNEL_DETAIL.SPECIFICATION' | translate }}</h3>
+      <dl class="meta-grid">
+        <div>
+          <dt>{{ 'CHANNELS.CATALOG_LABEL' | translate }}</dt>
+          <dd>{{ channel.catalog_name }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'COMMON.STATUS_LABEL' | translate }}</dt>
+          <dd>{{ getChannelStatusLabel() }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'COMMON.ACTIVE' | translate }}</dt>
+          <dd>{{ channel.is_enabled ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.EXTERNAL_PLAYOUT' | translate }}</dt>
+          <dd>{{ channel.external_playout_id || '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNELS.GRID' | translate }}</dt>
+          <dd>{{ channel.grid_data ? ('#' + channel.grid_data.id) : '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.ACTIVE_PLAYOUT' | translate }}</dt>
+          <dd>{{ channel.active_playout_id || '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.UPDATED_AT' | translate }}</dt>
+          <dd>{{ channel.updated_at | date:'medium' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.SCHEDULE_ITEMS' | translate }}</dt>
+          <dd>{{ channel.active_schedule_items.length }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="summary-card" *ngIf="editorialLine">
+      <div class="summary-card-head">
+        <div>
+      <span class="panel-label">{{ 'CHANNEL_DETAIL.EDITORIAL_LINE' | translate }}</span>
+          <h3>{{ 'CHANNEL_DETAIL.CHANNEL_RULES' | translate }}</h3>
+        </div>
+        <button mat-stroked-button type="button" (click)="openEditorialLineDetailDialog()">
+          <mat-icon>visibility</mat-icon>
+          {{ 'CHANNEL_DETAIL.VIEW_DETAIL' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="openResetRulesDialog()">
+          <mat-icon>restart_alt</mat-icon>
+          {{ 'CHANNELS.RESET_RULES' | translate }}
+        </button>
+      </div>
+      <dl class="meta-grid">
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.START' | translate }}</dt>
+          <dd>{{ editorialLine.start_at || '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.END' | translate }}</dt>
+          <dd>{{ editorialLine.end_at || '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'CHANNEL_DETAIL.ALLOW_FILLER' | translate }}</dt>
+          <dd>{{ editorialLine.allow_filler ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
+        </div>
+      </dl>
+    </article>
+  </section>
+
+  <section class="timeline-card" *ngIf="channel.grid_data as gridData">
+    <div class="timeline-card-head">
+      <div>
+        <span class="panel-label">{{ 'CHANNEL_DETAIL.CALENDARS' | translate }}</span>
+        <h3>{{ 'CHANNEL_DETAIL.GRID_AND_SCHEDULE' | translate }}</h3>
+      </div>
+    </div>
+    <div class="calendar-toolbar">
+      <div class="timeline-caption">{{ 'CHANNEL_DETAIL.CALENDAR_HELP' | translate }}</div>
+      <div class="calendar-nav">
+        <button mat-stroked-button (click)="shiftCalendarDay(-1)">
+          <mat-icon>chevron_left</mat-icon>
+          {{ 'CHANNELS.PREVIOUS_DAY' | translate }}
+        </button>
+        <button mat-button (click)="resetCalendarDay()">{{ 'CHANNELS.TODAY' | translate }}</button>
+        <span class="calendar-date">{{ calendarDate | date:'fullDate' }}</span>
+        <button mat-stroked-button (click)="shiftCalendarDay(1)">
+          {{ 'CHANNELS.NEXT_DAY' | translate }}
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar-split">
+      <article class="calendar-panel">
+        <div class="calendar-panel-head">
+          <span class="panel-label">{{ 'CHANNELS.SCHEDULE' | translate }}</span>
+          <h4>{{ 'CHANNEL_DETAIL.DAILY_CALENDAR' | translate }}</h4>
+        </div>
+        <mwl-calendar-day-view
+          [viewDate]="calendarDate"
+          [events]="scheduleCalendarEvents"
+          [hourSegments]="2"
+          [dayStartHour]="0"
+          [dayEndHour]="24"
+          (eventClicked)="onCalendarEventClicked($event.event)"
+        />
+      </article>
+
+      <article class="calendar-panel">
+        <div class="calendar-panel-head">
+          <span class="panel-label">{{ 'CHANNELS.GRID' | translate }}</span>
+          <h4>{{ 'CHANNEL_DETAIL.DAILY_CALENDAR' | translate }}</h4>
+        </div>
+        <mwl-calendar-day-view
+          [viewDate]="calendarDate"
+          [events]="gridCalendarEvents"
+          [hourSegments]="2"
+          [dayStartHour]="0"
+          [dayEndHour]="24"
+          (eventClicked)="onCalendarEventClicked($event.event)"
+        />
+      </article>
+    </div>
+  </section>
+
+</section>
+
+<ng-template #loadingOrEmpty>
+  <section class="empty-state" *ngIf="!isLoading; else loadingState">
+    <h3>{{ 'CHANNEL_DETAIL.NOT_FOUND_TITLE' | translate }}</h3>
+    <p>{{ 'CHANNEL_DETAIL.NOT_FOUND_HELP' | translate }}</p>
+  </section>
+</ng-template>
+
+<ng-template #loadingState>
+  <section class="empty-state">
+    <h3>{{ 'CHANNEL_DETAIL.LOADING_TITLE' | translate }}</h3>
+    <p>{{ 'CHANNEL_DETAIL.LOADING_HELP' | translate }}</p>
+  </section>
+</ng-template>
+
+<div class="page-loading-overlay" *ngIf="isPageLoading">
+  <mat-spinner diameter="64"></mat-spinner>
+</div>

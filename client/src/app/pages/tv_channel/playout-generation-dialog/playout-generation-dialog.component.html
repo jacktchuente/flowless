@@ -1,0 +1,20 @@
+<app-dialog-container1>
+  <div dialogTitle>
+    {{ title }}
+  </div>
+
+  <div dialogContent>
+    <form [formGroup]="form" class="dialog-form">
+      <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
+      <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </form>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+      <span *ngIf="!isSubmitting">Lancer</span>
+    </button>
+  </div>
+</app-dialog-container1>

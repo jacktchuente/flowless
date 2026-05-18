@@ -1,0 +1,30 @@
+<section class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-kicker">{{ appName }}</span>
+            <h1>{{ 'NAV.TITLE' | translate }}</h1>
+            <p>{{ 'NAV.SUBTITLE' | translate }}</p>
+        </div>
+
+        <nav class="menu">
+            <a
+                    *ngFor="let item of menuItems"
+                    class="menu-item"
+                    [routerLink]="item.route"
+                    routerLinkActive="is-active"
+            >
+                {{ item.label | translate }}
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a class="sidebar-admin-link" [href]="adminUrl">
+                {{ 'NAV.ADMIN' | translate }}
+            </a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <router-outlet></router-outlet>
+    </main>
+</section>

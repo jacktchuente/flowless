@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Collection {{ data.collection.name }}</h2>
+
+<mat-dialog-content class="dialog-shell">
+  <section class="detail-grid">
+    <div class="detail-cell">
+      <span class="detail-label">Source</span>
+      <strong>{{ data.collection.media_source_name }}</strong>
+    </div>
+    <div class="detail-cell">
+      <span class="detail-label">External ID</span>
+      <strong>{{ data.collection.external_id }}</strong>
+    </div>
+    <div class="detail-cell">
+      <span class="detail-label">Statut</span>
+      <strong>{{ data.collection.is_active ? 'Active' : 'Inactive' }}</strong>
+    </div>
+    <div class="detail-cell">
+      <span class="detail-label">Derniere analyse</span>
+      <strong>{{ data.collection.analyzed_at ? (data.collection.analyzed_at | date:'dd/MM/yyyy HH:mm') : 'Jamais' }}</strong>
+    </div>
+  </section>
+
+  <section class="form-grid">
+    <label class="field">
+      <span>Programming role</span>
+      <select [(ngModel)]="draft.programming_role" [ngModelOptions]="{standalone: true}">
+        <option [ngValue]="null">—</option>
+        <option *ngFor="let option of programmingRoleOptions" [ngValue]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Nature</span>
+      <select [(ngModel)]="draft.nature" [ngModelOptions]="{standalone: true}">
+        <option [ngValue]="null">—</option>
+        <option *ngFor="let option of natureOptions" [ngValue]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Container kind</span>
+      <select [(ngModel)]="draft.container_kind" [ngModelOptions]="{standalone: true}">
+        <option [ngValue]="null">—</option>
+        <option *ngFor="let option of containerKindOptions" [ngValue]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </label>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="isSubmitting">Fermer</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="isSubmitting">
+    <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+    <span *ngIf="!isSubmitting">Enregistrer</span>
+  </button>
+</mat-dialog-actions>

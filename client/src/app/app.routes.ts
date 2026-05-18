@@ -1,31 +1,24 @@
 import {Routes} from '@angular/router';
-import {AnonymousComponent} from "./pages/base/anonymous/anonymous.component";
-import {AuthenticatedComponent} from "./pages/base/authenticated/authenticated.component";
-import {AuthGuard} from "@kwyxyz/ngx-auth";
+import {BaseComponent} from "./pages/base/base.component";
+import {MediaSourceComponent} from "./pages/media_source/media-source/media-source.component";
+import {MediaCollectionComponent} from "./pages/media_source/media-collection/media-collection.component";
+import {MediaContainerComponent} from "./pages/media_source/media-container/media-container.component";
+import {ChannelDetailComponent} from "./pages/tv_channel/channel-detail/channel-detail.component";
+import {ChannelManagementComponent} from "./pages/tv_channel/channel-management/channel-management.component";
 
 export const routes: Routes = [
+    {path: '', pathMatch: 'full', redirectTo: 'app'},
     {
-        path: '', component: AnonymousComponent, children: [
-            // {path: '', component: LandingComponent},
-            // {path: 'login', component: LoginComponent},
-            // {path: 'login/:provider', component: LoginComponent},
-            // {path: 'registration', component: RegistrationComponent},
-            // {path: 'reset-password', component: ResetPasswordComponent},
-            // {path: 'user-confirmation', component: UserConfirmationComponent},
-            // {path: 'contact-us', component: ContactUsComponent},
-            // {path: 'tos', component: TermOfServiceComponent},
-            // {path: 'faq', component: FaqComponent},
-            // {path: '404', component: NotFoundComponent},
-            // {path: '500', component: NotFoundComponent},
-            // {path: 'maintenance', component: MaintenanceComponent},
-            // {path: 'logout', component: LogoutComponent}
+        path: 'app',
+        component: BaseComponent,
+        children: [
+            {path: '', pathMatch: 'full', redirectTo: 'sources'},
+            {path: 'sources', component: MediaSourceComponent},
+            {path: 'collections', component: MediaCollectionComponent},
+            {path: 'medias', component: MediaContainerComponent},
+            {path: 'channels/:channelId', component: ChannelDetailComponent},
+            {path: 'channels', component: ChannelManagementComponent},
         ]
     },
-    {
-        path: 'app', component: AuthenticatedComponent,
-        canActivate: [AuthGuard],
-        children: []
-    },
-    {path: '**', redirectTo: '/404'}
-
+    {path: '**', redirectTo: 'app'}
 ]

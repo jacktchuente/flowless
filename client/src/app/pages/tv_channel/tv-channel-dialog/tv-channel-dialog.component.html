@@ -1,0 +1,29 @@
+<app-dialog-container1>
+  <div dialogTitle>
+    {{ data.channel ? 'Modifier la chaine' : 'Nouvelle chaine' }}
+  </div>
+
+  <div dialogContent>
+    <form [formGroup]="form" class="dialog-form">
+      <formly-form [form]="form" [model]="model" [fields]="fields"></formly-form>
+    </form>
+    <section class="editorial-panel" *ngIf="editorialFields.length">
+      <h3>Ligne edito</h3>
+      <div class="editorial-grid">
+        <div class="editorial-row" *ngFor="let field of editorialFields" [class.is-empty]="field.value === null || field.value === ''">
+          <span class="editorial-label">{{ field.label }}</span>
+          <span class="editorial-value">{{ field.value ?? '—' }}</span>
+        </div>
+      </div>
+    </section>
+    <p *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</p>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+      <span>Enregistrer</span>
+    </button>
+  </div>
+</app-dialog-container1>

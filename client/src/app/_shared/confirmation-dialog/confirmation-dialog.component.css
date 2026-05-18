@@ -1,0 +1,18 @@
+.confirmation-shell {
+  background: #f8fbff;
+}
+
+.confirmation-content {
+  padding: 10px;
+}
+
+.confirmation-message {
+  margin: 0;
+  text-align: center;
+  color: #10233d;
+}
+
+.confirmation-spacer {
+  display: flex;
+  justify-content: space-around;
+}

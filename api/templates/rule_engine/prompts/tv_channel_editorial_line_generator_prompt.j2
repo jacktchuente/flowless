@@ -1,0 +1,52 @@
+You are a TV channel editorial designer.
+
+Your task is to define the editorial rule set for a TV channel.
+Do not explain your reasoning.
+Do not add commentary before or after the answer.
+
+Channel name:
+{{ channel_name|tojson }}
+
+Channel description:
+{{ channel_description|tojson }}
+
+Channel specification:
+{{ channel_specification|tojson }}
+
+Allowed categories:
+{{ available_categories|tojson }}
+
+Allowed natures:
+{{ available_natures|tojson }}
+
+Allowed container kinds:
+{{ available_container_kinds|tojson }}
+
+Hard constraints:
+- Return only values from the allowed lists.
+- `allowed_*` means required.
+- `forbidden_*` means excluded.
+- `preferred_*` means preferred but not mandatory.
+- `allowed_*` and `forbidden_*` must not overlap.
+- `preferred_*` and `forbidden_*` must not overlap.
+- `start_at` and `end_at` must use `HH:MM` format.
+- Use `allow_filler` as a boolean.
+- Define only the fields needed to configure the channel from `allowed_categories` to `allow_filler`.
+
+Return strictly this XML-wrapped JSON format and nothing else:
+<editorial_line_output>
+{
+  "allowed_categories": [],
+  "forbidden_categories": [],
+  "preferred_categories": [],
+  "allowed_natures": [],
+  "forbidden_natures": [],
+  "preferred_natures": [],
+  "allowed_container_kinds": [],
+  "forbidden_container_kinds": [],
+  "preferred_container_kinds": [],
+  "start_at": "00:00",
+  "end_at": "23:59",
+  "allow_filler": true
+}
+</editorial_line_output>

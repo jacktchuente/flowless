@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "etv-scripted-schedule-api"
+version = "0.1.0"
+description = "Python requests client for the ErsatzTV scripted schedule API"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["requests>=2.28"]
+
+[tool.setuptools.packages.find]
+include = ["etv_scripted_schedule_api*"]

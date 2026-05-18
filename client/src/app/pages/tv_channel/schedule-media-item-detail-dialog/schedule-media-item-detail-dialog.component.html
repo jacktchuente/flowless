@@ -1,0 +1,16 @@
+<app-dialog-container1>
+  <div dialogTitle>
+    {{ data.item.media_item_title }}
+  </div>
+
+  <div dialogContent class="detail-grid">
+    <div class="detail-row" *ngFor="let field of fields" [class.is-empty]="field.value === null || field.value === ''">
+      <span class="detail-label">{{ field.label }}</span>
+      <span class="detail-value">{{ field.value ?? '—' }}</span>
+    </div>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button mat-dialog-close>Fermer</button>
+  </div>
+</app-dialog-container1>

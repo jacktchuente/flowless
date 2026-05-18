@@ -18,10 +18,15 @@ celery = "^5.5.2"
 gevent = "^25.4.2"
 djx-websocket = "0.2.0"
 django-anymail = {extras = ["sendinblue"], version = "^13.0"}
+requests = "^2.32.3"
+piper-tts = "^1.4.2"
+openai = "^2.36.0"
+Jinja2 = "^3.1.6"
+django-celery-beat = "^2.9.0"
+
 
 [tool.poetry.dev-dependencies]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-

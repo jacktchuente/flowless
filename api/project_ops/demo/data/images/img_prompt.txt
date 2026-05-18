@@ -1,0 +1,29 @@
+Create one square channel logo per TV channel listed below.
+
+Global instructions:
+- Format: 1:1 square
+- Output style: clean broadcast channel logo, vector-like, high contrast, readable at small size
+- Background: transparent or solid dark background that keeps the logo legible
+- No tiny text, no photo collage, no mockup frame
+- Keep each logo visually distinct from the others
+- Save each exported file with the exact filename stem shown below
+
+1. Filename stem: Harbor Stories
+Prompt:
+Design a premium TV channel logo for "Harbor Stories". The channel identity should evoke prestige crime drama, waterfront neon reflections, investigative tension and late-evening storytelling. Use a restrained cinematic palette with deep navy, muted teal and a sharp accent of warm amber. The logo should feel serious, polished and memorable, suitable for an upscale crime-and-investigation channel.
+
+2. Filename stem: Night Shift Action
+Prompt:
+Design a bold TV channel logo for "Night Shift Action". The channel identity should evoke late-night action cinema, neon streets, pursuit energy, practical stunts and cult thriller attitude. Use a punchy palette with electric blue, vivid red and dark graphite. The logo should feel kinetic, muscular and legible, suitable for a nighttime action movie channel.
+
+3. Filename stem: Pulse Report
+Prompt:
+Design a modern TV channel logo for "Pulse Report". The channel identity should evoke current affairs, documentary journalism, geopolitical analysis and sober editorial credibility. Use a clean contemporary palette with white, deep charcoal and a strong crimson or signal red accent. The logo should feel sharp, trustworthy and newsroom-adjacent without looking like a corporate news station.
+
+4. Filename stem: Velvet Rewind
+Prompt:
+Design a warm and stylish TV channel logo for "Velvet Rewind". The channel identity should evoke comfort sitcoms, late-evening comedy, stage curtains, retro lounge energy and smart light-hearted entertainment. Use a palette with burgundy, cream and soft gold accents. The logo should feel playful but elegant, suitable for a comedy and comfort-viewing channel.
+
+5. Filename stem: Backstage Sessions
+Prompt:
+Design a refined music channel logo for "Backstage Sessions". The channel identity should evoke intimate live performances, studio sessions, rooftop concerts and after-dark musicianship. Use a palette with black, warm white and a saturated accent such as cobalt or magenta. The logo should feel modern, artistic and premium, suitable for a live music sessions channel.

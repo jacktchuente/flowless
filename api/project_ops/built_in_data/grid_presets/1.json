@@ -1,0 +1,378 @@
+[
+  {
+    "name": "Cinéma & Séries du Soir 1",
+    "description": "Grille cinéma/séries non continue couvrant la journée de 06:00 à 02:00, avec une montée progressive vers le prime time, des films en journée et soirée, puis une fin de soirée plus adulte ou patrimoniale.",
+    "blocks": [
+      {
+        "starts_at": "06:00:00",
+        "ends_at": "08:00:00",
+        "priority": 45,
+        "min_items": 3,
+        "max_items": 4,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Habillage court matin",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "08:00:00",
+        "ends_at": "10:00:00",
+        "priority": 55,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Inter-épisode standard",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "10:00:00",
+        "ends_at": "12:00:00",
+        "priority": 60,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Coupure cinéma légère",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "12:00:00",
+        "ends_at": "13:30:00",
+        "priority": 65,
+        "min_items": 3,
+        "max_items": 3,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Inter-épisode déjeuner",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "13:30:00",
+        "ends_at": "15:30:00",
+        "priority": 70,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Coupure cinéma journée",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "15:30:00",
+        "ends_at": "17:30:00",
+        "priority": 65,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Inter-épisode standard",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "17:30:00",
+        "ends_at": "19:30:00",
+        "priority": 75,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Access cinéma",
+          "duration_seconds": 240
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "19:30:00",
+        "ends_at": "20:30:00",
+        "priority": 80,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Avant-prime court",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "20:30:00",
+        "ends_at": "22:45:00",
+        "priority": 100,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 8100,
+        "post_filler_policy": {
+          "name": "Prime cinéma",
+          "duration_seconds": 300
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "22:45:00",
+        "ends_at": "23:45:00",
+        "priority": 85,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Fin de prime série",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "23:45:00",
+        "ends_at": "01:30:00",
+        "priority": 80,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 4500,
+        "max_duration_seconds_per_item": 6300,
+        "post_filler_policy": {
+          "name": "Seconde partie cinéma",
+          "duration_seconds": 240
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "01:30:00",
+        "ends_at": "02:00:00",
+        "priority": 40,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Clôture courte",
+          "duration_seconds": 60
+        },
+        "required_fields": []
+      }
+    ]
+  },
+  {
+    "name": "Cinéma & Séries du Soir 2",
+    "description": "Grille cinéma/séries continue sur 24h, pensée comme une chaîne premium orientée films et séries. La journée alterne séries et films accessibles, le prime time est réservé au grand film, et la nuit accueille des rediffusions, du cinéma de catalogue et des formats plus longs.",
+    "blocks": [
+      {
+        "starts_at": "00:00:00",
+        "ends_at": "02:00:00",
+        "priority": 75,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Seconde partie cinéma",
+          "duration_seconds": 240
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "02:00:00",
+        "ends_at": "04:00:00",
+        "priority": 45,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Nuit cinéma catalogue",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "04:00:00",
+        "ends_at": "06:00:00",
+        "priority": 35,
+        "min_items": 3,
+        "max_items": 4,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Inter-épisode nuit",
+          "duration_seconds": 90
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "06:00:00",
+        "ends_at": "08:00:00",
+        "priority": 45,
+        "min_items": 3,
+        "max_items": 4,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Habillage court matin",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "08:00:00",
+        "ends_at": "10:00:00",
+        "priority": 55,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Inter-épisode standard",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "10:00:00",
+        "ends_at": "12:00:00",
+        "priority": 60,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Coupure cinéma légère",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "12:00:00",
+        "ends_at": "13:30:00",
+        "priority": 65,
+        "min_items": 3,
+        "max_items": 3,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Inter-épisode déjeuner",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "13:30:00",
+        "ends_at": "15:30:00",
+        "priority": 70,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Coupure cinéma journée",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "15:30:00",
+        "ends_at": "17:30:00",
+        "priority": 65,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Inter-épisode standard",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "17:30:00",
+        "ends_at": "19:30:00",
+        "priority": 75,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 7200,
+        "post_filler_policy": {
+          "name": "Access cinéma",
+          "duration_seconds": 240
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "19:30:00",
+        "ends_at": "20:30:00",
+        "priority": 80,
+        "min_items": 2,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 1200,
+        "max_duration_seconds_per_item": 1800,
+        "post_filler_policy": {
+          "name": "Avant-prime court",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "20:30:00",
+        "ends_at": "22:45:00",
+        "priority": 100,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 5400,
+        "max_duration_seconds_per_item": 8100,
+        "post_filler_policy": {
+          "name": "Prime cinéma",
+          "duration_seconds": 300
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "22:45:00",
+        "ends_at": "23:45:00",
+        "priority": 85,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 2700,
+        "max_duration_seconds_per_item": 3600,
+        "post_filler_policy": {
+          "name": "Fin de prime série",
+          "duration_seconds": 180
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "23:45:00",
+        "ends_at": "00:00:00",
+        "priority": 50,
+        "min_items": 1,
+        "max_items": 1,
+        "min_duration_seconds_per_item": 300,
+        "max_duration_seconds_per_item": 900,
+        "post_filler_policy": {
+          "name": "Transition nuit courte",
+          "duration_seconds": 60
+        },
+        "required_fields": []
+      }
+    ]
+  }
+]

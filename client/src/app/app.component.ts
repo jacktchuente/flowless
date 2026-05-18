@@ -1,11 +1,8 @@
 import {Component} from '@angular/core';
 import {CustomIconService} from "@project-shared/services/custom-icon.service";
-import {AuthService} from "@kwyxyz/ngx-auth";
 import {WebsocketService} from "@kwyxyz/ngx-request";
 import {PreferenceService} from "@kwyxyz/ngx-common";
 import {RouterOutlet} from '@angular/router';
-import {UserPreferenceService} from "@project-services/user-preference.service";
-import {TranslateService} from "@ngx-translate/core";
 import {MtxAlert} from "@ng-matero/extensions/alert";
 import {NgIf} from "@angular/common";
 import {environment} from "../environments/environment";
@@ -22,25 +19,27 @@ export class AppComponent {
   showAlert = environment.mode === "demo";
 
   constructor(
-    private authService: AuthService,
     private webSocketService: WebsocketService,
-    private userPreferenceService: UserPreferenceService,
     private customIconService: CustomIconService,
     private languageService: PreferenceService,
-    private translateService: TranslateService
   ) {
-    this.languageService.initLanguage(["en", "fr"], "fr")
+    const defaultLanguage = this.resolveBrowserLanguage()
+    this.languageService.initLanguage(["en", "fr"], defaultLanguage)
     this.customIconService.init()
-
-    this.authService.isLoggedSubject.subscribe(
-      x => {
-        if (x) {
-          this.webSocketService.initSockets()
-        }
-      }
-    )
-
-
+    this.webSocketService.initSockets()
   }
 
+  private resolveBrowserLanguage(): "en" | "fr" {
+    const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language]
+    for (const language of browserLanguages) {
+      const normalizedLanguage = language?.toLowerCase().split('-')[0]
+      if (normalizedLanguage === 'en') {
+        return 'en'
+      }
+      if (normalizedLanguage === 'en') {
+        return 'en'
+      }
+    }
+    return 'en'
+  }
 }

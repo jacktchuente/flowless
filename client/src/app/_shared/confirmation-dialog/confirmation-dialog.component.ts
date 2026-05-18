@@ -2,7 +2,6 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {TranslateModule} from "@ngx-translate/core";
-import {DialogTemplate1Component} from "@project-shared/templates/dialog-template1/dialog-template1.component";
 import {MatIconModule} from "@angular/material/icon";
 
 @Component({
@@ -12,7 +11,6 @@ import {MatIconModule} from "@angular/material/icon";
   imports: [
     MatButtonModule,
     TranslateModule,
-    DialogTemplate1Component,
     MatDialogModule,
     MatIconModule
   ],

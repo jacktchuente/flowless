@@ -1,6 +1,8 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +13,23 @@ MODE = os.getenv('MODE', 'dev')
 USE_SQLITE = os.getenv('USE_SQLITE', '1') == '1'
 DEBUG = os.getenv('DEBUG', '1') == "1"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "INSECURE_SECRET_KEY")
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(' ')
+
+PUBLIC_ORIGINS = os.getenv("PUBLIC_ORIGINS", "").split()
+if not PUBLIC_ORIGINS:
+    PUBLIC_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split()
+
+ALLOWED_HOSTS_ENV = os.getenv("ALLOWED_HOSTS", "").split()
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV
+else:
+    # Default to the hosts derived from the public origins exposed by the gateway.
+    parsed_public_hosts = [
+        urlparse(origin).netloc.split(":", 1)[0]
+        for origin in PUBLIC_ORIGINS
+        if origin
+    ]
+    default_local_hosts = ["localhost", "127.0.0.1"]
+    ALLOWED_HOSTS = list(dict.fromkeys([*parsed_public_hosts, *default_local_hosts]))
 
 if USE_SQLITE:
     DATABASES = {
@@ -40,10 +58,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_celery_beat',
     'corsheaders',
     'djx_account',
     'djx_websocket',
     'channels',
+    'project_ops',
+    "media_source",
+    "tv_channel",
+    "grid_schedule",
+    "rule_engine",
+    "grid_layout_preset"
 ]
 
 if MODE == 'dev':
@@ -52,8 +77,8 @@ if MODE == 'dev':
     ]
 
 MIDDLEWARE = [
-    'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -104,27 +129,31 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'statics')
+STATIC_ROOT = os.path.join(BASE_DIR, "statics")
 MEDIA_ROOT = os.path.join(BASE_DIR, 'medias')
+
 if MODE == 'prod':
-    MEDIA_URL = os.getenv('MEDIAS_SERVER_URL', 'http://medias.localhost/medias/')
-    STATIC_URL = os.getenv('STATICS_SERVER_URL', 'http://statics.localhost/statics/')
+    MEDIA_URL = os.getenv('MEDIA_URL', '/medias/')
+    STATIC_URL = os.getenv('STATIC_URL', '/statics/')
 else:
-    STATIC_URL = 'static/'
+    MEDIA_URL = '/medias/'
+    STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # cors
 
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS')
-CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS.split(' ') if CORS_ALLOWED_ORIGINS else []
-CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', '1') == "1"
+CORS_ALLOWED_ORIGINS = PUBLIC_ORIGINS
+CORS_ALLOW_ALL_ORIGINS = False
+
+# csrf
+CSRF_TRUSTED_ORIGINS = PUBLIC_ORIGINS
 
 # DRF
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
@@ -235,3 +264,35 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_USE_SSL = False
+CELERY_BROKER_URL = f"{'rediss' if CELERY_USE_SSL else 'redis'}://{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+LLM_API_KEY = os.getenv("LLM_API_KEY", "ollama")
+LLM_URL = os.getenv("LLM_URL", "http://192.168.1.223:11434/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5")
+
+CATALOG_GENERATOR_MAX_CHANNELS = int(os.getenv("CATALOG_GENERATOR_MAX_CHANNELS", "30"))
+LLM_RETRY_CATALOG_CHANNEL_GENERATION = int(os.getenv("LLM_RETRY_CATALOG_CHANNEL_GENERATION", 3))
+EDITORIAL_LINE_LLM_MAX_ATTEMPTS = int(os.getenv("EDITORIAL_LINE_LLM_MAX_ATTEMPTS", "3"))
+
+ETV_BASE_URL = os.getenv("ETV_BASE_URL")
+ETV_API_BASE_URL = os.getenv("ETV_API_BASE_URL")
+ETV_API_WRAPPER_FILE_PATH = os.getenv("ETV_API_WRAPPER_FILE_PATH")
+
+DAYS_TO_BUILD = 3  # Nombre de jour que l'on build a l'avance
+SCAN_MEDIA_EVERY_HOURS = 3  # on scan les collections active chaque...
+MEDIA_CONTAINER_ANALYSE_USE_LLM = os.getenv("MEDIA_CONTAINER_ANALYSE_USE_LLM", "0") == "1"
+
+LLM_RETRY_BLUEPRINT = 1
+LLM_RETRY_GRID_PRESET = int(os.getenv("LLM_RETRY_GRID_PRESET", 3))
+LLM_DELAY = int(os.getenv("LLM_DELAY", 0))
+GRID_END_ADJUSTMENT_MAX_SECONDS = int(os.getenv("GRID_END_ADJUSTMENT_MAX_SECONDS", 15 * 60))
+
+
+GREEDY_MODE_NATURES = True
+GREEDY_MODE_KINDS = True
+GREEDY_MODE_CATEGORIES = True

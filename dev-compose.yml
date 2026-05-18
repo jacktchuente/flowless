@@ -1,0 +1,81 @@
+services:
+  gateway:
+    image: nginx:1.31.0
+    restart: unless-stopped
+    depends_on:
+      - client
+      - api
+    ports:
+      - "8004:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  client:
+    build: ./client
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.dev
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432" # not required for demo, only to ease some test
+    volumes:
+      - ./volumes/postgresql:/var/lib/postgresql
+
+  redis:
+    image: "redis:latest"
+    restart: unless-stopped
+
+  ersatztv:
+    image: ghcr.io/ersatztv/legacy:v26.5.0
+    environment:
+      TZ: America/Toronto
+      ETV_CONFIG_FOLDER: /config
+      ETV_TRANSCODE_FOLDER: /transcode
+      FLOWLESS_API: "http://etv-api:8000"
+    volumes:
+      - ./volumes/ersatztv/config:/config
+      - ./volumes/ersatztv/transcode:/transcode
+    ports:
+      - "8409:8409"
+
+  etv-api:
+    image: jacktchuente/etv-cli:latest
+    depends_on:
+      - ersatztv
+    volumes_from:
+      - ersatztv
+    volumes:
+      - ./volumes/etv-cli/requests:/requests
+    environment:
+      ETV_ADMIN_MODE: api
+      ETV_ADMIN_API_PORT: 8000
+      ERSATZTV_BASE_URL: http://ersatztv:8409
+      ETV_CONFIG_FOLDER: /config
+      ETV_TRANSCODE_FOLDER: /transcode
+    ports:
+      - "8888:8000"
+
+  etv-assets:
+    build: ./ersatztv_assets
+    volumes:
+      - ./volumes/ersatztv/:/output
