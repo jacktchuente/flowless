@@ -55,10 +55,17 @@ class EditorialLine(models.Model):
     allow_filler = models.BooleanField(default=True)
 
 
+class GridLayoutMode(models.IntegerChoices):
+    FIXED = 1, "fixed"
+    FLEXIBLE = 2, "flexible"
+
+
 class GridLayout(models.Model):
     tv_channel = models.ForeignKey("TvChannel", on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=now)
     is_active = models.BooleanField(default=False)
+    mode = models.IntegerField(choices=GridLayoutMode, default=GridLayoutMode.FIXED)
+    post_filler_policy = models.ForeignKey("FillerPolicy", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         constraints = [

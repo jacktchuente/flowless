@@ -1,0 +1,29 @@
+# Generated manually for flexible grid layouts.
+
+import django.db.models.deletion
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("tv_channel", "0003_alter_catalog_name"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="gridlayout",
+            name="mode",
+            field=models.IntegerField(choices=[(1, "fixed"), (2, "flexible")], default=1),
+        ),
+        migrations.AddField(
+            model_name="gridlayout",
+            name="post_filler_policy",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="tv_channel.fillerpolicy",
+            ),
+        ),
+    ]

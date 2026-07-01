@@ -40,6 +40,8 @@ class GridSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "is_active",
+            "mode",
+            "post_filler_policy",
             "blocks",
         )
 
