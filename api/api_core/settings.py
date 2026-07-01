@@ -68,7 +68,8 @@ INSTALLED_APPS = [
     "tv_channel",
     "grid_schedule",
     "rule_engine",
-    "grid_layout_preset"
+    "grid_layout_preset",
+    "editorial_planning",
 ]
 
 if MODE == 'dev':
