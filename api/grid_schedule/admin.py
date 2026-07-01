@@ -1,10 +1,18 @@
 from django.contrib import admin
 
-from grid_schedule.models import BlockContainerSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.models import BlockContainerSelection, FlexiblePlayoutSelection, ScheduleMediaItem, TvPlayout
 
 
 class ScheduleMediaItemInline(admin.StackedInline):
     model = ScheduleMediaItem
+    fk_name = "block_container_selection"
+    extra = 0
+    show_change_link = True
+
+
+class FlexibleScheduleMediaItemInline(admin.StackedInline):
+    model = ScheduleMediaItem
+    fk_name = "flexible_selection"
     extra = 0
     show_change_link = True
 
@@ -23,7 +31,22 @@ class BlockContainerSelectionAdmin(admin.ModelAdmin):
     inlines = [ScheduleMediaItemInline]
 
 
+@admin.register(FlexiblePlayoutSelection)
+class FlexiblePlayoutSelectionAdmin(admin.ModelAdmin):
+    list_display = ("id", "tv_playout", "segment", "media_container", "path_position", "order", "status")
+    list_select_related = ("tv_playout", "segment", "media_container")
+    inlines = [FlexibleScheduleMediaItemInline]
+
+
 @admin.register(ScheduleMediaItem)
 class ScheduleMediaItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "item", "block_container_selection", "starts_at", "ends_at", "added_to_playout")
-    list_select_related = ("item", "block_container_selection")
+    list_display = (
+        "id",
+        "item",
+        "block_container_selection",
+        "flexible_selection",
+        "starts_at",
+        "ends_at",
+        "added_to_playout",
+    )
+    list_select_related = ("item", "block_container_selection", "flexible_selection")

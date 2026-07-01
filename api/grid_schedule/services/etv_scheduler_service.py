@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from etv_scripted_schedule_api import ScriptedScheduleClient, ContentSearch, PlayoutCount, PlayoutPadUntilExact, \
     ControlGraphicsOn, ControlGraphicsOff
@@ -148,8 +149,14 @@ class ETVSchedulerService:
         queryset = (
             ScheduleMediaItem.objects
             .filter(
-                block_container_selection__tv_playout__tv_channel=tv_channel,
-                block_container_selection__tv_playout__is_active=True,
+                (
+                    Q(block_container_selection__tv_playout__tv_channel=tv_channel)
+                    & Q(block_container_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(flexible_selection__tv_playout__tv_channel=tv_channel)
+                    & Q(flexible_selection__tv_playout__is_active=True)
+                ),
                 item__is_missing=False,
                 starts_at__gte=start_at,
                 ends_at__lte=ends_at,
@@ -160,6 +167,7 @@ class ETVSchedulerService:
                 "item__container__media_collection",
                 "block_container_selection",
                 "block_container_selection__block",
+                "flexible_selection",
             )
             .order_by("starts_at", "item__season_number", "item__episode_number", "item__sequence_number", "id")
         )
@@ -173,8 +181,8 @@ class ETVSchedulerService:
                 "media_container_id": scheduled.item.container_id,
                 "media_container_external_id": scheduled.item.container.external_id,
                 "media_container_title": scheduled.item.container.title,
-                "block_id": scheduled.block_container_selection.block_id,
-                "block_name": ETVSchedulerService._block_label(scheduled.block_container_selection.block),
+                "block_id": ETVSchedulerService._scheduled_block_id(scheduled),
+                "block_name": ETVSchedulerService._scheduled_block_name(scheduled),
                 "starts_at": scheduled.starts_at.isoformat(),
                 "ends_at": scheduled.ends_at.isoformat(),
                 "duration_seconds": scheduled.item.duration_seconds,
@@ -209,3 +217,15 @@ class ETVSchedulerService:
     @staticmethod
     def _block_label(block) -> str:
         return f"{block.starts_at.strftime('%H:%M')}-{block.ends_at.strftime('%H:%M')}"
+
+    @staticmethod
+    def _scheduled_block_id(scheduled: ScheduleMediaItem):
+        if scheduled.block_container_selection_id:
+            return scheduled.block_container_selection.block_id
+        return None
+
+    @staticmethod
+    def _scheduled_block_name(scheduled: ScheduleMediaItem) -> str:
+        if scheduled.block_container_selection_id:
+            return ETVSchedulerService._block_label(scheduled.block_container_selection.block)
+        return "Flexible"

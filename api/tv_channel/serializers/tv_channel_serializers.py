@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -84,12 +85,23 @@ class TvChannelSerializer(serializers.ModelSerializer):
         queryset = (
             ScheduleMediaItem.objects
             .filter(
-                block_container_selection__tv_playout__tv_channel=obj,
-                block_container_selection__tv_playout__is_active=True,
+                (
+                    Q(block_container_selection__tv_playout__tv_channel=obj)
+                    & Q(block_container_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(flexible_selection__tv_playout__tv_channel=obj)
+                    & Q(flexible_selection__tv_playout__is_active=True)
+                ),
                 starts_at__lt=day_end,
                 ends_at__gt=day_start,
             )
-            .select_related("item", "item__container", "block_container_selection__block")
+            .select_related(
+                "item",
+                "item__container",
+                "block_container_selection__block",
+                "flexible_selection",
+            )
             .order_by("starts_at")
         )
         return ScheduleMediaItemSerializer(queryset, many=True).data
