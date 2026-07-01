@@ -2,9 +2,10 @@ import logging
 
 from celery import shared_task
 
+from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
-from tv_channel.models import Catalog, TvChannel
+from tv_channel.models import Catalog, GridLayoutMode, TvChannel
 from tv_channel.services.catalog_service import CatalogService
 from tv_channel.services.etv_channel_push_service import EtvChannelPushService
 from tv_channel.services.tv_channel_service import TvChannelService
@@ -109,11 +110,24 @@ def generate_tv_channel_playout(
         status=AnalyzeStatus.ANALYZING,
     )
     try:
-        service = TvPlayoutGenerationService(
-            tv_channel=instance,
-            days=days,
-            reset=reset,
+        active_grid = (
+            instance.gridlayout_set.filter(is_active=True)
+            .only("id", "mode")
+            .order_by("-created_at", "-id")
+            .first()
         )
+        if active_grid is not None and active_grid.mode == GridLayoutMode.FLEXIBLE:
+            service = FlexibleTvPlayoutGenerationService(
+                tv_channel=instance,
+                days=days,
+                reset=reset,
+            )
+        else:
+            service = TvPlayoutGenerationService(
+                tv_channel=instance,
+                days=days,
+                reset=reset,
+            )
         result = service.generate()
     except Exception as exc:
         logger.exception(
