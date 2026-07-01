@@ -25,6 +25,7 @@ import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialo
 import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-detail-dialog/schedule-media-item-detail-dialog.component";
 import {TvChannelDialogComponent} from "../tv-channel-dialog/tv-channel-dialog.component";
 import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
+import {EditorialCandidateDialogComponent} from "../editorial-candidate-dialog/editorial-candidate-dialog.component";
 
 type ChannelCalendarEventMeta =
   | {kind: 'schedule', item: ScheduledMediaItem}
@@ -225,6 +226,25 @@ export class ChannelManagementComponent implements AfterViewInit {
     }).afterClosed().subscribe((result) => {
       if (result) {
         this.notificationService.notify("CHANNELS.NOTIFY_GENERATION_STARTED")
+      }
+    })
+  }
+
+  openFlexibleCandidates() {
+    if (!this.selectedCatalog) {
+      return
+    }
+    this.dialog.open(EditorialCandidateDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        catalogId: this.selectedCatalog.id,
+        catalogName: this.selectedCatalog.name,
+      }
+    }).afterClosed().subscribe((result) => {
+      if (result) {
+        this.notificationService.notify("Chaine flexible creee.")
+        this.loadChannels()
       }
     })
   }

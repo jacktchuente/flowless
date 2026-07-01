@@ -6,4 +6,5 @@ export const apiRoutes = {
     catalog: "catalog",
     tvChannel: "tv-channel",
     gridBlock: "grid-block",
+    editorialChannelCandidate: "editorial-channel-candidate",
 }

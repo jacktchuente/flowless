@@ -39,6 +39,10 @@
       <mat-icon>account_tree</mat-icon>
       Flexible
     </button>
+    <button mat-stroked-button (click)="openFlexibleCandidates()" [disabled]="!selectedCatalogId">
+      <mat-icon>playlist_add</mat-icon>
+      Candidates
+    </button>
   </div>
 </section>
 
