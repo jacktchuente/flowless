@@ -1,5 +1,6 @@
 from django.utils.timezone import now
 
+from media_source.constants import MediaContainerKind
 from media_source.models import MediaCollection, MediaContainer, MediaSource, MediaItem
 from media_source.services.media_container_service import MediaContainerService
 from media_source.services.media_server_services.jellyfin_service import JellyfinService, MediaServerMediaContainer
@@ -8,8 +9,24 @@ from utils.hash_data import hash_data
 
 
 class MediaCollectionService:
+    CONTAINER_KIND_MAP = {
+        "movie": MediaContainerKind.STANDALONE_VIDEO,
+        "series": MediaContainerKind.SERIES,
+        "music_release": MediaContainerKind.MUSIC_RELEASE,
+        "music_video_release": MediaContainerKind.MUSIC_VIDEO_RELEASE,
+        "other": MediaContainerKind.OTHER,
+    }
+
     def __init__(self, media_collection: MediaCollection):
         self.media_collection = media_collection
+
+    @classmethod
+    def _resolve_collection_container_kind(cls, medias: list[MediaServerMediaContainer]):
+        for media in medias:
+            container_kind = media.get("container_kind")
+            if container_kind in cls.CONTAINER_KIND_MAP:
+                return cls.CONTAINER_KIND_MAP[container_kind]
+        return None
 
     def load_collection_data(self):
         media_source = self.media_collection.media_source
@@ -38,6 +55,12 @@ class MediaCollectionService:
         }
 
         missing_external_ids = existing_external_ids - found_external_ids
+
+        collection_container_kind = self._resolve_collection_container_kind(medias)
+        if self.media_collection.container_kind != collection_container_kind:
+            self.media_collection.container_kind = collection_container_kind
+            self.media_collection.save(update_fields=["container_kind"])
+
         self.manage_media_containers(medias, missing_external_ids, media_source, existing_medias_by_external_id)
         self.manage_media_items(
             medias=medias,
@@ -67,13 +90,25 @@ class MediaCollectionService:
                 "min_video_height": media.get("min_video_height"),
                 "min_age": media.get("min_age"),
                 "max_age": media.get("max_age"),
-                # "release_date": media.get("release_date"),
+                "release_date": media.get("release_date"),
+                "release_date_start": media.get("release_date_start"),
+                "release_date_end": media.get("release_date_end"),
+                "release_year_min": media.get("release_year_min"),
+                "release_year_max": media.get("release_year_max"),
                 "countries": media.get("countries", []),
                 "audio_languages": media.get("audio_languages", []),
                 "subtitle_languages": media.get("subtitle_languages", []),
                 "audio_languages_any": media.get("audio_languages_any", []),
                 "subtitle_languages_any": media.get("subtitle_languages_any", []),
+                "community_rating_score": media.get("community_rating_score"),
+                "critic_rating_score": media.get("critic_rating_score"),
                 "overall_rating_score": media.get("overall_rating_score"),
+                "people": media.get("people", []),
+                "directors": media.get("directors", []),
+                "writers": media.get("writers", []),
+                "creators": media.get("creators", []),
+                "actors": media.get("actors", []),
+                "studios": media.get("studios", []),
                 "tags": media.get("tags", []),
                 "genres": media.get("genres", []),
             }
@@ -92,7 +127,7 @@ class MediaCollectionService:
                         media_collection=self.media_collection,
                         is_missing=False,
                         original_data_hash=original_data_hash,
-                        raw_data=payload,
+                        raw_data=media.get("raw_metadata", payload),
                     )
                 )
                 continue
@@ -105,7 +140,7 @@ class MediaCollectionService:
 
             existing_media.is_missing = False
             existing_media.original_data_hash = original_data_hash
-            existing_media.raw_data = payload
+            existing_media.raw_data = media.get("raw_metadata", payload)
 
             media_to_update.append(existing_media)
 
@@ -128,12 +163,24 @@ class MediaCollectionService:
                     "min_age",
                     "max_age",
                     "release_date",
+                    "release_date_start",
+                    "release_date_end",
+                    "release_year_min",
+                    "release_year_max",
                     "countries",
                     "audio_languages",
                     "subtitle_languages",
                     "audio_languages_any",
                     "subtitle_languages_any",
+                    "community_rating_score",
+                    "critic_rating_score",
                     "overall_rating_score",
+                    "people",
+                    "directors",
+                    "writers",
+                    "creators",
+                    "actors",
+                    "studios",
                     "tags",
                     "genres",
                     "is_missing",
@@ -159,6 +206,7 @@ class MediaCollectionService:
             "container",
             "title",
             "description",
+            "item_kind",
             "duration_seconds",
             "sequence_number",
             "season_number",
@@ -172,7 +220,17 @@ class MediaCollectionService:
             "subtitle_languages",
             "video_width",
             "video_height",
+            "community_rating_score",
+            "critic_rating_score",
             "overall_rating_score",
+            "tags",
+            "genres",
+            "people",
+            "directors",
+            "writers",
+            "creators",
+            "actors",
+            "studios",
             "is_missing",
             "original_data_hash",
             "raw_data",
@@ -223,20 +281,31 @@ class MediaCollectionService:
                     "external_id": external_id,
                     "title": (item.get("title") or "")[:255],
                     "description": item.get("description"),
+                    "item_kind": item.get("item_kind"),
                     "duration_seconds": item.get("duration_seconds"),
                     "sequence_number": item.get("sequence_number"),
                     "season_number": item.get("season_number"),
                     "episode_number": item.get("episode_number"),
                     "min_age": item.get("min_age"),
                     "max_age": item.get("max_age"),
-                    # "release_date": item.get("release_date"),
+                    "release_date": item.get("release_date"),
                     "release_year": item.get("release_year"),
                     "countries": item.get("countries", []),
                     "audio_languages": item.get("audio_languages", []),
                     "subtitle_languages": item.get("subtitle_languages", []),
                     "video_width": item.get("video_width"),
                     "video_height": item.get("video_height"),
+                    "community_rating_score": item.get("community_rating_score"),
+                    "critic_rating_score": item.get("critic_rating_score"),
                     "overall_rating_score": item.get("overall_rating_score"),
+                    "tags": item.get("tags", []),
+                    "genres": item.get("genres", []),
+                    "people": item.get("people", []),
+                    "directors": item.get("directors", []),
+                    "writers": item.get("writers", []),
+                    "creators": item.get("creators", []),
+                    "actors": item.get("actors", []),
+                    "studios": item.get("studios", []),
                 }
 
                 hash_payload = {
@@ -255,7 +324,7 @@ class MediaCollectionService:
                             media_source=media_source,
                             is_missing=False,
                             original_data_hash=original_data_hash,
-                            raw_data=payload,
+                            raw_data=item.get("raw_metadata", payload),
                         )
                     )
                     continue
@@ -273,7 +342,7 @@ class MediaCollectionService:
                 existing_item.container = container
                 existing_item.is_missing = False
                 existing_item.original_data_hash = original_data_hash
-                existing_item.raw_data = payload
+                existing_item.raw_data = item.get("raw_metadata", payload)
 
                 item_to_update.append(existing_item)
 

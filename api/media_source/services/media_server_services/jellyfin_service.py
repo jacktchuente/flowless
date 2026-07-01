@@ -45,7 +45,19 @@ class MediaItem(TypedDict, total=False):
     subtitle_languages: list[str]
     video_width: int | None
     video_height: int | None
+    community_rating_score: float | None
+    critic_rating_score: float | None
     overall_rating_score: float | None
+
+    tags: list[str]
+    genres: list[str]
+
+    people: list[dict[str, str | None]]
+    directors: list[str]
+    writers: list[str]
+    creators: list[str]
+    actors: list[str]
+    studios: list[str]
 
     raw_metadata: dict[str, Any]
 
@@ -69,12 +81,25 @@ class MediaServerMediaContainer(TypedDict, total=False):
     min_age: int | None
     max_age: int | None
     release_date: date | None
+    release_date_start: date | None
+    release_date_end: date | None
+    release_year_min: int | None
+    release_year_max: int | None
     countries: list[str]
     audio_languages: list[str]
     subtitle_languages: list[str]
     audio_languages_any: list[str]
     subtitle_languages_any: list[str]
+    community_rating_score: float | None
+    critic_rating_score: float | None
     overall_rating_score: float | None
+
+    people: list[dict[str, str | None]]
+    directors: list[str]
+    writers: list[str]
+    creators: list[str]
+    actors: list[str]
+    studios: list[str]
 
     tags: list[str]
     genres: list[str]
@@ -105,20 +130,22 @@ class JellyfinService:
     CONTAINER_ITEM_TYPES = "Movie,Series,MusicAlbum,MusicVideo,Audio"
 
     COLLECTION_ITEM_FIELDS = (
-        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,ProductionYear,PremiereDate,"
-        "OfficialRating,RecursiveItemCount,ChildCount,ProductionLocations,ProviderIds,"
+        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,CriticRating,ProductionYear,PremiereDate,"
+        "OfficialRating,RecursiveItemCount,ChildCount,ProductionLocations,"
         "People,Studios,Taglines,MediaStreams,Path,ParentId,AlbumId,Album,IndexNumber,"
         "ParentIndexNumber,CollectionType"
     )
 
     SERIES_EPISODE_FIELDS = (
-        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,ProductionYear,PremiereDate,"
-        "OfficialRating,ProductionLocations,MediaStreams,IndexNumber,ParentIndexNumber"
+        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,CriticRating,ProductionYear,PremiereDate,"
+        "OfficialRating,ProductionLocations,MediaStreams,IndexNumber,ParentIndexNumber,"
+        "People,Studios"
     )
 
     ALBUM_TRACK_FIELDS = (
-        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,ProductionYear,PremiereDate,"
-        "ProductionLocations,MediaStreams,IndexNumber,ParentIndexNumber,Album,AlbumId"
+        "Genres,Tags,Overview,RunTimeTicks,CommunityRating,CriticRating,ProductionYear,PremiereDate,"
+        "ProductionLocations,MediaStreams,IndexNumber,ParentIndexNumber,Album,AlbumId,"
+        "People,Studios"
     )
 
     def __init__(self, credentials: Credentials):
@@ -345,6 +372,99 @@ class JellyfinService:
         return sorted({value for value in values if value})
 
     @staticmethod
+    def _dedupe_people(values: list[dict[str, str | None]]) -> list[dict[str, str | None]]:
+        seen: set[tuple[str | None, str | None, str | None, str | None]] = set()
+        people: list[dict[str, str | None]] = []
+
+        for value in values:
+            key = (
+                value.get("external_id"),
+                value.get("name"),
+                value.get("type"),
+                value.get("role"),
+            )
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+            people.append(value)
+
+        return people
+
+    @classmethod
+    def _extract_people(cls, item: dict[str, Any]) -> dict[str, Any]:
+        people: list[dict[str, str | None]] = []
+
+        for person in item.get("People") or []:
+            if not isinstance(person, dict):
+                continue
+
+            name = person.get("Name")
+
+            if not isinstance(name, str):
+                continue
+
+            external_id = person.get("Id")
+            person_type = person.get("Type")
+            role = person.get("Role")
+
+            people.append(
+                {
+                    "external_id": external_id if isinstance(external_id, str) else None,
+                    "name": name,
+                    "type": person_type if isinstance(person_type, str) else None,
+                    "role": role if isinstance(role, str) else None,
+                }
+            )
+
+        people = cls._dedupe_people(people)
+
+        return {
+            "people": people,
+            "directors": cls._dedupe_sorted(
+                [
+                    person["name"]
+                    for person in people
+                    if person.get("type") == "Director" and person.get("name")
+                ]
+            ),
+            "writers": cls._dedupe_sorted(
+                [
+                    person["name"]
+                    for person in people
+                    if person.get("type") == "Writer" and person.get("name")
+                ]
+            ),
+            "creators": cls._dedupe_sorted(
+                [
+                    person["name"]
+                    for person in people
+                    if person.get("type") == "Creator" and person.get("name")
+                ]
+            ),
+            "actors": cls._dedupe_sorted(
+                [
+                    person["name"]
+                    for person in people
+                    if person.get("type") == "Actor" and person.get("name")
+                ]
+            ),
+        }
+
+    @classmethod
+    def _extract_studios(cls, item: dict[str, Any]) -> list[str]:
+        studios: list[str] = []
+
+        for studio in item.get("Studios") or []:
+            if isinstance(studio, str):
+                studios.append(studio)
+            elif isinstance(studio, dict) and isinstance(studio.get("Name"), str):
+                studios.append(studio["Name"])
+
+        return cls._dedupe_sorted(studios)
+
+    @staticmethod
     def _extract_age_bounds(item: dict[str, Any]) -> tuple[int | None, int | None]:
         rating = item.get("OfficialRating")
 
@@ -411,7 +531,8 @@ class JellyfinService:
             ]
         )
 
-        rating = item.get("CommunityRating")
+        community_rating = item.get("CommunityRating")
+        critic_rating = item.get("CriticRating")
 
         return {
             "description": item.get("Overview")
@@ -429,8 +550,14 @@ class JellyfinService:
             "subtitle_languages": stream_data["subtitle_languages"],
             "video_width": stream_data["video_width"],
             "video_height": stream_data["video_height"],
-            "overall_rating_score": float(rating)
-            if isinstance(rating, int | float)
+            "community_rating_score": float(community_rating)
+            if isinstance(community_rating, int | float)
+            else None,
+            "critic_rating_score": float(critic_rating)
+            if isinstance(critic_rating, int | float)
+            else None,
+            "overall_rating_score": float(community_rating)
+            if isinstance(community_rating, int | float)
             else None,
         }
 
@@ -492,6 +619,9 @@ class JellyfinService:
             return None
 
         common = cls._extract_common_metadata(item)
+        category_data = cls._extract_categories(item)
+        people_data = cls._extract_people(item)
+        studios = cls._extract_studios(item)
 
         index_number = item.get("IndexNumber")
         parent_index_number = item.get("ParentIndexNumber")
@@ -511,7 +641,17 @@ class JellyfinService:
             "subtitle_languages": common["subtitle_languages"],
             "video_width": common["video_width"],
             "video_height": common["video_height"],
+            "community_rating_score": common["community_rating_score"],
+            "critic_rating_score": common["critic_rating_score"],
             "overall_rating_score": common["overall_rating_score"],
+            "genres": category_data["genres"],
+            "tags": category_data["tags"],
+            "people": people_data["people"],
+            "directors": people_data["directors"],
+            "writers": people_data["writers"],
+            "creators": people_data["creators"],
+            "actors": people_data["actors"],
+            "studios": studios,
             "sequence_number": index_number if isinstance(index_number, int) else None,
             "season_number": parent_index_number if isinstance(parent_index_number, int) else None,
             "episode_number": index_number if isinstance(index_number, int) else None,
@@ -531,6 +671,8 @@ class JellyfinService:
 
         common = cls._extract_common_metadata(container_item)
         category_data = cls._extract_categories(container_item)
+        container_people_data = cls._extract_people(container_item)
+        container_studios = cls._extract_studios(container_item)
 
         min_ages = [
             item["min_age"]
@@ -554,6 +696,24 @@ class JellyfinService:
             item["release_date"]
             for item in item_payloads
             if item.get("release_date") is not None
+        ]
+
+        release_years = [
+            item["release_year"]
+            for item in item_payloads
+            if item.get("release_year") is not None
+        ]
+
+        community_ratings = [
+            item["community_rating_score"]
+            for item in item_payloads
+            if item.get("community_rating_score") is not None
+        ]
+
+        critic_ratings = [
+            item["critic_rating_score"]
+            for item in item_payloads
+            if item.get("critic_rating_score") is not None
         ]
 
         ratings = [
@@ -610,6 +770,80 @@ class JellyfinService:
             if item.get("video_height") is not None
         ]
 
+        people = cls._dedupe_people(
+            container_people_data["people"]
+            + [
+                person
+                for item in item_payloads
+                for person in item.get("people", [])
+            ]
+        )
+
+        directors = cls._dedupe_sorted(
+            container_people_data["directors"]
+            + [
+                director
+                for item in item_payloads
+                for director in item.get("directors", [])
+            ]
+        )
+
+        writers = cls._dedupe_sorted(
+            container_people_data["writers"]
+            + [
+                writer
+                for item in item_payloads
+                for writer in item.get("writers", [])
+            ]
+        )
+
+        creators = cls._dedupe_sorted(
+            container_people_data["creators"]
+            + [
+                creator
+                for item in item_payloads
+                for creator in item.get("creators", [])
+            ]
+        )
+
+        actors = cls._dedupe_sorted(
+            container_people_data["actors"]
+            + [
+                actor
+                for item in item_payloads
+                for actor in item.get("actors", [])
+            ]
+        )
+
+        studios = cls._dedupe_sorted(
+            container_studios
+            + [
+                studio
+                for item in item_payloads
+                for studio in item.get("studios", [])
+            ]
+        )
+
+        genres = cls._dedupe_sorted(
+            category_data["genres"]
+            + [
+                genre
+                for item in item_payloads
+                for genre in item.get("genres", [])
+            ]
+        )
+
+        tags = cls._dedupe_sorted(
+            category_data["tags"]
+            + [
+                tag
+                for item in item_payloads
+                for tag in item.get("tags", [])
+            ]
+        )
+
+        categories = cls._dedupe_sorted(genres + tags)
+
         return {
             "external_id": external_id,
             "title": container_item.get("Name")
@@ -619,9 +853,9 @@ class JellyfinService:
 
             "container_kind": cls._container_kind(container_item.get("Type")),
 
-            "categories": category_data["categories"],
-            "genres": category_data["genres"],
-            "tags": category_data["tags"],
+            "categories": categories,
+            "genres": genres,
+            "tags": tags,
 
             "item_count": len(item_payloads),
 
@@ -641,6 +875,10 @@ class JellyfinService:
             "min_age": max(min_ages) if min_ages else common["min_age"],
             "max_age": max(max_ages) if max_ages else common["max_age"],
             "release_date": min(release_dates) if release_dates else common["release_date"],
+            "release_date_start": min(release_dates) if release_dates else common["release_date"],
+            "release_date_end": max(release_dates) if release_dates else common["release_date"],
+            "release_year_min": min(release_years) if release_years else common["release_year"],
+            "release_year_max": max(release_years) if release_years else common["release_year"],
 
             "countries": countries or common["countries"],
 
@@ -655,9 +893,22 @@ class JellyfinService:
             "audio_languages_any": audio_any or common["audio_languages"],
             "subtitle_languages_any": subtitle_any or common["subtitle_languages"],
 
+            "community_rating_score": mean(community_ratings)
+            if community_ratings
+            else common["community_rating_score"],
+            "critic_rating_score": mean(critic_ratings)
+            if critic_ratings
+            else common["critic_rating_score"],
             "overall_rating_score": mean(ratings)
             if ratings
             else common["overall_rating_score"],
+
+            "people": people,
+            "directors": directors,
+            "writers": writers,
+            "creators": creators,
+            "actors": actors,
+            "studios": studios,
 
             "raw_metadata": {
                 "container": container_item,
