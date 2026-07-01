@@ -269,3 +269,21 @@ class EditorialSegmentPathElement(models.Model):
 
     def __str__(self):
         return f"{self.path.channel_candidate.name} #{self.position}"
+
+
+class EditorialPlannedGrid(models.Model):
+    channel_candidate = models.OneToOneField(
+        "editorial_planning.EditorialChannelCandidate",
+        on_delete=models.CASCADE,
+        related_name="planned_grid",
+    )
+    grid_layout = models.OneToOneField(
+        "tv_channel.GridLayout",
+        on_delete=models.CASCADE,
+        related_name="editorial_planning_source",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.channel_candidate.name} / grid #{self.grid_layout_id}"
