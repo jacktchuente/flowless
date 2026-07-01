@@ -35,6 +35,10 @@
       <mat-icon>auto_awesome</mat-icon>
       {{ 'CHANNELS.GENERATE_CHANNELS' | translate }}
     </button>
+    <button mat-stroked-button (click)="generateFlexibleProgramming()" [disabled]="!selectedCatalogId">
+      <mat-icon>account_tree</mat-icon>
+      Flexible
+    </button>
   </div>
 </section>
 

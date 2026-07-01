@@ -18,6 +18,7 @@ import {TvChannelService} from "@project-services/tv-channel.service";
 import {NotificationService} from "@project-shared/services/notification.service";
 import {CatalogDialogComponent} from "../catalog-dialog/catalog-dialog.component";
 import {BlueprintGenerationDialogComponent} from "../blueprint-generation-dialog/blueprint-generation-dialog.component";
+import {EditorialPlanningGenerationDialogComponent} from "../editorial-planning-generation-dialog/editorial-planning-generation-dialog.component";
 import {GridBlockDetailDialogComponent} from "../grid-block-detail-dialog/grid-block-detail-dialog.component";
 import {PlayoutGenerationDialogComponent} from "../playout-generation-dialog/playout-generation-dialog.component";
 import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialog.component";
@@ -28,6 +29,7 @@ import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/c
 type ChannelCalendarEventMeta =
   | {kind: 'schedule', item: ScheduledMediaItem}
   | {kind: 'block', channel: TvChannel, block: GridBlock}
+  | {kind: 'flexible-grid', channel: TvChannel}
 type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
 
 @Component({
@@ -206,6 +208,24 @@ export class ChannelManagementComponent implements AfterViewInit {
         }
         this.notificationService.notify("CHANNELS.NOTIFY_GENERATION_STARTED")
       })
+    })
+  }
+
+  generateFlexibleProgramming() {
+    if (!this.selectedCatalog) {
+      return
+    }
+    this.dialog.open(EditorialPlanningGenerationDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      data: {
+        catalogId: this.selectedCatalog.id,
+        catalogName: this.selectedCatalog.name,
+      }
+    }).afterClosed().subscribe((result) => {
+      if (result) {
+        this.notificationService.notify("CHANNELS.NOTIFY_GENERATION_STARTED")
+      }
     })
   }
 
@@ -392,6 +412,9 @@ export class ChannelManagementComponent implements AfterViewInit {
   }
 
   private getGridCalendarEvents(channel: TvChannel): ChannelCalendarEvent[] {
+    if (channel.grid_data?.mode === 2) {
+      return this.getFlexibleGridCalendarEvents(channel)
+    }
     const blocks = channel.grid_data?.blocks ?? []
     const dayStart = new Date(this.calendarDate.getFullYear(), this.calendarDate.getMonth(), this.calendarDate.getDate(), 0, 0, 0, 0)
     const dayEnd = new Date(dayStart)
@@ -418,6 +441,37 @@ export class ChannelManagementComponent implements AfterViewInit {
           }
         })
     })
+  }
+
+  private getFlexibleGridCalendarEvents(channel: TvChannel): ChannelCalendarEvent[] {
+    if (!channel.editorial_line_data) {
+      return []
+    }
+    const dayStart = new Date(this.calendarDate.getFullYear(), this.calendarDate.getMonth(), this.calendarDate.getDate(), 0, 0, 0, 0)
+    const dayEnd = new Date(dayStart)
+    dayEnd.setDate(dayEnd.getDate() + 1)
+    const previousDay = new Date(dayStart)
+    previousDay.setDate(previousDay.getDate() - 1)
+    const occurrences = [
+      this.buildFlexibleOccurrence(channel, previousDay),
+      this.buildFlexibleOccurrence(channel, dayStart),
+    ]
+
+    return occurrences
+      .filter((occurrence) => occurrence.start < dayEnd && occurrence.end > dayStart)
+      .map((occurrence) => {
+        const clippedRange = this.clipRangeToDay(occurrence.start, occurrence.end, dayStart, dayEnd)
+        return {
+          start: clippedRange.start,
+          end: clippedRange.end,
+          title: 'Flexible',
+          color: {
+            primary: 'hsla(172, 56%, 28%, 0.86)',
+            secondary: 'hsla(172, 58%, 70%, 0.92)',
+          },
+          meta: {kind: 'flexible-grid', channel},
+        }
+      })
   }
 
   onCalendarEventClicked(event: ChannelCalendarEvent) {
@@ -499,6 +553,16 @@ export class ChannelManagementComponent implements AfterViewInit {
   private buildBlockOccurrence(block: GridBlock, anchorDate: Date): {start: Date, end: Date} {
     const start = this.combineDateAndTime(anchorDate, block.starts_at)
     const end = this.combineDateAndTime(anchorDate, block.ends_at)
+    if (end <= start) {
+      end.setDate(end.getDate() + 1)
+    }
+    return {start, end}
+  }
+
+  private buildFlexibleOccurrence(channel: TvChannel, anchorDate: Date): {start: Date, end: Date} {
+    const editorialLine = channel.editorial_line_data!
+    const start = this.combineDateAndTime(anchorDate, editorialLine.start_at)
+    const end = this.combineDateAndTime(anchorDate, editorialLine.end_at)
     if (end <= start) {
       end.setDate(end.getDate() + 1)
     }
