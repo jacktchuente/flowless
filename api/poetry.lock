@@ -19,7 +19,7 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "anyio"
-version = "4.13.0"
+version = "4.14.1"
 description = "High-level concurrency and networking framework on top of asyncio or Trio"
 category = "main"
 optional = false
@@ -42,14 +42,6 @@ python-versions = ">=3.9"
 
 [package.extras]
 tests = ["pytest", "pytest-asyncio", "mypy (>=1.14.0)"]
-
-[[package]]
-name = "async-timeout"
-version = "5.0.1"
-description = "Timeout context manager for asyncio programs"
-category = "main"
-optional = false
-python-versions = ">=3.8"
 
 [[package]]
 name = "billiard"
@@ -115,7 +107,7 @@ zstd = ["zstandard (==0.23.0)"]
 
 [[package]]
 name = "certifi"
-version = "2026.5.20"
+version = "2026.6.17"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
@@ -177,7 +169,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "click"
-version = "8.4.1"
+version = "8.4.2"
 description = "Composable command line interface toolkit"
 category = "main"
 optional = false
@@ -272,7 +264,7 @@ dev = ["polib"]
 
 [[package]]
 name = "cryptography"
-version = "48.0.0"
+version = "49.0.0"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
 category = "main"
 optional = false
@@ -294,7 +286,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "django"
-version = "5.2.14"
+version = "5.2.15"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 category = "main"
 optional = false
@@ -372,14 +364,14 @@ drf = ["djangorestframework"]
 
 [[package]]
 name = "django-timezone-field"
-version = "7.2.1"
+version = "7.2.2"
 description = "A Django app providing DB, form, and REST framework fields for zoneinfo and pytz timezone objects."
 category = "main"
 optional = false
 python-versions = "<4.0,>=3.8"
 
 [package.dependencies]
-Django = ">=3.2,<6.1"
+Django = ">=4.2,<6.2"
 
 [[package]]
 name = "djangorestframework"
@@ -503,7 +495,7 @@ test = ["cffi (>=1.17.1)", "dnspython (>=1.16.0,<2.0)", "idna", "psutil (>=5.7.0
 
 [[package]]
 name = "google-auth"
-version = "2.53.0"
+version = "2.55.1"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -527,7 +519,7 @@ rsa = ["rsa (>=3.1.4,<5)"]
 
 [[package]]
 name = "greenlet"
-version = "3.5.1"
+version = "3.5.3"
 description = "Lightweight in-process concurrent programming"
 category = "main"
 optional = false
@@ -594,7 +586,7 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "idna"
-version = "3.16"
+version = "3.18"
 description = "Internationalized Domain Names in Applications (IDNA)"
 category = "main"
 optional = false
@@ -635,8 +627,16 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "jiter"
-version = "0.15.0"
+version = "0.16.0"
 description = "Fast iterable JSON parser."
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[[package]]
+name = "joblib"
+version = "1.5.3"
+description = "Lightweight pipelining with Python functions"
 category = "main"
 optional = false
 python-versions = ">=3.9"
@@ -683,35 +683,57 @@ python-versions = ">=3.9"
 
 [[package]]
 name = "msal"
-version = "1.36.0"
+version = "1.37.0"
 description = "The Microsoft Authentication Library (MSAL) for Python library enables your app to access the Microsoft Cloud by supporting authentication of users with Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA) using industry standard OAuth2 and OpenID Connect."
-category = "main"
-optional = false
-python-versions = ">=3.8"
-
-[package.dependencies]
-cryptography = ">=2.5,<49"
-PyJWT = {version = ">=1.0.0,<3", extras = ["crypto"]}
-requests = ">=2.0.0,<3"
-
-[package.extras]
-broker = ["pymsalruntime (>=0.14,<0.21)", "pymsalruntime (>=0.17,<0.21)", "pymsalruntime (>=0.18,<0.21)"]
-
-[[package]]
-name = "msgpack"
-version = "1.1.2"
-description = "MessagePack serializer"
 category = "main"
 optional = false
 python-versions = ">=3.9"
 
+[package.dependencies]
+cryptography = ">=2.5,<51"
+PyJWT = {version = ">=1.0.0,<3", extras = ["crypto"]}
+requests = ">=2.0.0,<3"
+
+[package.extras]
+broker = ["pymsalruntime (>=0.20,<0.21)", "pymsalruntime (>=0.20,<0.21)", "pymsalruntime (>=0.20,<0.21)"]
+
+[[package]]
+name = "msgpack"
+version = "1.2.1"
+description = "MessagePack serializer"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[[package]]
+name = "narwhals"
+version = "2.23.0"
+description = "Extremely lightweight compatibility layer between dataframe libraries"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.extras]
+cudf = ["cudf-cu12 (>=24.10.0)"]
+dask = ["dask[dataframe] (>=2024.8)"]
+duckdb = ["duckdb (>=1.1)"]
+ibis = ["ibis-framework (>=6.0.0)", "rich (>=12.4.4)", "packaging (>=21.3)", "pyarrow-hotfix (>=0.7)"]
+modin = ["modin (>=0.22.0)"]
+pandas = ["pandas (>=1.3.4)"]
+polars = ["polars (>=0.20.4)"]
+pyarrow = ["pyarrow (>=13.0.0)"]
+pyspark = ["pyspark (>=3.5.0)"]
+pyspark-connect = ["pyspark[connect] (>=3.5.0)"]
+sql = ["narwhals", "sqlparse (>=0.5.5)"]
+sqlframe = ["sqlframe (>=3.22.0,!=3.39.3)"]
+
 [[package]]
 name = "numpy"
-version = "2.4.6"
+version = "2.5.0"
 description = "Fundamental package for array computing in Python"
 category = "main"
 optional = false
-python-versions = ">=3.11"
+python-versions = ">=3.12"
 
 [[package]]
 name = "oauthlib"
@@ -728,7 +750,7 @@ signals = ["blinker (>=1.4.0)"]
 
 [[package]]
 name = "onnxruntime"
-version = "1.26.0"
+version = "1.27.0"
 description = "ONNX Runtime is a runtime accelerator for Machine Learning models"
 category = "main"
 optional = false
@@ -738,7 +760,7 @@ python-versions = ">=3.11"
 flatbuffers = "*"
 numpy = ">=1.21.6"
 packaging = "*"
-protobuf = "*"
+protobuf = ">=4.25.8"
 
 [package.extras]
 symbolic = ["sympy"]
@@ -746,7 +768,7 @@ quantization = ["ml-dtypes"]
 
 [[package]]
 name = "openai"
-version = "2.38.0"
+version = "2.44.0"
 description = "The official Python library for the openai API"
 category = "main"
 optional = false
@@ -760,13 +782,11 @@ jiter = ">=0.10.0,<1"
 pydantic = ">=1.9.0,<3"
 sniffio = "*"
 tqdm = ">4"
-typing-extensions = [
-    ">=4.11,<5",
-    ">=4.14,<5",
-]
+typing-extensions = ">=4.14,<5"
 
 [package.extras]
 aiohttp = ["aiohttp", "httpx-aiohttp (>=0.1.9)"]
+bedrock = ["botocore (>=1.40.0,<1.43)", "botocore (>=1.40.0,<2)"]
 datalib = ["numpy (>=1)", "pandas-stubs (>=1.1.0.11)", "pandas (>=1.2.3)"]
 realtime = ["websockets (>=13,<16)"]
 voice-helpers = ["numpy (>=2.0.2)", "sounddevice (>=0.5.1)"]
@@ -824,7 +844,7 @@ wcwidth = "*"
 
 [[package]]
 name = "protobuf"
-version = "7.35.0"
+version = "7.35.1"
 description = ""
 category = "main"
 optional = false
@@ -952,19 +972,16 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "redis"
-version = "7.4.0"
+version = "8.0.1"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = false
 python-versions = ">=3.10"
 
-[package.dependencies]
-async-timeout = {version = ">=4.0.3", markers = "python_full_version < \"3.11.3\""}
-
 [package.extras]
 circuit-breaker = ["pybreaker (>=1.4.0)"]
 hiredis = ["hiredis (>=3.2.0)"]
-jwt = ["pyjwt (>=2.9.0)"]
+jwt = ["pyjwt (>=2.13.0)"]
 ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
 otel = ["opentelemetry-api (>=1.39.1)", "opentelemetry-exporter-otlp-proto-http (>=1.39.1)", "opentelemetry-sdk (>=1.39.1)"]
 xxhash = ["xxhash (>=3.6.0,<3.7.0)"]
@@ -1003,6 +1020,46 @@ requests = ">=2.0.0"
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
+name = "scikit-learn"
+version = "1.9.0"
+description = "A set of python modules for machine learning and data mining"
+category = "main"
+optional = false
+python-versions = ">=3.11"
+
+[package.dependencies]
+joblib = ">=1.4.0"
+narwhals = ">=2.0.1"
+numpy = ">=1.24.1"
+scipy = ">=1.10.0"
+threadpoolctl = ">=3.5.0"
+
+[package.extras]
+build = ["numpy (>=1.24.1)", "scipy (>=1.10.0)", "cython (>=3.1.2)", "meson-python (>=0.17.1)"]
+install = ["numpy (>=1.24.1)", "scipy (>=1.10.0)", "joblib (>=1.4.0)", "narwhals (>=2.0.1)", "threadpoolctl (>=3.5.0)"]
+benchmark = ["matplotlib (>=3.6.1)", "pandas (>=1.5.0)", "memory_profiler (>=0.57.0)"]
+docs = ["matplotlib (>=3.6.1)", "scikit-image (>=0.22.0)", "pandas (>=1.5.0)", "rich (>=14.1.0)", "seaborn (>=0.13.0)", "memory_profiler (>=0.57.0)", "sphinx (>=7.3.7)", "sphinx-copybutton (>=0.5.2)", "sphinx-gallery (>=0.17.1)", "numpydoc (>=1.2.0)", "Pillow (>=12.1.1)", "pooch (>=1.8.0)", "sphinx-prompt (>=1.4.0)", "sphinxext-opengraph (>=0.9.1)", "plotly (>=5.22.0)", "polars (>=0.20.30)", "sphinx-design (>=0.6.0)", "sphinxcontrib-sass (>=0.3.4)", "pydata-sphinx-theme (>=0.15.3)", "sphinx-remove-toctrees (>=1.0.0.post1)", "towncrier (>=24.8.0)"]
+examples = ["matplotlib (>=3.6.1)", "scikit-image (>=0.22.0)", "pandas (>=1.5.0)", "rich (>=14.1.0)", "seaborn (>=0.13.0)", "pooch (>=1.8.0)", "plotly (>=5.22.0)"]
+tests = ["matplotlib (>=3.6.1)", "pandas (>=1.5.0)", "rich (>=14.1.0)", "pytest (>=7.1.2)", "pytest-cov (>=2.9.0)", "ruff (>=0.12.2)", "mypy (>=1.15)", "pyamg (>=5.0.0)", "polars (>=0.20.30)", "pyarrow (>=13.0.0)", "numpydoc (>=1.2.0)", "pooch (>=1.8.0)"]
+maintenance = ["conda-lock (==3.0.1)"]
+
+[[package]]
+name = "scipy"
+version = "1.18.0"
+description = "Fundamental algorithms for scientific computing in Python"
+category = "main"
+optional = false
+python-versions = ">=3.12"
+
+[package.dependencies]
+numpy = ">=2.0.0,<2.8"
+
+[package.extras]
+test = ["pytest (>=8.0.0)", "pytest-cov", "pytest-timeout", "pytest-xdist", "asv", "mpmath", "gmpy2", "threadpoolctl", "scikit-umfpack", "pooch", "hypothesis (>=6.30)", "array-api-strict (>=2.3.1)", "cython", "meson", "ninja", "scipy-doctest (>=2.0.0)"]
+doc = ["sphinx (>=5.0.0,<8.2.0)", "intersphinx-registry", "pydata-sphinx-theme (>=0.15.2)", "sphinx-copybutton", "sphinx-design (>=0.4.0)", "matplotlib (>=3.5)", "numpydoc", "jupytext", "myst-nb (>=1.2.0)", "pooch", "jupyterlite-sphinx (>=0.19.1)", "jupyterlite-pyodide-kernel", "linkify-it-py", "tabulate"]
+dev = ["click (<8.3.0)", "spin", "mypy (==1.19.1)", "pyrefly (==0.63.0)", "typing-extensions", "types-psutil", "pycodestyle", "ruff (>=0.12.0)", "cython-lint (>=0.12.2)"]
+
+[[package]]
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1031,21 +1088,28 @@ dev = ["build"]
 doc = ["sphinx"]
 
 [[package]]
+name = "threadpoolctl"
+version = "3.6.0"
+description = "threadpoolctl"
+category = "main"
+optional = false
+python-versions = ">=3.9"
+
+[[package]]
 name = "tqdm"
-version = "4.67.3"
+version = "4.68.3"
 description = "Fast, Extensible Progress Meter"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [package.extras]
-dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-asyncio (>=0.24)", "nbval"]
-discord = ["requests"]
-slack = ["slack-sdk"]
-telegram = ["requests"]
+discord = ["requests", "envwrap"]
+slack = ["slack-sdk", "envwrap"]
+telegram = ["requests", "envwrap"]
 notebook = ["ipywidgets (>=6)"]
 
 [[package]]
@@ -1095,17 +1159,18 @@ python-versions = ">=2"
 
 [[package]]
 name = "tzlocal"
-version = "5.3.1"
+version = "5.4.4"
 description = "tzinfo object for the local timezone"
 category = "main"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 
 [package.dependencies]
 tzdata = {version = "*", markers = "platform_system == \"Windows\""}
 
 [package.extras]
-devenv = ["pytest (>=4.3)", "pytest-mock (>=3.3)", "pytest-cov", "check-manifest", "zest.releaser"]
+testing = ["pytest (>=4.3)", "pytest-mock (>=3.3)", "pytest-cov", "check-manifest", "pyroma", "ruff"]
+devenv = ["zest.releaser"]
 
 [[package]]
 name = "uritemplate"
@@ -1185,7 +1250,7 @@ anyio = ">=3.0.0"
 
 [[package]]
 name = "wcwidth"
-version = "0.7.0"
+version = "0.8.2"
 description = "Measures the displayed width of unicode strings in a terminal"
 category = "main"
 optional = false
@@ -1226,15 +1291,14 @@ testing = ["coverage", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.11"
-content-hash = "8d5c05678552f3f8c923dadb24e27dce434783494bf4ab7745ccbea6b3cece05"
+python-versions = ">=3.12,<4.0"
+content-hash = "4b3b693e3968c7619ceb827a651d301179e088f0dd5ea2dcf06cc2583bc204d4"
 
 [metadata.files]
 amqp = []
 annotated-types = []
 anyio = []
 asgiref = []
-async-timeout = []
 billiard = []
 celery = []
 certifi = []
@@ -1277,10 +1341,12 @@ inflection = []
 itypes = []
 jinja2 = []
 jiter = []
+joblib = []
 kombu = []
 markupsafe = []
 msal = []
 msgpack = []
+narwhals = []
 numpy = []
 oauthlib = []
 onnxruntime = []
@@ -1304,9 +1370,12 @@ pyyaml = []
 redis = []
 requests = []
 requests-oauthlib = []
+scikit-learn = []
+scipy = []
 six = []
 sniffio = []
 sqlparse = []
+threadpoolctl = []
 tqdm = []
 tweepy = []
 typing-extensions = []
