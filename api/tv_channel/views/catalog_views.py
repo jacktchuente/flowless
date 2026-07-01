@@ -11,6 +11,8 @@ from tv_channel.serializers.catalog_serializers import (
     CatalogUpdateSerializer,
 )
 from tv_channel.tasks import generate_catalog_channels
+from editorial_planning.serializers.planning_serializers import EditorialPlanningGenerationRequestSerializer
+from editorial_planning.tasks import generate_editorial_planning as generate_editorial_planning_task
 
 
 class CatalogViewSet(
@@ -39,6 +41,19 @@ class CatalogViewSet(
         instance = self.get_object()
         reboot = str(request.data.get("reboot", "")).lower() in {"1", "true", "yes", "on"}
         generate_catalog_channels.delay(instance.id, reboot=reboot)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=("post",), url_name="generate-editorial-planning", url_path="generate-editorial-planning")
+    def generate_editorial_planning(self, request, pk=None):
+        instance = self.get_object()
+        serializer = EditorialPlanningGenerationRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        generate_editorial_planning_task.delay(
+            instance.id,
+            media_collection_ids=serializer.validated_data["media_collection_ids"],
+            max_channel_candidates=serializer.validated_data.get("max_channel_candidates"),
+            target_channel_count=serializer.validated_data.get("target_channel_count"),
+        )
         return Response(status=status.HTTP_202_ACCEPTED)
     
     #

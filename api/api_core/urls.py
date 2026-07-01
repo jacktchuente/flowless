@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/', include('media_source.urls')),
     path('api/', include('tv_channel.urls')),
     path('api/', include('grid_schedule.urls')),
+    path('api/', include('editorial_planning.urls')),
 
 ]
 
