@@ -13,8 +13,8 @@ class CategoryNormalizerWithLlm:
     RESPONSE_MARKER = "###response###"
     TEMPLATE_PATH = settings.BASE_DIR / "templates" / "rule_engine" / "prompts" / "category_normalization_prompt.j2"
 
-    def __init__(self, media_container_raw_data):
-        self.media_container_raw_data = media_container_raw_data
+    def __init__(self, media_container):
+        self.media_container = media_container
 
     def get_categories(self) -> list[str]:
         available_categories = list(
@@ -27,16 +27,16 @@ class CategoryNormalizerWithLlm:
             self.TEMPLATE_PATH,
             context={
                 "available_categories": available_categories,
-                "title": self.media_container_raw_data.get("title"),
-                "description": self.media_container_raw_data.get("description"),
-                "genres": self.media_container_raw_data.get("genres", []),
-                "tags": self.media_container_raw_data.get("tags", []),
-                "countries": self.media_container_raw_data.get("countries", []),
-                "audio_languages": self.media_container_raw_data.get("audio_languages", []),
-                "subtitle_languages": self.media_container_raw_data.get("subtitle_languages", []),
-                "min_age": self.media_container_raw_data.get("min_age"),
-                "max_age": self.media_container_raw_data.get("max_age"),
-                "release_date": self.media_container_raw_data.get("release_date"),
+                "title": self.media_container.title,
+                "description": self.media_container.description,
+                "genres": self.media_container.genres or [],
+                "tags": self.media_container.tags or [],
+                "countries": self.media_container.countries or [],
+                "audio_languages": self.media_container.audio_languages or [],
+                "subtitle_languages": self.media_container.subtitle_languages or [],
+                "min_age": self.media_container.min_age,
+                "max_age": self.media_container.max_age,
+                "release_date": self.media_container.release_date,
                 "response_marker": self.RESPONSE_MARKER,
             },
         )

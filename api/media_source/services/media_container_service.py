@@ -18,10 +18,10 @@ class MediaContainerService:
 
     def _set_media_container_category(self, use_llm):
         if use_llm:
-            service = CategoryNormalizerWithLlm(media_container_raw_data=self.media_container.raw_data)
+            service = CategoryNormalizerWithLlm(media_container=self.media_container)
             categories = service.get_categories()
         else:
-            service = CategoryNormalizerWithoutLlm(media_container_raw_data=self.media_container.raw_data)
+            service = CategoryNormalizerWithoutLlm(media_container=self.media_container)
             categories = service.get_categories()
         print(categories)
         self.media_container.categories = categories
