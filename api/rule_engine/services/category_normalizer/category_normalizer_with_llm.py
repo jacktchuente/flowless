@@ -36,7 +36,11 @@ class CategoryNormalizerWithLlm:
                 "subtitle_languages": self.media_container.subtitle_languages or [],
                 "min_age": self.media_container.min_age,
                 "max_age": self.media_container.max_age,
-                "release_date": self.media_container.release_date,
+                "release_date": (
+                    self.media_container.release_date.isoformat()
+                    if self.media_container.release_date
+                    else None
+                ),
                 "response_marker": self.RESPONSE_MARKER,
             },
         )
