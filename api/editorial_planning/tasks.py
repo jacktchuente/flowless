@@ -2,7 +2,9 @@ import logging
 
 from celery import shared_task
 
+from editorial_planning.models import EditorialFlowRun
 from editorial_planning.services.generation_service import EditorialPlanningGenerationService
+from editorial_planning.services.matching_service import EditorialPlanningMatchingService
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import Catalog
 from utils.task_status_service import broadcast_refresh, save_status_and_broadcast
@@ -42,5 +44,34 @@ def generate_editorial_planning(
         status = AnalyzeStatus.COMPLETE
 
     save_status_and_broadcast(catalog, object_type="Catalog", status=status)
+    broadcast_refresh("EditorialFlowRun")
+    broadcast_refresh("EditorialChannelCandidate")
+
+
+@shared_task
+def match_new_media_to_editorial_run(run_id: int):
+    try:
+        run = EditorialFlowRun.objects.get(pk=run_id)
+    except EditorialFlowRun.DoesNotExist:
+        logger.warning("match_new_media_to_editorial_run skipped unknown run_id=%s", run_id)
+        return
+
+    try:
+        result = EditorialPlanningMatchingService(run=run).match_new_media()
+    except Exception:
+        logger.exception("match_new_media_to_editorial_run failed run_id=%s", run_id)
+    else:
+        logger.info(
+            "match_new_media_to_editorial_run completed run_id=%s evaluated=%s accepted=%s "
+            "secondary=%s ambiguous=%s rejected=%s created_memberships=%s",
+            run_id,
+            result.evaluated_count,
+            result.accepted_count,
+            result.secondary_count,
+            result.ambiguous_count,
+            result.rejected_count,
+            result.created_membership_count,
+        )
+
     broadcast_refresh("EditorialFlowRun")
     broadcast_refresh("EditorialChannelCandidate")

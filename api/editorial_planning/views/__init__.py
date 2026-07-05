@@ -11,6 +11,7 @@ from editorial_planning.serializers.planning_serializers import (
     EditorialFlowRunSerializer,
 )
 from editorial_planning.services.channel_creation_service import EditorialFlexibleChannelCreationService
+from editorial_planning.tasks import match_new_media_to_editorial_run
 from tv_channel.serializers.tv_channel_serializers import TvChannelSerializer
 
 
@@ -21,6 +22,12 @@ class EditorialFlowRunViewSet(
 ):
     serializer_class = EditorialFlowRunSerializer
     permission_classes = [AllowAny]
+
+    @action(detail=True, methods=("post",), url_name="match-new-media", url_path="match-new-media")
+    def match_new_media(self, request, pk=None):
+        run = self.get_object()
+        match_new_media_to_editorial_run.delay(run.id)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
     def get_queryset(self):
         queryset = (

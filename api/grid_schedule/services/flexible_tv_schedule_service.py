@@ -10,7 +10,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
 
-from editorial_planning.models import EditorialSegmentMembership
+from editorial_planning.models import EditorialSegmentMembership, EditorialSegmentMembershipStatus
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import FlexiblePlayoutSelection, ScheduleMediaItem, TvPlayout
 from media_source.models import MediaContainer, MediaItem
@@ -29,6 +29,10 @@ class FlexibleGenerationResult:
 
 class FlexibleTvPlayoutGenerationService:
     LOOKBACK_HOURS = 600
+    PLAYABLE_MEMBERSHIP_STATUSES = (
+        EditorialSegmentMembershipStatus.ACCEPTED,
+        EditorialSegmentMembershipStatus.MANUAL_OVERRIDE,
+    )
 
     def __init__(self, *, tv_channel: TvChannel, days: int, reset: bool = False):
         self.tv_channel = tv_channel
@@ -229,6 +233,7 @@ class FlexibleTvPlayoutGenerationService:
             EditorialSegmentMembership.objects.filter(
                 segment_id=segment_id,
                 is_primary=True,
+                status__in=self.PLAYABLE_MEMBERSHIP_STATUSES,
                 media_container__is_missing=False,
                 media_container__media_collection__is_active=True,
             )
