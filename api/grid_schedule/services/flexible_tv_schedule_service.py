@@ -67,6 +67,7 @@ class FlexibleTvPlayoutGenerationService:
             warnings: list[str] = []
             cursor = start_at
             path_index = 0
+            consecutive_misses = 0
             max_iterations = max(1, len(path_elements) * 500)
 
             for _ in range(max_iterations):
@@ -83,9 +84,12 @@ class FlexibleTvPlayoutGenerationService:
                 )
                 if selection_data is None:
                     warnings.append(f"No flexible candidate for segment {path_element.segment_id}.")
-                    if path_index >= len(path_elements):
+                    consecutive_misses += 1
+                    if consecutive_misses >= len(path_elements):
+                        warnings.append("No flexible candidate for any segment of the path, stopping generation.")
                         break
                     continue
+                consecutive_misses = 0
 
                 container, item = selection_data
                 occupied_seconds = self._scheduled_occupied_duration_seconds(item.duration_seconds or 0)
@@ -273,8 +277,11 @@ class FlexibleTvPlayoutGenerationService:
 
         items = [item for item in items if item.id not in history["scheduled_item_ids_in_run"]]
         for item in items:
-            occupied_seconds = self._scheduled_occupied_duration_seconds(item.duration_seconds or 0)
-            if occupied_seconds > 0 and occupied_seconds <= remaining_seconds:
+            duration_seconds = item.duration_seconds or 0
+            if duration_seconds <= 0:
+                continue
+            occupied_seconds = self._scheduled_occupied_duration_seconds(duration_seconds)
+            if occupied_seconds <= remaining_seconds:
                 return item
         return None
 
