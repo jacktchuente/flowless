@@ -7,6 +7,7 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatIconModule} from "@angular/material/icon";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Router} from "@angular/router";
 import {CalendarEvent, CalendarModule} from "angular-calendar";
@@ -14,6 +15,7 @@ import {TranslateModule, TranslateService} from "@ngx-translate/core";
 import {Catalog} from "@project-interfaces/catalog";
 import {GridBlock, ScheduledMediaItem, TvChannel} from "@project-interfaces/tv-channel";
 import {CatalogService} from "@project-services/catalog.service";
+import {EditorialPlanningService} from "@project-services/editorial-planning.service";
 import {TvChannelService} from "@project-services/tv-channel.service";
 import {NotificationService} from "@project-shared/services/notification.service";
 import {CatalogDialogComponent} from "../catalog-dialog/catalog-dialog.component";
@@ -44,6 +46,7 @@ type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
     MatIconModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
     CalendarModule,
     TranslateModule,
     NgFor,
@@ -63,12 +66,14 @@ export class ChannelManagementComponent implements AfterViewInit {
   selectedCatalogId: string | null = null
   calendarDate = new Date()
   calendarViewMode: 'grid' | 'schedule' = 'grid'
+  flexMode = false
   isPageLoading = false
   readonly emptyCalendarEvents: ChannelCalendarEvent[] = []
   showCalendarContent = false
 
   constructor(
     private catalogService: CatalogService,
+    private editorialPlanningService: EditorialPlanningService,
     private tvChannelService: TvChannelService,
     private notificationService: NotificationService,
     private dialog: MatDialog,
@@ -247,6 +252,40 @@ export class ChannelManagementComponent implements AfterViewInit {
         this.loadChannels()
       }
     })
+  }
+
+  matchFlexibleNewMedia() {
+    if (!this.selectedCatalog) {
+      return
+    }
+    this.dialog.open(ConfirmationDialogComponent, {
+      width: '520px',
+      maxWidth: '92vw',
+      data: {
+        confirmationMessage: `Rattacher les nouveaux medias aux segments flexibles de ${this.selectedCatalog.name} ?`
+      }
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return
+      }
+      this.isPageLoading = true
+      this.editorialPlanningService.matchNewMediaForCatalog(this.selectedCatalog!.id).subscribe((response) => {
+        this.isPageLoading = false
+        if (!response.isOk) {
+          this.notificationService.notify(
+            response.body === "no_active_run"
+              ? "Aucune analyse flexible active pour ce catalogue."
+              : "Rattachement des nouveaux medias impossible."
+          )
+          return
+        }
+        this.notificationService.notify("Rattachement des nouveaux medias lance.")
+      })
+    })
+  }
+
+  isFlexibleChannel(channel: TvChannel): boolean {
+    return channel.grid_data?.mode === 2
   }
 
   getChannelStatusLabel(channel: TvChannel): string {

@@ -72,6 +72,10 @@
   flex: 0 0 auto;
 }
 
+.flex-mode-toggle {
+  margin-right: 6px;
+}
+
 .channel-selection-banner {
   display: flex;
   align-items: center;

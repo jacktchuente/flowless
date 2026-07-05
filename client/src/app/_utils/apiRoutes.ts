@@ -7,4 +7,5 @@ export const apiRoutes = {
     tvChannel: "tv-channel",
     gridBlock: "grid-block",
     editorialChannelCandidate: "editorial-channel-candidate",
+    editorialFlowRun: "editorial-flow-run",
 }

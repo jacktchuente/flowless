@@ -43,10 +43,13 @@ planning, and integration with tools like Jellyfin and ErsatzTV.
 
 Things may change quickly. The app may be rebuilt, simplified, broken, or redesigned at any time.
 
-The current process is mostly top-down: Flowless first generates the channel structure (editorial line + grid), 
+The historical process is top-down: Flowless first generates the channel structure (editorial line + grid),
 then assigns media to programming blocks and builds the upcoming schedule.
 
-The next step will be to support the opposite approach: building channels directly from the media library.
+A bottom-up process is now also available: Flowless analyzes the media library, segments it into programmable
+segments, discovers coherent channel candidates, and lets you promote a candidate into a *flexible* channel whose
+playout follows the generated segment path. New media imported later can be matched back into the existing
+segments without re-running the whole analysis.
 
 I also built other apps related to this project to make interacting with ErsatzTV easier. More coming.
 
@@ -76,12 +79,20 @@ Flowless can currently:
     - random generation
     - AI generation based on presets
 - Match media to generated programming blocks
+- Build channels bottom-up from the media library
+    - segment the library into programmable segments
+    - discover coherent channel candidates
+    - promote a candidate into a flexible channel
+    - generate flexible playouts from the segment path
+    - match newly imported media to existing segments
 - Create channels in an IPTV app
     - currently only ErsatzTV is supported
 
 ---
 
 ## Current generation flow
+
+### Top-down
 
 ```txt
 Jellyfin media
@@ -99,6 +110,30 @@ Grid generation
 Media matching
     ↓
 ErsatzTV channel creation
+```
+
+### Bottom-up
+
+```txt
+Jellyfin media
+    ↓
+Media metadata import
+    ↓
+Automatic labeling / categorization
+    ↓
+Library segmentation (programmable segments)
+    ↓
+Channel candidate discovery
+    ↓
+Segment path generation
+    ↓
+Candidate promotion → flexible channel
+    ↓
+Flexible playout generation
+    ↓
+ErsatzTV channel creation
+    ↺
+New media matching into existing segments
 ```
 
 ---
@@ -136,8 +171,15 @@ ErsatzTV channel creation
     - [x] Create channels in ErsatzTV
     - [x] Push generated schedules to ErsatzTV
 
-- [ ] **Bottom-up channel generation**
-    - [ ] Analyze a media library and suggest coherent channels
+- [x] **Bottom-up channel generation**
+    - [x] Analyze a media library and suggest coherent channels
+    - [x] Segment the library into programmable segments
+    - [x] Discover viable channel candidates from segments
+    - [x] Generate a looping segment path per candidate
+    - [x] Promote a candidate into a flexible channel
+    - [x] Generate flexible playouts from the segment path
+    - [x] Match newly imported media to existing segments
+    - [ ] Review / override segment memberships manually
 
 - [ ] **Layout & channel branding**
     - [ ] Generate visual identity based on each channel’s theme
