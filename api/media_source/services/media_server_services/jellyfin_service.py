@@ -111,6 +111,7 @@ class MediaServerMediaContainer(TypedDict, total=False):
 class Collection(TypedDict):
     name: str
     external_id: str
+    container_kind: ContainerKind | None
 
 
 class Credentials(TypedDict):
@@ -126,6 +127,13 @@ class JellyfinService:
     )
 
     COLLECTION_FIELDS = "PrimaryImageAspectRatio,CollectionType"
+
+    COLLECTION_TYPE_KIND_MAP: dict[str, ContainerKind] = {
+        "movies": "movie",
+        "tvshows": "series",
+        "music": "music_release",
+        "musicvideos": "music_video_release",
+    }
 
     CONTAINER_ITEM_TYPES = "Movie,Series,MusicAlbum,MusicVideo,Audio"
 
@@ -268,10 +276,18 @@ class JellyfinService:
             if not isinstance(external_id, str) or not isinstance(name, str):
                 continue
 
+            collection_type = view.get("CollectionType")
+            container_kind = (
+                self.COLLECTION_TYPE_KIND_MAP.get(collection_type.strip().lower())
+                if isinstance(collection_type, str)
+                else None
+            )
+
             collections.append(
                 {
                     "name": name[:20],
                     "external_id": external_id,
+                    "container_kind": container_kind,
                 }
             )
 

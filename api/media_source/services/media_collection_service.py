@@ -56,10 +56,11 @@ class MediaCollectionService:
 
         missing_external_ids = existing_external_ids - found_external_ids
 
-        collection_container_kind = self._resolve_collection_container_kind(medias)
-        if self.media_collection.container_kind != collection_container_kind:
-            self.media_collection.container_kind = collection_container_kind
-            self.media_collection.save(update_fields=["container_kind"])
+        if self.media_collection.container_kind is None:
+            collection_container_kind = self._resolve_collection_container_kind(medias)
+            if collection_container_kind is not None:
+                self.media_collection.container_kind = collection_container_kind
+                self.media_collection.save(update_fields=["container_kind"])
 
         self.manage_media_containers(medias, missing_external_ids, media_source, existing_medias_by_external_id)
         self.manage_media_items(
