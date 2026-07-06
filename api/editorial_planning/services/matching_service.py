@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils import timezone
 
 from editorial_flow import match_media_to_segments
@@ -17,6 +17,7 @@ from editorial_planning.models import (
     EditorialSegmentMembershipStatus,
 )
 from editorial_planning.services.media_input_builder import build_media_input
+from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer
 from project_ops.constants import AnalyzeStatus
 
@@ -158,6 +159,8 @@ class EditorialPlanningMatchingService:
 
     def _load_new_containers(self) -> list[MediaContainer]:
         queryset = MediaContainer.objects.filter(
+            Q(media_collection__programming_role__isnull=True)
+            | Q(media_collection__programming_role=MediaProgrammingRole.MAIN),
             media_collection__is_active=True,
             analyze_status=AnalyzeStatus.COMPLETE,
             is_missing=False,

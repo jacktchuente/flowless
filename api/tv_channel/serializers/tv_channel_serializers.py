@@ -92,6 +92,14 @@ class TvChannelSerializer(serializers.ModelSerializer):
                 | (
                     Q(flexible_selection__tv_playout__tv_channel=obj)
                     & Q(flexible_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(parent_schedule_item__block_container_selection__tv_playout__tv_channel=obj)
+                    & Q(parent_schedule_item__block_container_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(parent_schedule_item__flexible_selection__tv_playout__tv_channel=obj)
+                    & Q(parent_schedule_item__flexible_selection__tv_playout__is_active=True)
                 ),
                 starts_at__lt=day_end,
                 ends_at__gt=day_start,

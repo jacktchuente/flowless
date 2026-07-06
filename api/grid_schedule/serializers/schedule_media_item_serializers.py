@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from grid_schedule.models import ScheduleMediaItem
+from media_source.constants import MediaProgrammingRole
 
 
 class ScheduleMediaItemSerializer(serializers.ModelSerializer):
@@ -12,6 +13,7 @@ class ScheduleMediaItemSerializer(serializers.ModelSerializer):
     block_id = serializers.SerializerMethodField()
     flexible_selection_id = serializers.IntegerField(read_only=True)
     selection_type = serializers.SerializerMethodField()
+    role_label = serializers.SerializerMethodField()
 
     class Meta:
         model = ScheduleMediaItem
@@ -28,7 +30,13 @@ class ScheduleMediaItemSerializer(serializers.ModelSerializer):
             "block_name",
             "flexible_selection_id",
             "selection_type",
+            "role",
+            "role_label",
+            "parent_schedule_item",
         )
+
+    def get_role_label(self, obj) -> str:
+        return MediaProgrammingRole(obj.role).label
 
     def get_block_id(self, obj):
         if obj.block_container_selection_id:

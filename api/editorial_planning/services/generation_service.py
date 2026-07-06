@@ -22,6 +22,7 @@ from editorial_planning.models import (
     EditorialSegmentPathElement,
 )
 from editorial_planning.services.media_input_builder import build_media_input
+from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaCollection, MediaContainer
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import Catalog
@@ -243,6 +244,15 @@ class EditorialPlanningGenerationService:
                         "id": collection.id,
                         "name": collection.name,
                         "reason": "inactive",
+                    }
+                )
+                continue
+            if collection.programming_role not in (None, MediaProgrammingRole.MAIN):
+                diagnostics["ignored_collections"].append(
+                    {
+                        "id": collection.id,
+                        "name": collection.name,
+                        "reason": "interstitial_role",
                     }
                 )
                 continue

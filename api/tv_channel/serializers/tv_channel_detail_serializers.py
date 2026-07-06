@@ -66,6 +66,8 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
             .filter(
                 Q(block_container_selection__tv_playout=active_playout)
                 | Q(flexible_selection__tv_playout=active_playout)
+                | Q(parent_schedule_item__block_container_selection__tv_playout=active_playout)
+                | Q(parent_schedule_item__flexible_selection__tv_playout=active_playout)
             )
             .select_related(
                 "item",

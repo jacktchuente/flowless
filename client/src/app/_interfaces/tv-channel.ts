@@ -48,6 +48,9 @@ export interface ScheduledMediaItem {
   block_name: string
   flexible_selection_id?: string | number | null
   selection_type?: 'fixed' | 'flexible'
+  role?: number
+  role_label?: string
+  parent_schedule_item?: string | number | null
 }
 
 export interface GridData {

@@ -8,11 +8,13 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils import timezone
 
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import BlockContainerSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.services.post_roll_filler_service import PostRollFillerService
+from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer, MediaItem
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import EditorialLine, GridBlock, GridLayout, TvChannel
@@ -40,6 +42,7 @@ class GenerationResult:
     created: bool
     generated_items: int
     warnings: list[str]
+    filled_items: int = 0
 
 
 class NextItemState(Enum):
@@ -176,6 +179,21 @@ class TvPlayoutGenerationService:
                         warning,
                     )
 
+            filled_items = 0
+            if self.editorial_line.allow_filler:
+                filler_result = PostRollFillerService(
+                    tv_playout=tv_playout,
+                    window_start=start_at,
+                    window_end=end_at,
+                ).fill()
+                filled_items = filler_result.created_items
+                warnings.extend(filler_result.warnings)
+                logger.info(
+                    "TvPlayoutGenerationService.generate post-roll fill done playout_id=%s filled_items=%s",
+                    tv_playout.id,
+                    filled_items,
+                )
+
             validation_errors = self._validate_playout(tv_playout=tv_playout, occurrences=occurrences)
             if validation_errors:
                 logger.error(
@@ -197,6 +215,7 @@ class TvPlayoutGenerationService:
                 created=created,
                 generated_items=generated_items,
                 warnings=warnings,
+                filled_items=filled_items,
             )
 
     def _validate_channel(self, tv_channel: TvChannel) -> GridLayout:
@@ -249,6 +268,12 @@ class TvPlayoutGenerationService:
         return cycle_anchor
 
     def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> None:
+        # Enfants post-roll dont le parent (avant start_at) est conserve mais dont la
+        # fenetre depasse start_at: le CASCADE ne les couvre pas, suppression explicite.
+        ScheduleMediaItem.objects.filter(
+            parent_schedule_item__block_container_selection__tv_playout=tv_playout,
+            starts_at__gte=start_at,
+        ).delete()
         future_qs = ScheduleMediaItem.objects.filter(
             block_container_selection__tv_playout=tv_playout,
             starts_at__gte=start_at,
@@ -415,6 +440,8 @@ class TvPlayoutGenerationService:
         qs = (
             MediaContainer.objects
             .filter(
+                Q(media_collection__programming_role__isnull=True)
+                | Q(media_collection__programming_role=MediaProgrammingRole.MAIN),
                 analyze_status=AnalyzeStatus.COMPLETE,
                 media_collection__is_active=True,
                 is_missing=False,

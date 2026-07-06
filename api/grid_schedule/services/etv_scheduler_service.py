@@ -10,7 +10,7 @@ from django.db.models import Q
 from etv_scripted_schedule_api import ScriptedScheduleClient, ContentSearch, PlayoutCount, PlayoutPadUntilExact, \
     ControlGraphicsOn, ControlGraphicsOff
 from grid_schedule.models import ScheduleMediaItem
-from media_source.constants import MediaContainerKind
+from media_source.constants import MediaContainerKind, MediaProgrammingRole
 from tv_channel.models import TvChannel
 
 
@@ -156,6 +156,14 @@ class ETVSchedulerService:
                 | (
                     Q(flexible_selection__tv_playout__tv_channel=tv_channel)
                     & Q(flexible_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(parent_schedule_item__block_container_selection__tv_playout__tv_channel=tv_channel)
+                    & Q(parent_schedule_item__block_container_selection__tv_playout__is_active=True)
+                )
+                | (
+                    Q(parent_schedule_item__flexible_selection__tv_playout__tv_channel=tv_channel)
+                    & Q(parent_schedule_item__flexible_selection__tv_playout__is_active=True)
                 ),
                 item__is_missing=False,
                 starts_at__gte=start_at,
@@ -190,6 +198,7 @@ class ETVSchedulerService:
                 "episode_number": scheduled.item.episode_number,
                 "sequence_number": scheduled.item.sequence_number,
                 "media_container_kind": getattr(scheduled.item.container.media_collection, "container_kind", None),
+                "role": scheduled.role,
             }
             for scheduled in queryset
         ]
@@ -200,6 +209,15 @@ class ETVSchedulerService:
         title = ETVSchedulerService._escape_query_value(element.get("media_container_title") or "")
         if not title:
             return None
+        role = element.get("role")
+        if role is not None and role != MediaProgrammingRole.MAIN:
+            # Interstitiel (trailer/filler...): bibliotheque Shows dont le dossier
+            # (show) porte l'identifiant cible - requete ancree sur l'item precis.
+            item_title = ETVSchedulerService._escape_query_value(element.get("media_item_title") or "")
+            query = f'show_title:"{title}" AND type:episode'
+            if item_title:
+                query += f' AND title:"{item_title}"'
+            return query
         if container_kind == MediaContainerKind.STANDALONE_VIDEO:
             return f'title:"{title}" AND type:movie'
         if container_kind == MediaContainerKind.SERIES:

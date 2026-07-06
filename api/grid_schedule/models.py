@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Q
 
 from grid_schedule.constants import ScheduledContainerStatus
+from media_source.constants import MediaProgrammingRole
 
 
 class TvPlayout(models.Model):
@@ -111,23 +112,58 @@ class ScheduleMediaItem(models.Model):
         blank=True,
     )
     post_roll_filler_ends_at = models.DateTimeField(null=True, blank=True)
+    role = models.IntegerField(choices=MediaProgrammingRole, default=MediaProgrammingRole.MAIN)
+    # Item non-MAIN (trailer/filler...) planifie dans la fenetre post-roll de son parent
+    parent_schedule_item = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="post_roll_items",
+    )
 
     class Meta:
         constraints = [
             models.CheckConstraint(
                 check=(
-                    Q(block_container_selection__isnull=False, flexible_selection__isnull=True)
-                    | Q(block_container_selection__isnull=True, flexible_selection__isnull=False)
+                    Q(
+                        role=MediaProgrammingRole.MAIN,
+                        parent_schedule_item__isnull=True,
+                        block_container_selection__isnull=False,
+                        flexible_selection__isnull=True,
+                    )
+                    | Q(
+                        role=MediaProgrammingRole.MAIN,
+                        parent_schedule_item__isnull=True,
+                        block_container_selection__isnull=True,
+                        flexible_selection__isnull=False,
+                    )
+                    | (
+                        ~Q(role=MediaProgrammingRole.MAIN)
+                        & Q(
+                            parent_schedule_item__isnull=False,
+                            block_container_selection__isnull=True,
+                            flexible_selection__isnull=True,
+                        )
+                    )
                 ),
-                name="schedule_item_has_exactly_one_selection",
+                name="schedule_item_selection_matches_role",
             ),
         ]
 
     def clean(self):
         has_fixed_selection = self.block_container_selection_id is not None
         has_flexible_selection = self.flexible_selection_id is not None
-        if has_fixed_selection == has_flexible_selection:
-            raise ValidationError("ScheduleMediaItem must have exactly one selection.")
+        if self.role == MediaProgrammingRole.MAIN:
+            if has_fixed_selection == has_flexible_selection:
+                raise ValidationError("A main ScheduleMediaItem must have exactly one selection.")
+            if self.parent_schedule_item_id is not None:
+                raise ValidationError("A main ScheduleMediaItem cannot have a parent.")
+        else:
+            if has_fixed_selection or has_flexible_selection:
+                raise ValidationError("A post-roll ScheduleMediaItem cannot have a selection.")
+            if self.parent_schedule_item_id is None:
+                raise ValidationError("A post-roll ScheduleMediaItem requires a parent item.")
 
     def __str__(self):
         if self.block_container_selection_id:

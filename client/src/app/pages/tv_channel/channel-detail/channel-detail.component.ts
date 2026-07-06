@@ -402,14 +402,21 @@ export class ChannelDetailComponent {
           dayEnd,
         )
 
+        const isInterstitial = this.isInterstitialItem(item)
+        const titlePrefix = isInterstitial ? `▸ ${item.role_label ?? 'interlude'} · ` : ''
+
         return {
           start: clippedRange.start,
           end: clippedRange.end,
-        title: `${item.media_item_title} · ${item.block_name} · ${this.getScheduleTimeLabel(item)}`,
+        title: `${titlePrefix}${item.media_item_title} · ${item.block_name} · ${this.getScheduleTimeLabel(item)}`,
         color: this.buildScheduleCalendarColor(item),
         meta: {kind: 'schedule', item},
         }
       })
+  }
+
+  private isInterstitialItem(item: ScheduledMediaItem): boolean {
+    return item.parent_schedule_item !== null && item.parent_schedule_item !== undefined
   }
 
   private buildGridCalendarEvents(dayStart: Date, dayEnd: Date): ChannelCalendarEvent[] {
@@ -440,6 +447,12 @@ export class ChannelDetailComponent {
   }
 
   private buildScheduleCalendarColor(item: ScheduledMediaItem) {
+    if (this.isInterstitialItem(item)) {
+      return {
+        primary: 'hsla(0, 0%, 42%, 0.85)',
+        secondary: 'hsla(0, 0%, 68%, 0.9)',
+      }
+    }
     const itemKey = item.id?.toString?.() ?? `${item.media_container_id}-${item.media_item_title}`
     const seed = Array.from(itemKey).reduce((total, char) => total + char.charCodeAt(0), 0)
     const hue = (seed * 43) % 360
