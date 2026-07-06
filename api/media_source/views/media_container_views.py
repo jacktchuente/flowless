@@ -19,7 +19,7 @@ class MediaContainerViewSet(
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        queryset = MediaContainer.objects.all()
+        queryset = MediaContainer.objects.filter(media_collection__is_active=True)
         title = self.request.query_params.get("title")
         status_value = self.request.query_params.get("status")
         category = self.request.query_params.get("category")
