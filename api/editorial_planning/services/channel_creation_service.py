@@ -58,16 +58,68 @@ class EditorialFlexibleChannelCreationService:
             self.channel_candidate.save(update_fields=["tv_channel", "status", "updated_at"])
             return tv_channel
 
+    DURATION_BUCKET_LABELS = {
+        "very_short": "formats très courts (<5 min)",
+        "short": "formats courts (5-15 min)",
+        "tv_short": "épisodes ~30 min",
+        "medium_episode": "épisodes ~45 min",
+        "long_episode": "épisodes ~1h",
+        "film_length": "films",
+        "very_long": "formats longs (>2h)",
+    }
+
     def _build_specification(self) -> str:
         profile = self.channel_candidate.profile or {}
-        categories = ", ".join(profile.get("dominant_categories") or [])
-        nature = profile.get("dominant_nature") or ""
-        parts = ["Flexible editorial flow channel."]
+        segments = list(
+            self.channel_candidate.channel_segments
+            .select_related("segment")
+            .order_by("position", "-weight")
+        )
+
+        lines = ["Chaîne flexible générée automatiquement depuis la bibliothèque (flow éditorial bottom-up)."]
+
+        nature = profile.get("dominant_nature")
         if nature:
-            parts.append(f"Dominant nature: {nature}.")
+            lines.append(f"Nature dominante : {nature}.")
+        categories = [value for value in (profile.get("dominant_categories") or []) if value]
         if categories:
-            parts.append(f"Dominant categories: {categories}.")
-        return " ".join(parts)
+            lines.append(f"Catégories dominantes : {', '.join(categories)}.")
+
+        segment_profiles = [channel_segment.segment.profile or {} for channel_segment in segments]
+        formats = self._collect_values(segment_profiles, "duration_bucket")
+        if formats:
+            labels = [self.DURATION_BUCKET_LABELS.get(value, value) for value in formats]
+            lines.append(f"Formats : {', '.join(dict.fromkeys(labels))}.")
+        decades = sorted({value for p in segment_profiles for value in (p.get("decades") or [])})
+        if decades:
+            lines.append(f"Époques couvertes : {', '.join(decades)}.")
+        anime_values = self._collect_values(segment_profiles, "dominant_anime")
+        if anime_values == ["anime"]:
+            lines.append("Contenu anime.")
+        elif "anime" in anime_values:
+            lines.append("Contenu partiellement anime.")
+        age_values = self._collect_values(segment_profiles, "dominant_age_bucket")
+        if age_values:
+            lines.append(f"Public : {', '.join(age_values)}.")
+
+        if segments:
+            lines.append(f"Composée de {len(segments)} segment(s) éditoriaux :")
+            for channel_segment in segments:
+                segment = channel_segment.segment
+                lines.append(
+                    f"- {segment.name} (rôle {channel_segment.role}, {segment.media_count} médias)"
+                )
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def _collect_values(profiles: list[dict], key: str) -> list[str]:
+        values: list[str] = []
+        for profile in profiles:
+            value = profile.get(key)
+            if value and value != "unknown" and value not in values:
+                values.append(value)
+        return values
 
     def _dominant_categories(self) -> list[str]:
         values = self.channel_candidate.profile.get("dominant_categories") if self.channel_candidate.profile else []
