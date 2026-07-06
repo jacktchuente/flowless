@@ -35,6 +35,7 @@ export class EditorialPlanningGenerationDialogComponent {
   selectedCollectionIds = new Set<string>()
   targetChannelCount = 2
   maxChannelCandidates = 2
+  allowMultiSegment = true
   isSubmitting = false
   errorMessage: string | null = null
 
@@ -93,6 +94,7 @@ export class EditorialPlanningGenerationDialogComponent {
       media_collection_ids: mediaCollectionIds,
       max_channel_candidates: this.maxChannelCandidates,
       target_channel_count: this.targetChannelCount,
+      allow_multi_segment: this.allowMultiSegment,
     }).subscribe((response) => {
       this.isSubmitting = false
       if (!response.isOk) {

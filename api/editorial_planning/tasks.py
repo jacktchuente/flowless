@@ -2,6 +2,7 @@ import logging
 
 from celery import shared_task
 
+from editorial_flow.configs import SegmentationConfig
 from editorial_planning.models import EditorialFlowRun
 from editorial_planning.services.generation_service import EditorialPlanningGenerationService
 from editorial_planning.services.matching_service import EditorialPlanningMatchingService
@@ -18,6 +19,7 @@ def generate_editorial_planning(
     media_collection_ids: list[int],
     max_channel_candidates: int | None = None,
     target_channel_count: int | None = None,
+    allow_multi_segment: bool = True,
 ):
     try:
         catalog = Catalog.objects.get(pk=catalog_id)
@@ -36,6 +38,7 @@ def generate_editorial_planning(
             media_collection_ids=media_collection_ids,
             max_channel_candidates=max_channel_candidates,
             target_channel_count=target_channel_count,
+            segmentation_config=SegmentationConfig(allow_multi_segment=allow_multi_segment),
         ).generate()
     except Exception:
         logger.exception("generate_editorial_planning failed catalog_id=%s", catalog_id)

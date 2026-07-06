@@ -291,10 +291,11 @@ class FlexibleTvPlayoutGenerationService:
         }
 
     def _select_next_container(self, *, segment_id: int, remaining_seconds: int, history: dict):
+        # Secondary memberships (multi-segment media) are playable too, as
+        # long as their status was accepted or manually overridden.
         memberships = (
             EditorialSegmentMembership.objects.filter(
                 segment_id=segment_id,
-                is_primary=True,
                 status__in=self.PLAYABLE_MEMBERSHIP_STATUSES,
                 media_container__is_missing=False,
                 media_container__media_collection__is_active=True,

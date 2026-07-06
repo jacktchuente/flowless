@@ -53,6 +53,7 @@ class CatalogViewSet(
             media_collection_ids=serializer.validated_data["media_collection_ids"],
             max_channel_candidates=serializer.validated_data.get("max_channel_candidates"),
             target_channel_count=serializer.validated_data.get("target_channel_count"),
+            allow_multi_segment=serializer.validated_data.get("allow_multi_segment", True),
         )
         return Response(status=status.HTTP_202_ACCEPTED)
     

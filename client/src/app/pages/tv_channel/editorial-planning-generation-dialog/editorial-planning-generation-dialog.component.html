@@ -35,6 +35,14 @@
         [(ngModel)]="maxChannelCandidates"
       />
 
+      <mat-checkbox
+        class="multi-segment-toggle"
+        name="allowMultiSegment"
+        [(ngModel)]="allowMultiSegment"
+      >
+        Autoriser un media dans plusieurs segments
+      </mat-checkbox>
+
       <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
     </form>
   </div>

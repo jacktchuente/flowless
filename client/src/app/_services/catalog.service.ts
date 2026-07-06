@@ -14,6 +14,7 @@ export interface EditorialPlanningPayload {
   media_collection_ids: Array<string | number>
   max_channel_candidates?: number | null
   target_channel_count?: number | null
+  allow_multi_segment?: boolean
 }
 
 @Injectable({
