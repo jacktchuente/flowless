@@ -15,6 +15,8 @@ export interface EditorialPlanningPayload {
   max_channel_candidates?: number | null
   target_channel_count?: number | null
   allow_multi_segment?: boolean
+  allow_segment_sharing?: boolean
+  refine_membership_threshold?: number | null
 }
 
 @Injectable({

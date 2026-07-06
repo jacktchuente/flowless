@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 
-from editorial_flow.configs import SegmentationConfig
+from editorial_flow.configs import ChannelDiscoveryConfig, SegmentationConfig
 from editorial_planning.models import EditorialFlowRun
 from editorial_planning.services.generation_service import EditorialPlanningGenerationService
 from editorial_planning.services.matching_service import EditorialPlanningMatchingService
@@ -20,6 +20,8 @@ def generate_editorial_planning(
     max_channel_candidates: int | None = None,
     target_channel_count: int | None = None,
     allow_multi_segment: bool = True,
+    allow_segment_sharing: bool = False,
+    refine_membership_threshold: float | None = None,
 ):
     try:
         catalog = Catalog.objects.get(pk=catalog_id)
@@ -38,7 +40,13 @@ def generate_editorial_planning(
             media_collection_ids=media_collection_ids,
             max_channel_candidates=max_channel_candidates,
             target_channel_count=target_channel_count,
-            segmentation_config=SegmentationConfig(allow_multi_segment=allow_multi_segment),
+            segmentation_config=SegmentationConfig(
+                allow_multi_segment=allow_multi_segment,
+                refine_membership_threshold=refine_membership_threshold,
+            ),
+            channel_discovery_config=ChannelDiscoveryConfig(
+                allow_segment_sharing=allow_segment_sharing,
+            ),
         ).generate()
     except Exception:
         logger.exception("generate_editorial_planning failed catalog_id=%s", catalog_id)

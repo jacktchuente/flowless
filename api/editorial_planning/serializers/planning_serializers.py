@@ -21,6 +21,14 @@ class EditorialPlanningGenerationRequestSerializer(serializers.Serializer):
     max_channel_candidates = serializers.IntegerField(min_value=1, required=False, allow_null=True)
     target_channel_count = serializers.IntegerField(min_value=1, required=False, allow_null=True)
     allow_multi_segment = serializers.BooleanField(required=False, default=True)
+    allow_segment_sharing = serializers.BooleanField(required=False, default=False)
+    refine_membership_threshold = serializers.FloatField(
+        required=False,
+        allow_null=True,
+        default=None,
+        min_value=0.0,
+        max_value=1.0,
+    )
 
     def validate_media_collection_ids(self, value):
         return list(dict.fromkeys(value))

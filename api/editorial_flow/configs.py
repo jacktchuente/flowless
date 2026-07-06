@@ -46,6 +46,13 @@ class SegmentationConfig:
     ``max_cluster_ratio`` / ``cluster_imbalance_penalty`` penalise k
     choices where the biggest cluster exceeds a share of the corpus, to
     avoid trivial binary splits.
+
+    ``min_segment_target`` forces the explored k range to start at that
+    value so enough segments can emerge to build the requested number of
+    channels. ``refine_membership_threshold`` enables an optional second
+    clustering pass: media whose primary membership score falls below the
+    threshold are pruned and the remaining corpus is re-segmented, which
+    lets finer clusters emerge once the fuzzy in-between media are gone.
     """
 
     min_cluster_size: int = 2
@@ -64,17 +71,29 @@ class SegmentationConfig:
     multi_segment_distance_ratio: float = 1.5
     max_cluster_ratio: float = 0.6
     cluster_imbalance_penalty: float = 1.0
+    min_segment_target: Optional[int] = None
+    refine_membership_threshold: Optional[float] = None
 
 
 @dataclass
 class ChannelDiscoveryConfig:
-    """Configuration for the channel discovery process."""
+    """Configuration for the channel discovery process.
+
+    ``allow_segment_sharing`` switches community building from connected
+    components (disjoint channels, at most one channel per component) to
+    one community per anchor segment (anchor + compatible neighbours),
+    which can propose up to one channel per segment with overlapping
+    compositions. ``duplicate_similarity_threshold`` then drops any
+    candidate whose centroid is quasi identical to an already accepted
+    one, so overlap never degenerates into duplicates.
+    """
 
     min_channel_score: float = 0.5
     min_segments_per_channel: int = 2
     min_total_duration_seconds: int = 0
     compatibility_threshold: float = 0.3
     allow_segment_sharing: bool = False
+    duplicate_similarity_threshold: float = 0.97
     max_channel_candidates: int = 10
 
 

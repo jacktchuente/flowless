@@ -68,26 +68,40 @@ def discover_channel_candidates(
                 adjacency[i].append(j)
                 adjacency[j].append(i)
                 segment_links.append((segment_ids[i], segment_ids[j], sim))
-    # Compute communities as connected components
-    visited = [False] * n
-    communities_indices: List[List[int]] = []
-    for i in range(n):
-        if not visited[i]:
-            # BFS/DFS
-            stack = [i]
-            component = []
-            visited[i] = True
-            while stack:
-                v = stack.pop()
-                component.append(v)
-                for nb in adjacency[v]:
-                    if not visited[nb]:
-                        visited[nb] = True
-                        stack.append(nb)
+    if config.allow_segment_sharing:
+        # One community per anchor segment: the anchor plus its direct
+        # compatible neighbours. Communities may overlap, which allows up
+        # to one channel per segment; identical neighbourhoods collapse.
+        communities_indices = []
+        seen_components: set[frozenset[int]] = set()
+        for i in range(n):
+            component = sorted({i, *adjacency[i]})
+            key = frozenset(component)
+            if key in seen_components:
+                continue
+            seen_components.add(key)
             communities_indices.append(component)
+    else:
+        # Compute communities as connected components
+        visited = [False] * n
+        communities_indices = []
+        for i in range(n):
+            if not visited[i]:
+                # BFS/DFS
+                stack = [i]
+                component = []
+                visited[i] = True
+                while stack:
+                    v = stack.pop()
+                    component.append(v)
+                    for nb in adjacency[v]:
+                        if not visited[nb]:
+                            visited[nb] = True
+                            stack.append(nb)
+                communities_indices.append(component)
     # Build community lists of segment IDs
     communities: List[List[str]] = [[segment_ids[idx] for idx in comp] for comp in communities_indices]
-    channel_candidates: List[ChannelCandidate] = []
+    scored_candidates: List[Tuple[ChannelCandidate, np.ndarray]] = []
     # Compute centroids for distinctiveness
     community_centroids: List[np.ndarray] = []
     for comp in communities_indices:
@@ -104,13 +118,18 @@ def discover_channel_candidates(
         # Skip communities smaller than minimum segments
         if len(segs) < config.min_segments_per_channel:
             continue
-        # Internal coherence: average pairwise similarity within community
+        # Internal coherence: average pairwise similarity within community.
+        # A single-segment community has no pairs: fall back to the
+        # segment's own cohesion instead of punishing it with 0.
         internal_scores = []
         for i in range(len(segs)):
             for j in range(i + 1, len(segs)):
                 sim = similarity(segs[i].reference_vector, segs[j].reference_vector)
                 internal_scores.append(sim)
-        internal_coherence = float(np.mean(internal_scores)) if internal_scores else 0.0
+        if internal_scores:
+            internal_coherence = float(np.mean(internal_scores))
+        else:
+            internal_coherence = float(np.mean([s.cohesion_score for s in segs])) if segs else 0.0
         # Volume: average of segment volume scores
         avg_volume = float(np.mean([s.volume_score for s in segs])) if segs else 0.0
         # Diversity: categories across segments
@@ -144,7 +163,7 @@ def discover_channel_candidates(
         if config.min_total_duration_seconds and total_duration < config.min_total_duration_seconds:
             status = "rejected"
         # Build channel candidate if not rejected
-        if status != "rejected" and len(channel_candidates) < config.max_channel_candidates:
+        if status != "rejected":
             channel_id = str(uuid.uuid4())
             # Determine name: combine dominant nature and top categories across segments
             natures = [s.profile.get("dominant_nature") for s in segs if s.profile.get("dominant_nature")]
@@ -159,13 +178,17 @@ def discover_channel_candidates(
                 for n_val in natures:
                     counts[n_val] = counts.get(n_val, 0) + 1
                 dominant_nature = max(counts, key=counts.get)
-            # Build name string
-            name_parts = []
-            if dominant_nature:
-                name_parts.append(dominant_nature.capitalize())
-            if top_cats:
-                name_parts.append(" / ".join([c.capitalize() for c in top_cats]))
-            channel_name = " / ".join(name_parts) if name_parts else f"Chaîne {channel_id[:8]}"
+            # Build name string; a single-segment channel reuses the segment
+            # name, which already carries the format and stays unique.
+            if len(segs) == 1:
+                channel_name = segs[0].name
+            else:
+                name_parts = []
+                if dominant_nature:
+                    name_parts.append(dominant_nature.capitalize())
+                if top_cats:
+                    name_parts.append(" / ".join([c.capitalize() for c in top_cats]))
+                channel_name = " / ".join(name_parts) if name_parts else f"Chaîne {channel_id[:8]}"
             description = f"Chaîne éditoriale composée de {len(segs)} segments."
             # Assign roles and weights
             # Weight per segment: use programmable_score * volume_score
@@ -197,26 +220,50 @@ def discover_channel_candidates(
                 "dominant_nature": dominant_nature,
                 "avg_viability": viability,
             }
-            channel_candidates.append(
-                ChannelCandidate(
-                    channel_id=channel_id,
-                    name=channel_name,
-                    description=description,
-                    segments=segment_in_channel_list,
-                    viability_score=viability,
-                    status=status,
-                    profile=profile,
-                    diagnostics={
-                        "internal_coherence": internal_coherence,
-                        "avg_volume": avg_volume,
-                        "diversity": diversity,
-                        "transition_density": transition_density,
-                        "avg_labelability": avg_labelability,
-                        "distinctiveness": distinctiveness,
-                        "total_duration": total_duration,
-                    },
+            scored_candidates.append(
+                (
+                    ChannelCandidate(
+                        channel_id=channel_id,
+                        name=channel_name,
+                        description=description,
+                        segments=segment_in_channel_list,
+                        viability_score=viability,
+                        status=status,
+                        profile=profile,
+                        diagnostics={
+                            "internal_coherence": internal_coherence,
+                            "avg_volume": avg_volume,
+                            "diversity": diversity,
+                            "transition_density": transition_density,
+                            "avg_labelability": avg_labelability,
+                            "distinctiveness": distinctiveness,
+                            "total_duration": total_duration,
+                        },
+                    ),
+                    community_centroids[idx],
                 )
             )
+
+    # Keep the most viable candidates, dropping any whose centroid is
+    # quasi identical to an already accepted one (overlapping communities
+    # must never degenerate into duplicate channels).
+    scored_candidates.sort(key=lambda entry: entry[0].viability_score, reverse=True)
+    channel_candidates: List[ChannelCandidate] = []
+    accepted_centroids: List[np.ndarray] = []
+    duplicates_dropped = 0
+    for candidate, centroid in scored_candidates:
+        if len(channel_candidates) >= config.max_channel_candidates:
+            break
+        if any(
+            similarity(centroid, accepted) >= config.duplicate_similarity_threshold
+            for accepted in accepted_centroids
+        ):
+            duplicates_dropped += 1
+            continue
+        channel_candidates.append(candidate)
+        accepted_centroids.append(centroid)
+    diagnostics["duplicates_dropped"] = duplicates_dropped
+
     return ChannelDiscoveryResult(
         channel_candidates=channel_candidates,
         communities=communities,

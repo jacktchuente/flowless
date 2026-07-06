@@ -54,6 +54,8 @@ class CatalogViewSet(
             max_channel_candidates=serializer.validated_data.get("max_channel_candidates"),
             target_channel_count=serializer.validated_data.get("target_channel_count"),
             allow_multi_segment=serializer.validated_data.get("allow_multi_segment", True),
+            allow_segment_sharing=serializer.validated_data.get("allow_segment_sharing", False),
+            refine_membership_threshold=serializer.validated_data.get("refine_membership_threshold"),
         )
         return Response(status=status.HTTP_202_ACCEPTED)
     

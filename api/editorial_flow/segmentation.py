@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import math
 import uuid
+from dataclasses import replace
 from typing import List, Dict, Optional, Any
 
 import numpy as np
@@ -123,6 +124,9 @@ def run_segmentation(
     if config is None:
         config = SegmentationConfig()
 
+    if config.refine_membership_threshold is not None:
+        return _run_refined_segmentation(media, config)
+
     fe = FeatureExtractor(
         max_features=config.max_features,
         min_df_count=config.min_df_count,
@@ -147,7 +151,13 @@ def run_segmentation(
     else:
         # Reasonable range: 2 to min(sqrt(n) + 1, n-1) capped at 10
         max_k = max(2, min(int(math.sqrt(n_samples)) + 1, n_samples - 1, 10))
-        candidate_k = list(range(2, max_k + 1))
+        min_k = 2
+        if config.min_segment_target:
+            # Guarantee enough clusters can emerge to build the requested
+            # number of channels: explore k from the target upwards.
+            min_k = max(2, min(config.min_segment_target, n_samples - 1))
+            max_k = max(max_k, min(min_k + 3, n_samples - 1))
+        candidate_k = list(range(min_k, max_k + 1))
     if not candidate_k:
         # Not enough samples to cluster meaningfully
         candidate_k = [1]
@@ -402,3 +412,46 @@ def run_segmentation(
         model_state=model_state,
         diagnostics=diagnostics,
     )
+
+
+def _run_refined_segmentation(media: List[MediaInput], config: SegmentationConfig) -> SegmentationResult:
+    """Prune-then-re-segment refinement pass.
+
+    A first clustering pass identifies each media's primary membership
+    score; media below ``refine_membership_threshold`` (including weak
+    clusters and outliers, which have no score) are pruned and the
+    remaining corpus is segmented again. Removing the fuzzy in-between
+    media sharpens cluster boundaries, so finer k values can win the
+    selection. Pruned media are reported as weak clusters of the final
+    result.
+    """
+    threshold = config.refine_membership_threshold
+    base_config = replace(config, refine_membership_threshold=None)
+    first = run_segmentation(media, base_config)
+
+    primary_scores: Dict[str, float] = {
+        membership.media_id: membership.score
+        for membership in first.memberships
+        if membership.is_primary
+    }
+    kept = [m for m in media if primary_scores.get(m.id, 0.0) >= threshold]
+    dropped_ids = [m.id for m in media if primary_scores.get(m.id, 0.0) < threshold]
+
+    refinement_info: Dict[str, Any] = {
+        "threshold": threshold,
+        "first_pass_selected_k": first.diagnostics.get("selected_k"),
+        "first_pass_silhouette": first.diagnostics.get("global_silhouette"),
+        "dropped_count": len(dropped_ids),
+        "kept_count": len(kept),
+    }
+
+    minimum_corpus = max(config.min_cluster_size * 2, 4)
+    if len(kept) < minimum_corpus or len(kept) == len(media):
+        refinement_info["skipped"] = True
+        first.diagnostics["refinement"] = refinement_info
+        return first
+
+    second = run_segmentation(kept, base_config)
+    second.weak_clusters = sorted(set(second.weak_clusters) | set(dropped_ids))
+    second.diagnostics["refinement"] = refinement_info
+    return second

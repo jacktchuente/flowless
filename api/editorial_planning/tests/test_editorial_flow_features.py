@@ -5,7 +5,9 @@ No database involved: everything runs on synthetic MediaInput lists.
 
 from django.test import SimpleTestCase
 
-from editorial_flow.configs import SegmentationConfig
+from editorial_flow.channel_discovery import discover_channel_candidates
+from editorial_flow.configs import ChannelDiscoveryConfig, SegmentationConfig
+from editorial_flow.outputs import ProgrammableSegment
 from editorial_flow.features import (
     FeatureExtractor,
     LegacyFeatureExtractor,
@@ -182,3 +184,99 @@ class SegmentationMultiMembershipTests(SimpleTestCase):
         result = run_segmentation(self.build_corpus(), self.base_config())
         self.assertEqual(result.model_state.version, "2.0")
         self.assertEqual(result.model_state.feature_state.get("version"), "2.0")
+
+
+class SegmentationRefinementTests(SimpleTestCase):
+    def build_corpus(self) -> list[MediaInput]:
+        media = []
+        for index in range(6):
+            extra = "guns" if index % 2 else "cars"
+            media.append(make_media(f"a{index}", categories=["action", "war", extra]))
+        for index in range(6):
+            extra = "tears" if index % 2 else "flowers"
+            media.append(make_media(f"b{index}", categories=["romance", "drama", extra]))
+        # Fuzzy media unrelated to both clusters
+        media.append(make_media("junk0", categories=["zombie", "kraken"]))
+        media.append(make_media("junk1", categories=["zombie", "kraken"]))
+        return media
+
+    def test_refinement_prunes_low_score_media_and_resegments(self):
+        config = SegmentationConfig(
+            candidate_cluster_counts=[2],
+            min_programmable_score=0.0,
+            min_df_count=2,
+            allow_multi_segment=False,
+            refine_membership_threshold=0.8,
+        )
+        result = run_segmentation(self.build_corpus(), config)
+        refinement = result.diagnostics.get("refinement")
+        self.assertIsNotNone(refinement)
+        self.assertGreaterEqual(refinement["dropped_count"], 2)
+        self.assertIn("junk0", result.weak_clusters)
+        self.assertIn("junk1", result.weak_clusters)
+        member_ids = {m.media_id for m in result.memberships}
+        self.assertNotIn("junk0", member_ids)
+        self.assertNotIn("junk1", member_ids)
+
+
+class ChannelDiscoverySharingTests(SimpleTestCase):
+    @staticmethod
+    def make_segment(segment_id: str, vector: list[float], categories: list[str]) -> ProgrammableSegment:
+        return ProgrammableSegment(
+            segment_id=segment_id,
+            name=segment_id,
+            description="",
+            profile={"dominant_categories": categories, "avg_duration_seconds": 1800.0},
+            reference_vector=vector,
+            reference_profile={},
+            observed_profile={},
+            programmable_score=0.5,
+            cohesion_score=0.5,
+            separation_score=0.5,
+            format_consistency_score=0.5,
+            volume_score=0.5,
+            labelability_score=0.5,
+            acceptance_threshold=0.5,
+            media_ids=["m1", "m2"],
+        )
+
+    def chain_segments(self) -> list[ProgrammableSegment]:
+        # s1-s2 and s2-s3 are compatible, s1-s3 are not: a chain topology
+        return [
+            self.make_segment("s1", [1.0, 0.0, 0.0], ["action"]),
+            self.make_segment("s2", [0.7, 0.7, 0.0], ["action", "romance"]),
+            self.make_segment("s3", [0.0, 1.0, 0.0], ["romance"]),
+        ]
+
+    def base_config(self, **kwargs) -> ChannelDiscoveryConfig:
+        return ChannelDiscoveryConfig(
+            compatibility_threshold=0.8,
+            min_segments_per_channel=1,
+            min_channel_score=0.0,
+            **kwargs,
+        )
+
+    def test_connected_components_yield_single_channel_on_chain(self):
+        result = discover_channel_candidates(self.chain_segments(), self.base_config())
+        self.assertEqual(len(result.channel_candidates), 1)
+
+    def test_segment_sharing_yields_one_channel_per_anchor(self):
+        result = discover_channel_candidates(
+            self.chain_segments(),
+            self.base_config(allow_segment_sharing=True),
+        )
+        self.assertEqual(len(result.channel_candidates), 3)
+        segment_sets = {frozenset(s.segment_id for s in c.segments) for c in result.channel_candidates}
+        self.assertEqual(len(segment_sets), 3)
+
+    def test_segment_sharing_dedupes_identical_neighbourhoods(self):
+        # Two quasi identical segments: their anchor neighbourhoods collapse
+        segments = [
+            self.make_segment("s1", [1.0, 0.0], ["action"]),
+            self.make_segment("s2", [1.0, 0.0], ["action"]),
+        ]
+        result = discover_channel_candidates(
+            segments,
+            self.base_config(allow_segment_sharing=True),
+        )
+        self.assertEqual(len(result.channel_candidates), 1)

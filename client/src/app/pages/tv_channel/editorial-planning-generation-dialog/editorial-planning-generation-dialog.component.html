@@ -43,6 +43,26 @@
         Autoriser un media dans plusieurs segments
       </mat-checkbox>
 
+      <mat-checkbox
+        class="multi-segment-toggle"
+        name="allowSegmentSharing"
+        [(ngModel)]="allowSegmentSharing"
+      >
+        Autoriser le partage de segments entre chaines
+      </mat-checkbox>
+
+      <label class="field-label" for="refine-threshold">Seuil de raffinement (optionnel, 0-1)</label>
+      <input
+        id="refine-threshold"
+        name="refineThreshold"
+        type="number"
+        min="0"
+        max="1"
+        step="0.05"
+        placeholder="ex: 0.7 — vide pour desactiver"
+        [(ngModel)]="refineThreshold"
+      />
+
       <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
     </form>
   </div>

@@ -49,6 +49,16 @@ class EditorialPlanningGenerationService:
         self.segment_path_config = segment_path_config or SegmentPathConfig()
         self.activate_run = activate_run
 
+        # The requested channel count needs at least that many segments to
+        # exist: force the explored k range to cover it.
+        target = self._effective_target_channel_count()
+        if (
+            target
+            and self.segmentation_config.min_segment_target is None
+            and not self.segmentation_config.candidate_cluster_counts
+        ):
+            self.segmentation_config = replace(self.segmentation_config, min_segment_target=target + 1)
+
     def generate(self) -> EditorialFlowRun:
         started_at = timezone.now()
         run = EditorialFlowRun.objects.create(
@@ -152,11 +162,12 @@ class EditorialPlanningGenerationService:
             self.channel_discovery_config,
             max_channel_candidates=base_max,
         )
-        attempts = self._channel_discovery_attempts(base_config) if target else [base_config]
+
         best_result = None
         best_config = None
+        best_count = -1
 
-        for attempt_index, config in enumerate(attempts, start=1):
+        for attempt_index, config in enumerate(self._channel_discovery_attempts(base_config, target), start=1):
             result = discover_channel_candidates(segments, config)
             candidates = self._select_channel_candidates(result.channel_candidates)
             diagnostics["attempts"].append(
@@ -168,31 +179,39 @@ class EditorialPlanningGenerationService:
                 }
             )
 
-            if best_result is None or len(candidates) > len(self._select_channel_candidates(best_result.channel_candidates)):
+            if len(candidates) > best_count:
                 best_result = result
                 best_config = config
+                best_count = len(candidates)
 
             if target and len(candidates) >= target:
                 return result, config
 
         return best_result, best_config
 
-    def _channel_discovery_attempts(self, base_config: ChannelDiscoveryConfig) -> list[ChannelDiscoveryConfig]:
-        return [
-            base_config,
-            replace(
-                base_config,
-                min_segments_per_channel=max(1, base_config.min_segments_per_channel - 1),
-                compatibility_threshold=min(0.95, max(base_config.compatibility_threshold, 0.45)),
-                min_channel_score=max(0.4, base_config.min_channel_score - 0.1),
-            ),
-            replace(
-                base_config,
-                min_segments_per_channel=1,
-                compatibility_threshold=min(0.98, max(base_config.compatibility_threshold, 0.65)),
-                min_channel_score=max(0.3, base_config.min_channel_score - 0.2),
-            ),
-        ]
+    def _channel_discovery_attempts(self, base_config: ChannelDiscoveryConfig, target: int):
+        """Yields discovery configs until the channel target can be met.
+
+        Without a target, the base config runs alone. With a target, the
+        compatibility threshold sweeps upward so the segment graph splits
+        into more communities; a second, relaxed sweep (single-segment
+        channels allowed, lower score floor) runs if the first one was not
+        enough. Communities are disjoint per attempt, so raising the
+        threshold can only split channels, never duplicate them.
+        """
+        yield base_config
+        if not target:
+            return
+
+        for relaxed in (False, True):
+            threshold = base_config.compatibility_threshold
+            while threshold < 0.95:
+                threshold = round(min(0.95, threshold + 0.05), 3)
+                overrides = {"compatibility_threshold": threshold}
+                if relaxed:
+                    overrides["min_segments_per_channel"] = 1
+                    overrides["min_channel_score"] = max(0.3, base_config.min_channel_score - 0.2)
+                yield replace(base_config, **overrides)
 
     def _select_channel_candidates(self, candidates):
         selected = sorted(candidates, key=lambda candidate: candidate.viability_score, reverse=True)

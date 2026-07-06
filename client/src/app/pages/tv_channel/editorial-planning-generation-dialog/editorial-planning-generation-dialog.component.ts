@@ -36,6 +36,8 @@ export class EditorialPlanningGenerationDialogComponent {
   targetChannelCount = 2
   maxChannelCandidates = 2
   allowMultiSegment = true
+  allowSegmentSharing = false
+  refineThreshold: number | null = null
   isSubmitting = false
   errorMessage: string | null = null
 
@@ -95,6 +97,8 @@ export class EditorialPlanningGenerationDialogComponent {
       max_channel_candidates: this.maxChannelCandidates,
       target_channel_count: this.targetChannelCount,
       allow_multi_segment: this.allowMultiSegment,
+      allow_segment_sharing: this.allowSegmentSharing,
+      refine_membership_threshold: this.refineThreshold,
     }).subscribe((response) => {
       this.isSubmitting = false
       if (!response.isOk) {
