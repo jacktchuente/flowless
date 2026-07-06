@@ -4,6 +4,7 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {MatButtonModule} from "@angular/material/button";
 import {MatDialog} from "@angular/material/dialog";
 import {MatIconModule} from "@angular/material/icon";
+import {MatMenuModule} from "@angular/material/menu";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {filter} from "rxjs/operators";
 import {CalendarEvent, CalendarModule} from "angular-calendar";
@@ -37,6 +38,7 @@ type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
     DatePipe,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     TranslateModule,
     NgClass,
@@ -269,6 +271,21 @@ export class ChannelDetailComponent {
       this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_UPDATED")
       this.loadChannel(this.channel!.id.toString())
     })
+  }
+
+  generateLogo(backend: 'comfyui' | 'openai') {
+    if (!this.channel) {
+      return
+    }
+    this.tvChannelService.generateLogo(this.channel.id, backend)
+      .subscribe((response) => {
+        if (!response.isOk) {
+          this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_FAILED")
+          return
+        }
+        this.logoLoadFailed = false
+        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_STARTED")
+      })
   }
 
   downloadLogoPrompt() {

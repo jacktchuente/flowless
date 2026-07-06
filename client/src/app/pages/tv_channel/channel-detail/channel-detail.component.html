@@ -47,6 +47,20 @@
             <mat-icon>download</mat-icon>
             {{ 'CHANNEL_DETAIL.DOWNLOAD_LOGO_PROMPT' | translate }}
           </button>
+          <button mat-stroked-button [matMenuTriggerFor]="logoBackendMenu">
+            <mat-icon>brush</mat-icon>
+            {{ 'CHANNEL_DETAIL.GENERATE_LOGO' | translate }}
+          </button>
+          <mat-menu #logoBackendMenu="matMenu">
+            <button mat-menu-item (click)="generateLogo('comfyui')">
+              <mat-icon>memory</mat-icon>
+              {{ 'CHANNEL_DETAIL.GENERATE_LOGO_LOCAL' | translate }}
+            </button>
+            <button mat-menu-item (click)="generateLogo('openai')">
+              <mat-icon>cloud</mat-icon>
+              {{ 'CHANNEL_DETAIL.GENERATE_LOGO_CLOUD' | translate }}
+            </button>
+          </mat-menu>
           <button mat-flat-button color="primary" (click)="openGeneratePlayoutDialog()">
             <mat-icon>schedule</mat-icon>
             {{ 'CHANNELS.GENERATE_PLAYOUT' | translate }}

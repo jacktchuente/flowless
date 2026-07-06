@@ -81,6 +81,10 @@ export class TvChannelApiService extends BaseApiService {
     getGenerationReports(id: string | number): Observable<PlayoutGenerationReport[]> {
         return this.http.get<PlayoutGenerationReport[]>(`${this.getFullUrl()}${id}/generation-reports/`);
     }
+
+    generateLogo(id: string | number, backend: string | null): Observable<unknown> {
+        return this.http.post(`${this.getFullUrl()}${id}/generate-logo/`, {backend});
+    }
 }
 
 @Injectable({
@@ -161,6 +165,15 @@ export class TvChannelService extends ObjectApiService {
     suggestName(id: string | number): Subject<RequestResponseLike> {
         const subject = new Subject<RequestResponseLike>()
         this.api.suggestName(id).subscribe({
+            next: (body) => subject.next({isOk: true, body}),
+            error: (body) => subject.next({isOk: false, body}),
+        })
+        return subject
+    }
+
+    generateLogo(id: string | number, backend: string | null): Subject<RequestResponseLike> {
+        const subject = new Subject<RequestResponseLike>()
+        this.api.generateLogo(id, backend).subscribe({
             next: (body) => subject.next({isOk: true, body}),
             error: (body) => subject.next({isOk: false, body}),
         })

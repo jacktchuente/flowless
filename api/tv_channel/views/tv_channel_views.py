@@ -20,8 +20,14 @@ from tv_channel.services.channel_name_suggestion_service import (
     ChannelNameSuggestionError,
     ChannelNameSuggestionService,
 )
+from tv_channel.services.logo_generation.logo_generation_service import BACKENDS as LOGO_BACKENDS
 from tv_channel.services.logo_prompt_service import LogoPromptService
-from tv_channel.tasks import generate_channel_editorial_line, generate_tv_channel_playout, push_tv_channel_to_etv
+from tv_channel.tasks import (
+    generate_channel_editorial_line,
+    generate_tv_channel_logo,
+    generate_tv_channel_playout,
+    push_tv_channel_to_etv,
+)
 
 
 class TvChannelViewSet(
@@ -91,6 +97,20 @@ class TvChannelViewSet(
     def push(self, request, pk=None):
         instance = self.get_object()
         push_tv_channel_to_etv.delay(instance.id)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=("post",), url_name="generate-logo", url_path="generate-logo")
+    def generate_logo(self, request, pk=None):
+        instance = self.get_object()
+        backend = request.data.get("backend")
+        if backend is not None:
+            backend = str(backend).strip().lower()
+            if backend not in LOGO_BACKENDS:
+                return Response(
+                    {"backend": f"Unknown backend. Available: {', '.join(sorted(LOGO_BACKENDS))}."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        generate_tv_channel_logo.delay(instance.id, backend=backend)
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=("get",), url_name="generation-reports", url_path="generation-reports")

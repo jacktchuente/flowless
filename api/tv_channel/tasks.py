@@ -13,6 +13,7 @@ from project_ops.constants import AnalyzeStatus
 from tv_channel.models import Catalog, GridLayoutMode, TvChannel
 from tv_channel.services.catalog_service import CatalogService
 from tv_channel.services.etv_channel_push_service import EtvChannelPushService
+from tv_channel.services.logo_generation import LogoGenerationService
 from tv_channel.services.tv_channel_service import TvChannelService
 from utils.task_status_service import broadcast_refresh, save_status_and_broadcast
 
@@ -254,6 +255,43 @@ def extend_channel_playouts():
             reset=False,
             trigger=PlayoutGenerationReport.TRIGGER_EXTEND,
         )
+
+
+@shared_task
+def generate_tv_channel_logo(channel_id: int, backend: str | None = None):
+    try:
+        instance = TvChannel.objects.get(pk=channel_id)
+    except TvChannel.DoesNotExist:
+        logger.warning("generate_tv_channel_logo skipped unknown channel_id=%s", channel_id)
+        return
+
+    if instance.analyze_status == AnalyzeStatus.ANALYZING:
+        logger.info("generate_tv_channel_logo skipped channel_id=%s already_analyzing=true", channel_id)
+        return
+
+    save_status_and_broadcast(
+        instance,
+        object_type="TvChannel",
+        status=AnalyzeStatus.ANALYZING,
+    )
+    try:
+        LogoGenerationService(instance, backend=backend).generate()
+    except Exception:
+        logger.exception(
+            "generate_tv_channel_logo failed channel_id=%s backend=%s",
+            channel_id,
+            backend,
+        )
+        status = AnalyzeStatus.COMPLETE_WITH_ERRORS
+    else:
+        logger.info("generate_tv_channel_logo completed channel_id=%s", channel_id)
+        status = AnalyzeStatus.COMPLETE
+
+    save_status_and_broadcast(
+        instance,
+        object_type="TvChannel",
+        status=status,
+    )
 
 
 @shared_task
