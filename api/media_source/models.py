@@ -28,6 +28,7 @@ class MediaCollection(models.Model):
     nature = models.IntegerField(choices=MediaNature, null=True, blank=True)
     hash_data = models.TextField()
     container_kind = models.IntegerField(choices=MediaContainerKind, null=True, blank=True)
+    is_anime = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.media_source.name} - {self.name}"

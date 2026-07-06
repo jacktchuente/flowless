@@ -70,7 +70,8 @@
     "NOTIFY_ANALYZE_FAILED": "Collection analysis failed.",
     "NOTIFY_ANALYZE_STARTED": "Collection analysis started in background.",
     "FORCE_REANALYZE": "Yes, re-analyze everything",
-    "ANALYZING_WARNING": "An analysis already seems to be running for this collection. If it got stuck (crash), only a forced re-analysis will restart the processing."
+    "ANALYZING_WARNING": "An analysis already seems to be running for this collection. If it got stuck (crash), only a forced re-analysis will restart the processing.",
+    "IS_ANIME": "Anime"
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",

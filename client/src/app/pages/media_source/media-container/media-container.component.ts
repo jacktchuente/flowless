@@ -61,6 +61,11 @@ export class MediaContainerComponent {
     {value: '4', label: 'music_video_release'},
     {value: '99', label: 'other'},
   ]
+  readonly isAnimeOptions = [
+    {value: '', label: 'Tous'},
+    {value: '1', label: 'anime'},
+    {value: '0', label: 'non anime'},
+  ]
 
   containers: MediaContainerListItem[] = []
   filters = {
@@ -69,6 +74,7 @@ export class MediaContainerComponent {
     category: '',
     nature: '',
     container_kind: '',
+    is_anime: '',
   }
   currentPage = 1
   pageSize = 10
@@ -131,6 +137,7 @@ export class MediaContainerComponent {
       category: '',
       nature: '',
       container_kind: '',
+      is_anime: '',
     }
     this.loadPage(1)
   }
@@ -265,6 +272,9 @@ export class MediaContainerComponent {
     }
     if (this.filters.container_kind) {
       params['container_kind'] = this.filters.container_kind
+    }
+    if (this.filters.is_anime) {
+      params['is_anime'] = this.filters.is_anime
     }
     return params
   }

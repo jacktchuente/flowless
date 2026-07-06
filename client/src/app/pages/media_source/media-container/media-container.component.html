@@ -43,6 +43,13 @@
         </select>
     </label>
 
+    <label class="filter-field">
+        <span>{{ 'MEDIA_COLLECTION.IS_ANIME' | translate }}</span>
+        <select [(ngModel)]="filters.is_anime">
+            <option *ngFor="let option of isAnimeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </label>
+
     <label class="filter-field page-size-field">
         <span>{{ 'MEDIA_CONTAINER.PAGE_SIZE' | translate }}</span>
         <select [value]="pageSize" (change)="onPageSizeChange($any($event.target).value)">
