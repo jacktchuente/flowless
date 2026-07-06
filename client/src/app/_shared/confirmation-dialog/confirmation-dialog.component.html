@@ -8,6 +8,9 @@
   </mat-dialog-content>
   <mat-dialog-actions align="center">
     <button (click)="confirm()" color="warn" mat-button>{{"Oui" | translate}}</button>
+    @if (extraActionLabel) {
+      <button (click)="confirmExtra()" color="warn" mat-stroked-button>{{ extraActionLabel | translate }}</button>
+    }
     <button (click)="cancel()" color="primary" mat-button>{{"Non" | translate}}</button>
   </mat-dialog-actions>
 </div>

@@ -43,7 +43,7 @@ def analyze_media_source_data(media_source_id: int):
 
 
 @shared_task
-def analyze_media_collection_data(media_collection_id: int):
+def analyze_media_collection_data(media_collection_id: int, force: bool = False):
     try:
         media_collection = MediaCollection.objects.get(pk=media_collection_id)
     except MediaCollection.DoesNotExist:
@@ -62,7 +62,10 @@ def analyze_media_collection_data(media_collection_id: int):
             print("retrieve data")
             service.load_collection_data()
             print("normalize & clean up")
-            service.analyze_collection_data(use_llm=settings.MEDIA_CONTAINER_ANALYSE_USE_LLM)
+            service.analyze_collection_data(
+                use_llm=settings.MEDIA_CONTAINER_ANALYSE_USE_LLM,
+                new_data_only=not force,
+            )
             print("done")
         except Exception as e:
             print(e)

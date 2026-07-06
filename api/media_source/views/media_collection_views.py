@@ -41,5 +41,6 @@ class MediaCollectionViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={"detail": "La collection doit etre active avant analyse."},
             )
-        analyze_media_collection_data.delay(instance.id)
+        force = str(request.data.get("force", "")).lower() in {"1", "true", "yes", "on"}
+        analyze_media_collection_data.delay(instance.id, force=force)
         return Response(status=status.HTTP_200_OK)

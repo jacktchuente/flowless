@@ -68,7 +68,8 @@
     "CONFIRM_ANALYZE": "Analyser la collection {{name}} ?",
     "NOTIFY_TOGGLE_FAILED": "Activation impossible.",
     "NOTIFY_ANALYZE_FAILED": "Analyse de collection impossible.",
-    "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan."
+    "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan.",
+    "FORCE_REANALYZE": "Oui, tout réanalyser"
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",

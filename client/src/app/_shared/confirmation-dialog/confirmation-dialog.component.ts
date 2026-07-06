@@ -19,12 +19,16 @@ import {MatIconModule} from "@angular/material/icon";
 export class ConfirmationDialogComponent implements OnInit {
 
   confirmationMessage = 'Cette action est irreversible. Voulez-vous vraiment continuer ?';
+  extraActionLabel: string | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any) {
     if (Object.keys(data).indexOf('confirmationMessage') > -1 && data.confirmationMessage) {
       this.confirmationMessage = data.confirmationMessage;
+    }
+    if (Object.keys(data).indexOf('extraActionLabel') > -1 && data.extraActionLabel) {
+      this.extraActionLabel = data.extraActionLabel;
     }
   }
 
@@ -37,5 +41,9 @@ export class ConfirmationDialogComponent implements OnInit {
 
   confirm(): void {
     this.dialogRef.close(true);
+  }
+
+  confirmExtra(): void {
+    this.dialogRef.close('extra');
   }
 }
