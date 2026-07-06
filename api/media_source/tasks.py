@@ -79,6 +79,12 @@ def analyze_media_collection_data(media_collection_id: int, force: bool = False)
             status=status,
         )
         broadcast_refresh("MediaContainer")
+        if status == AnalyzeStatus.COMPLETE:
+            # New media may have arrived: attach them to the active
+            # editorial runs covering this collection right away.
+            from editorial_planning.tasks import match_new_media_for_active_runs
+
+            match_new_media_for_active_runs.delay(media_collection_id=media_collection.id)
 
 
 @shared_task

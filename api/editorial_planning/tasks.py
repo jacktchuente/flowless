@@ -60,6 +60,24 @@ def generate_editorial_planning(
 
 
 @shared_task
+def match_new_media_for_active_runs(media_collection_id: int | None = None):
+    """Matches new media against every active editorial run.
+
+    When ``media_collection_id`` is given (chained after a collection
+    analysis), only the active runs whose configuration covers that
+    collection are triggered. The underlying matching service is
+    idempotent: containers already attached to a run are skipped.
+    """
+    runs = EditorialFlowRun.objects.filter(is_active=True, status=AnalyzeStatus.COMPLETE)
+    for run in runs:
+        if media_collection_id is not None:
+            collection_ids = (run.config or {}).get("media_collection_ids") or []
+            if media_collection_id not in collection_ids:
+                continue
+        match_new_media_to_editorial_run.delay(run.id)
+
+
+@shared_task
 def match_new_media_to_editorial_run(run_id: int):
     try:
         run = EditorialFlowRun.objects.get(pk=run_id)
