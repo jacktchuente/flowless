@@ -287,11 +287,18 @@ ETV_API_WRAPPER_FILE_PATH = os.getenv("ETV_API_WRAPPER_FILE_PATH")
 DAYS_TO_BUILD = 3  # Nombre de jour que l'on build a l'avance
 SCAN_MEDIA_EVERY_HOURS = 3  # on scan les collections active chaque...
 MEDIA_CONTAINER_ANALYSE_USE_LLM = os.getenv("MEDIA_CONTAINER_ANALYSE_USE_LLM", "0") == "1"
+MEDIA_COLLECTION_SYNC_BATCH_SIZE = int(os.getenv("MEDIA_COLLECTION_SYNC_BATCH_SIZE", 10))
 
 LLM_RETRY_BLUEPRINT = 1
 LLM_RETRY_GRID_PRESET = int(os.getenv("LLM_RETRY_GRID_PRESET", 3))
 LLM_DELAY = int(os.getenv("LLM_DELAY", 0))
 GRID_END_ADJUSTMENT_MAX_SECONDS = int(os.getenv("GRID_END_ADJUSTMENT_MAX_SECONDS", 15 * 60))
+
+# Fenetre de programmation journaliere du playout flexible (HH:MM)
+FLEXIBLE_PLAYOUT_DAY_START = os.getenv("FLEXIBLE_PLAYOUT_DAY_START", "06:00")
+FLEXIBLE_PLAYOUT_DAY_END = os.getenv("FLEXIBLE_PLAYOUT_DAY_END", "21:00")
+# strict: aucun item ne doit finir apres DAY_END; soft: accepte tant que l'item commence avant DAY_END
+FLEXIBLE_PLAYOUT_OVERFLOW_MODE = os.getenv("FLEXIBLE_PLAYOUT_OVERFLOW_MODE", "strict")
 
 
 GREEDY_MODE_NATURES = True

@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.db import reset_queries
 from django.utils.timezone import now
 
 from media_source.constants import MediaContainerKind
@@ -28,7 +30,10 @@ class MediaCollectionService:
                 return cls.CONTAINER_KIND_MAP[container_kind]
         return None
 
-    def load_collection_data(self, batch_size: int = 100):
+    def load_collection_data(self, batch_size: int | None = None):
+        if batch_size is None:
+            batch_size = settings.MEDIA_COLLECTION_SYNC_BATCH_SIZE
+
         media_source = self.media_collection.media_source
 
         jellyfin_service = JellyfinService(
@@ -64,6 +69,9 @@ class MediaCollectionService:
                 medias=medias,
                 media_source=media_source,
             )
+            # In DEBUG mode Django keeps every executed query (including the
+            # multi-MB raw_data inserts) in memory for the whole task.
+            reset_queries()
 
         self.mark_missing_entries(
             media_source=media_source,
@@ -380,7 +388,10 @@ class MediaCollectionService:
                 media_item_update_fields,
             )
 
-    def analyze_collection_data(self, use_llm=False, new_data_only=True, batch_size: int = 100):
+    def analyze_collection_data(self, use_llm=False, new_data_only=True, batch_size: int | None = None):
+        if batch_size is None:
+            batch_size = settings.MEDIA_COLLECTION_SYNC_BATCH_SIZE
+
         media_containers_qs = MediaContainer.objects.filter(
             media_collection=self.media_collection
         )
@@ -412,3 +423,4 @@ class MediaCollectionService:
                 instance.analyzed_at = now()
                 objs.append(instance)
             MediaContainer.objects.bulk_update(objs, fields=['categories', "analyze_status", "analyzed_at"])
+            reset_queries()
