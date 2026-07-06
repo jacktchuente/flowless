@@ -1,1 +1,0 @@
-celery -A celery_tasks worker -l info -P solo
