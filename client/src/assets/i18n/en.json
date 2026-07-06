@@ -181,5 +181,11 @@
       "COMPLETE_WITH_ERRORS": "Complete with errors",
       "CANCELLED": "Cancelled"
     }
+  },
+  "TV_CHANNEL_DIALOG": {
+    "SUGGEST_NAME": "Suggest a name",
+    "SUGGESTED_NAME": "Suggested name",
+    "USE_SUGGESTED_NAME": "Use it",
+    "NOTIFY_SUGGEST_NAME_FAILED": "Name suggestion failed."
   }
 }

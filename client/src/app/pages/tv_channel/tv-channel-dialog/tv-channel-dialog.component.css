@@ -10,6 +10,37 @@
   color: #a11313;
 }
 
+.name-suggestion-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(11, 79, 200, 0.08);
+  border: 1px solid rgba(11, 79, 200, 0.22);
+  color: #10233d;
+}
+
+.name-suggestion-banner > mat-icon {
+  flex: 0 0 auto;
+  color: #34527c;
+}
+
+.name-suggestion-body {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.name-suggestion-label {
+  color: #4b5c72;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 :host ::ng-deep .form-group {
   margin-bottom: 14px;
 }
