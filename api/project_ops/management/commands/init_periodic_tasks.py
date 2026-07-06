@@ -17,8 +17,8 @@ PERIODIC_TASK_SPECS = (
         "period": IntervalSchedule.HOURS,
     },
     {
-        "name": "Extend flexible channel playouts",
-        "task": "tv_channel.tasks.extend_flexible_playouts",
+        "name": "Extend channel playouts",
+        "task": "tv_channel.tasks.extend_channel_playouts",
         "every": 6,
         "period": IntervalSchedule.HOURS,
     },
@@ -27,6 +27,7 @@ PERIODIC_TASK_SPECS = (
 # Anciennes taches pointant vers du code disparu: a purger des bases existantes.
 STALE_TASK_NAMES = (
     "Generate ready TV channel playouts",
+    "Extend flexible channel playouts",
 )
 
 

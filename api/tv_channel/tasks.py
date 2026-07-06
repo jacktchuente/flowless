@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.conf import settings
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils import timezone
 
 from grid_schedule.models import ScheduleMediaItem, TvPlayout
@@ -161,21 +161,22 @@ def generate_tv_channel_playout(
 
 
 @shared_task
-def extend_flexible_playouts():
-    """Keeps flexible channels programmed ahead of time.
+def extend_channel_playouts():
+    """Keeps channels programmed ahead of time, whatever the grid mode.
 
-    For each enabled channel with an active flexible grid layout and an
-    existing active playout, the playout is regenerated when its horizon
-    (last scheduled end) drops below DAYS_TO_BUILD days from now.
-    Channels that were never generated stay untouched (first generation
-    remains a manual decision), and the ErsatzTV push stays manual too.
+    For each enabled channel with an active grid layout and an existing
+    active playout, the playout is regenerated when its horizon (last
+    scheduled end) drops below DAYS_TO_BUILD days from now; the generation
+    task dispatches to the flexible or standard service according to the
+    layout mode. Channels that were never generated stay untouched (first
+    generation remains a manual decision), and the ErsatzTV push stays
+    manual too.
     """
     horizon_target = timezone.now() + timedelta(days=settings.DAYS_TO_BUILD)
     channels = (
         TvChannel.objects.filter(
             is_enabled=True,
             gridlayout__is_active=True,
-            gridlayout__mode=GridLayoutMode.FLEXIBLE,
         )
         .distinct()
     )
@@ -184,12 +185,13 @@ def extend_flexible_playouts():
         if playout is None:
             continue
         last_end = ScheduleMediaItem.objects.filter(
-            flexible_selection__tv_playout=playout,
+            Q(flexible_selection__tv_playout=playout)
+            | Q(block_container_selection__tv_playout=playout),
         ).aggregate(value=Max("ends_at"))["value"]
         if last_end is None or last_end >= horizon_target:
             continue
         logger.info(
-            "extend_flexible_playouts channel_id=%s horizon=%s target=%s",
+            "extend_channel_playouts channel_id=%s horizon=%s target=%s",
             channel.id,
             last_end,
             horizon_target,
