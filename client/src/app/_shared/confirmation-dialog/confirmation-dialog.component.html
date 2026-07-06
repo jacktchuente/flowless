@@ -1,6 +1,12 @@
 <div class="confirmation-shell">
   <mat-dialog-content>
     <div class="confirmation-content">
+      @if (warningMessage) {
+        <p class="confirmation-warning">
+          <mat-icon>warning</mat-icon>
+          {{ warningMessage | translate }}
+        </p>
+      }
       <p class="confirmation-message">{{ confirmationMessage | translate }}</p>
       <div class="confirmation-spacer">
       </div>

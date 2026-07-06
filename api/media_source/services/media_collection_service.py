@@ -28,52 +28,82 @@ class MediaCollectionService:
                 return cls.CONTAINER_KIND_MAP[container_kind]
         return None
 
-    def load_collection_data(self):
+    def load_collection_data(self, batch_size: int = 100):
         media_source = self.media_collection.media_source
 
         jellyfin_service = JellyfinService(
             credentials=media_source.credentials,
         )
 
-        medias = jellyfin_service.get_media(
+        found_container_external_ids: set[str] = set()
+        found_item_external_ids: set[str] = set()
+
+        for medias in jellyfin_service.iter_media_batches(
             self.media_collection.external_id,
+            batch_size=batch_size,
+        ):
+            found_container_external_ids.update(
+                media["external_id"]
+                for media in medias
+            )
+            found_item_external_ids.update(
+                item["external_id"]
+                for media in medias
+                for item in media.get("items", [])
+                if item.get("external_id")
+            )
+
+            if self.media_collection.container_kind is None:
+                collection_container_kind = self._resolve_collection_container_kind(medias)
+                if collection_container_kind is not None:
+                    self.media_collection.container_kind = collection_container_kind
+                    self.media_collection.save(update_fields=["container_kind"])
+
+            self.manage_media_containers(medias, media_source)
+            self.manage_media_items(
+                medias=medias,
+                media_source=media_source,
+            )
+
+        self.mark_missing_entries(
+            media_source=media_source,
+            found_container_external_ids=found_container_external_ids,
+            found_item_external_ids=found_item_external_ids,
         )
 
+    def mark_missing_entries(
+            self,
+            media_source: MediaSource,
+            found_container_external_ids: set[str],
+            found_item_external_ids: set[str],
+    ):
+        MediaContainer.objects.filter(
+            media_source=media_source,
+            media_collection=self.media_collection,
+        ).exclude(
+            external_id__in=found_container_external_ids,
+        ).update(is_missing=True)
+
+        MediaItem.objects.filter(
+            media_source=media_source,
+            container__media_collection=self.media_collection,
+        ).exclude(
+            external_id__in=found_item_external_ids,
+        ).update(is_missing=True)
+
+    def manage_media_containers(self,
+                                medias: list[MediaServerMediaContainer],
+                                media_source: MediaSource,
+                                ):
         existing_medias_by_external_id = {
             media.external_id: media
             for media in MediaContainer.objects.filter(
                 media_source=media_source,
                 media_collection=self.media_collection,
+                external_id__in=[media["external_id"] for media in medias],
             )
         }
 
-        existing_external_ids = set(existing_medias_by_external_id.keys())
-
-        found_external_ids = {
-            media["external_id"]
-            for media in medias
-        }
-
-        missing_external_ids = existing_external_ids - found_external_ids
-
-        if self.media_collection.container_kind is None:
-            collection_container_kind = self._resolve_collection_container_kind(medias)
-            if collection_container_kind is not None:
-                self.media_collection.container_kind = collection_container_kind
-                self.media_collection.save(update_fields=["container_kind"])
-
-        self.manage_media_containers(medias, missing_external_ids, media_source, existing_medias_by_external_id)
-        self.manage_media_items(
-            medias=medias,
-            media_source=media_source,
-        )
-
-    def manage_media_containers(self,
-                                medias: list[MediaServerMediaContainer],
-                                missing_external_ids: set[str],
-                                media_source: MediaSource,
-                                existing_medias_by_external_id
-                                ):
         media_to_create = []
         media_to_update = []
 
@@ -190,13 +220,6 @@ class MediaCollectionService:
                 ],
             )
 
-        if missing_external_ids:
-            MediaContainer.objects.filter(
-                media_source=media_source,
-                media_collection=self.media_collection,
-                external_id__in=missing_external_ids,
-            ).update(is_missing=True)
-
     def manage_media_items(
             self,
             medias: list[MediaServerMediaContainer],
@@ -241,15 +264,8 @@ class MediaCollectionService:
             for container in MediaContainer.objects.filter(
                 media_source=media_source,
                 media_collection=self.media_collection,
+                external_id__in=[media["external_id"] for media in medias],
             )
-        }
-
-        existing_items_by_external_id = {
-            item.external_id: item
-            for item in MediaItem.objects.filter(
-                media_source=media_source,
-                container__media_collection=self.media_collection,
-            ).select_related("container")
         }
 
         found_item_external_ids = {
@@ -259,9 +275,14 @@ class MediaCollectionService:
             if item.get("external_id")
         }
 
-        existing_item_external_ids = set(existing_items_by_external_id.keys())
-
-        missing_item_external_ids = existing_item_external_ids - found_item_external_ids
+        existing_items_by_external_id = {
+            item.external_id: item
+            for item in MediaItem.objects.filter(
+                media_source=media_source,
+                container__media_collection=self.media_collection,
+                external_id__in=found_item_external_ids,
+            ).select_related("container")
+        }
 
         item_to_create = []
         item_to_update = []
@@ -359,14 +380,7 @@ class MediaCollectionService:
                 media_item_update_fields,
             )
 
-        if missing_item_external_ids:
-            MediaItem.objects.filter(
-                media_source=media_source,
-                container__media_collection=self.media_collection,
-                external_id__in=missing_item_external_ids,
-            ).update(is_missing=True)
-
-    def analyze_collection_data(self, use_llm=False, new_data_only=True):
+    def analyze_collection_data(self, use_llm=False, new_data_only=True, batch_size: int = 100):
         media_containers_qs = MediaContainer.objects.filter(
             media_collection=self.media_collection
         )
@@ -375,22 +389,26 @@ class MediaCollectionService:
             media_containers_qs = media_containers_qs.filter(analyze_status=AnalyzeStatus.IDLE)
 
         media_containers = list(media_containers_qs)
-        MediaContainer.objects.filter(id__in=[element.id for element in media_containers]).update(
-            analyze_status=AnalyzeStatus.ANALYZING,
-        )
 
-        objs = []
+        for start_index in range(0, len(media_containers), batch_size):
+            batch = media_containers[start_index:start_index + batch_size]
 
-        for element in media_containers:
-            service = MediaContainerService(media_container=element)
-            try:
-                instance = service.normalize_data(use_llm=use_llm)
-            except Exception as e:
-                print(e)
-                instance = element
-                instance.analyze_status = AnalyzeStatus.COMPLETE_WITH_ERRORS
-            else:
-                instance.analyze_status = AnalyzeStatus.COMPLETE
-            instance.analyzed_at = now()
-            objs.append(instance)
-        MediaContainer.objects.bulk_update(objs, fields=['categories', "analyze_status", "analyzed_at"])
+            MediaContainer.objects.filter(id__in=[element.id for element in batch]).update(
+                analyze_status=AnalyzeStatus.ANALYZING,
+            )
+
+            objs = []
+
+            for element in batch:
+                service = MediaContainerService(media_container=element)
+                try:
+                    instance = service.normalize_data(use_llm=use_llm)
+                except Exception as e:
+                    print(e)
+                    instance = element
+                    instance.analyze_status = AnalyzeStatus.COMPLETE_WITH_ERRORS
+                else:
+                    instance.analyze_status = AnalyzeStatus.COMPLETE
+                instance.analyzed_at = now()
+                objs.append(instance)
+            MediaContainer.objects.bulk_update(objs, fields=['categories', "analyze_status", "analyzed_at"])

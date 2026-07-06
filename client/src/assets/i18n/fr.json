@@ -69,7 +69,8 @@
     "NOTIFY_TOGGLE_FAILED": "Activation impossible.",
     "NOTIFY_ANALYZE_FAILED": "Analyse de collection impossible.",
     "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan.",
-    "FORCE_REANALYZE": "Oui, tout réanalyser"
+    "FORCE_REANALYZE": "Oui, tout réanalyser",
+    "ANALYZING_WARNING": "Une analyse semble déjà en cours pour cette collection. Si elle est restée bloquée (crash), seule la réanalyse forcée relancera le traitement."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",

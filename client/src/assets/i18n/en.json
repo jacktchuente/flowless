@@ -69,7 +69,8 @@
     "NOTIFY_TOGGLE_FAILED": "Activation failed.",
     "NOTIFY_ANALYZE_FAILED": "Collection analysis failed.",
     "NOTIFY_ANALYZE_STARTED": "Collection analysis started in background.",
-    "FORCE_REANALYZE": "Yes, re-analyze everything"
+    "FORCE_REANALYZE": "Yes, re-analyze everything",
+    "ANALYZING_WARNING": "An analysis already seems to be running for this collection. If it got stuck (crash), only a forced re-analysis will restart the processing."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",

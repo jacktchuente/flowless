@@ -49,7 +49,7 @@ def analyze_media_collection_data(media_collection_id: int, force: bool = False)
     except MediaCollection.DoesNotExist:
         print("Not found")
     else:
-        if media_collection.analyze_status == AnalyzeStatus.ANALYZING:
+        if media_collection.analyze_status == AnalyzeStatus.ANALYZING and not force:
             print("analyzing already")
             return
         save_status_and_broadcast(

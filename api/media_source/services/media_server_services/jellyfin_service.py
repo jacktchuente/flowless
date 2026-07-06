@@ -294,6 +294,17 @@ class JellyfinService:
         return collections
 
     def get_media(self, collection_id: str) -> list[MediaServerMediaContainer]:
+        return [
+            container
+            for batch in self.iter_media_batches(collection_id)
+            for container in batch
+        ]
+
+    def iter_media_batches(
+            self,
+            collection_id: str,
+            batch_size: int = 100,
+    ):
         token, user_id = self._authenticate()
 
         collection_items = self._fetch_collection_items(
@@ -302,11 +313,12 @@ class JellyfinService:
             collection_id=collection_id,
         )
 
-        return self._build_media_containers(
-            token=token,
-            user_id=user_id,
-            collection_items=collection_items,
-        )
+        for start_index in range(0, len(collection_items), batch_size):
+            yield self._build_media_containers(
+                token=token,
+                user_id=user_id,
+                collection_items=collection_items[start_index:start_index + batch_size],
+            )
 
     def _fetch_collection_items(
             self,
