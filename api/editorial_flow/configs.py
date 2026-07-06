@@ -11,7 +11,7 @@ size, editorial preferences or platform constraints.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -29,6 +29,23 @@ class SegmentationConfig:
     limits the number of distinct categories, languages and countries
     tracked during feature extraction. ``allow_outliers`` permits media
     items to remain unclustered.
+
+    ``min_df_count`` / ``max_df_ratio`` drive the generic noise filter of
+    the feature extractor: vocabulary values carried by fewer than
+    ``min_df_count`` media or by more than ``max_df_ratio`` of the corpus
+    have no discriminative power and are dropped. ``block_weights``
+    overrides the default relative weight of each feature block.
+
+    ``allow_multi_segment`` lets a media belong to several segments: on
+    top of its primary cluster, it joins any other segment whose
+    acceptance threshold it satisfies, or that sits at most
+    ``multi_segment_distance_ratio`` times farther than its own segment
+    (scale-free criterion, so it generalises across libraries). When
+    disabled the segmentation is a strict partition.
+
+    ``max_cluster_ratio`` / ``cluster_imbalance_penalty`` penalise k
+    choices where the biggest cluster exceeds a share of the corpus, to
+    avoid trivial binary splits.
     """
 
     min_cluster_size: int = 2
@@ -40,6 +57,13 @@ class SegmentationConfig:
     candidate_cluster_counts: Optional[List[int]] = None
     algorithm: str = "kmeans"
     random_state: Optional[int] = 42
+    min_df_count: int = 2
+    max_df_ratio: float = 0.9
+    block_weights: Optional[Dict[str, float]] = None
+    allow_multi_segment: bool = True
+    multi_segment_distance_ratio: float = 1.5
+    max_cluster_ratio: float = 0.6
+    cluster_imbalance_penalty: float = 1.0
 
 
 @dataclass

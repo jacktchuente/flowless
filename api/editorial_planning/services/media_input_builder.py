@@ -1,15 +1,26 @@
 from __future__ import annotations
 
 from editorial_flow.inputs import MediaInput
+from media_source.constants import MediaContainerKind, MediaNature
 from media_source.models import MediaContainer
+
+
+def _choice_label(choices, value) -> str | None:
+    if value is None:
+        return None
+    try:
+        return choices(value).label
+    except ValueError:
+        return str(value)
 
 
 def build_media_input(container: MediaContainer) -> MediaInput:
     collection = container.media_collection
     return MediaInput(
         id=str(container.id),
-        container_kind=collection.container_kind,
-        nature=collection.nature,
+        container_kind=_choice_label(MediaContainerKind, collection.container_kind),
+        nature=_choice_label(MediaNature, collection.nature),
+        is_anime=collection.is_anime,
         title=container.title,
         description=container.description,
         categories=container.categories or [],

@@ -33,6 +33,7 @@ class MediaInput:
     # Structural metadata
     container_kind: Optional[int | str] = None
     nature: Optional[int | str] = None
+    is_anime: Optional[bool] = None
 
     # Editorial metadata
     title: str = ""

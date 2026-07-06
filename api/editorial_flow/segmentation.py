@@ -7,13 +7,18 @@ the media, performs clustering to group similar items into candidate
 segments, scores each cluster, and returns only those clusters that
 qualify as programmable segments. The function also produces a model
 state that can be used later for matching new media to the segments.
+
+Vectors produced by the feature extractor are L2-normalised, so the
+Euclidean geometry used by k-means and the acceptance thresholds is
+consistent with the cosine similarity used for membership scores
+(d² = 2 − 2·cos on the unit sphere).
 """
 
 from __future__ import annotations
 
 import math
 import uuid
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Any
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -26,10 +31,18 @@ from .outputs import (
     SegmentationResult,
 )
 from .configs import SegmentationConfig
-from .features import FeatureExtractor
+from .features import (
+    FeatureExtractor,
+    age_bucket,
+    anime_bucket,
+    average_duration,
+    decade_bucket,
+    duration_bucket,
+)
 from .scoring import (
     compute_silhouette_scores,
     compute_cluster_silhouette,
+    distinctiveness_score,
     format_consistency_score,
     volume_score,
     labelability_score,
@@ -37,28 +50,18 @@ from .scoring import (
     similarity,
 )
 
-
-def _duration_bucket(seconds: Optional[float]) -> str:
-    """Converts a duration in seconds to a human friendly bucket name."""
-    if seconds is None:
-        return "unknown"
-    minutes = seconds / 60.0
-    if minutes < 5:
-        return "very_short"
-    if minutes < 15:
-        return "short"
-    if minutes < 30:
-        return "tv_short"
-    if minutes < 45:
-        return "medium_episode"
-    if minutes < 65:
-        return "long_episode"
-    if minutes < 130:
-        return "film_length"
-    return "very_long"
+DURATION_BUCKET_LABELS = {
+    "very_short": "courts",
+    "short": "courts",
+    "tv_short": "30 min",
+    "medium_episode": "45 min",
+    "long_episode": "1h",
+    "film_length": "film",
+    "very_long": "longs",
+}
 
 
-def _generate_segment_name(dominant_nature: Optional[str], dominant_categories: List[str], duration_bucket: str) -> str:
+def _generate_segment_name(dominant_nature: Optional[str], dominant_categories: List[str], bucket: str) -> str:
     """Generates a human friendly name for a segment based on its profile."""
     parts: List[str] = []
     if dominant_nature:
@@ -66,21 +69,38 @@ def _generate_segment_name(dominant_nature: Optional[str], dominant_categories: 
     if dominant_categories:
         # Use up to two categories in the name
         parts.append(" / ".join([c.capitalize() for c in dominant_categories[:2]]))
-    if duration_bucket and duration_bucket != "unknown":
-        # Map buckets to readable terms
-        bucket_map = {
-            "very_short": "courts",
-            "short": "courts",
-            "tv_short": "30 min",
-            "medium_episode": "45 min",
-            "long_episode": "1h",
-            "film_length": "film",
-            "very_long": "longs",
-        }
-        parts.append(bucket_map.get(duration_bucket, duration_bucket))
+    if bucket and bucket != "unknown":
+        parts.append(DURATION_BUCKET_LABELS.get(bucket, bucket))
     if not parts:
         return "Segment"
     return " ".join(parts)
+
+
+def _dominant(values: List[str]) -> Optional[str]:
+    if not values:
+        return None
+    counts: Dict[str, int] = {}
+    for value in values:
+        counts[value] = counts.get(value, 0) + 1
+    return max(counts, key=counts.get)
+
+
+def _empty_result(config: SegmentationConfig, message: str, media: List[MediaInput], fe: FeatureExtractor) -> SegmentationResult:
+    model_state = SegmentationModelState(
+        feature_state=fe.to_state(),
+        cluster_centroids={},
+        acceptance_thresholds={},
+        algorithm=config.algorithm,
+        version="1.0",
+    )
+    return SegmentationResult(
+        segments=[],
+        memberships=[],
+        outliers=[],
+        weak_clusters=[m.id for m in media],
+        model_state=model_state,
+        diagnostics={"message": message},
+    )
 
 
 def run_segmentation(
@@ -93,37 +113,33 @@ def run_segmentation(
     over candidate k values when ``candidate_cluster_counts`` is ``None``).
     It then scores each cluster and retains only those that meet the
     programmable criteria. Outliers and weak clusters are reported
-    separately. The function returns a ``SegmentationResult`` containing
-    the valid segments, membership assignments, outliers, weak clusters
-    and a model state for later use.
+    separately. When ``config.allow_multi_segment`` is enabled, media that
+    satisfy the acceptance threshold of other segments also receive
+    secondary memberships there, so segments are unique by their full
+    composition rather than a strict partition. The function returns a
+    ``SegmentationResult`` containing the valid segments, membership
+    assignments, outliers, weak clusters and a model state for later use.
     """
     if config is None:
         config = SegmentationConfig()
-    # Edge case: no media provided
-    if not media:
-        fe = FeatureExtractor(max_features=config.max_features)
-        fe.fit([])
-        model_state = SegmentationModelState(
-            feature_state=fe.to_state(),
-            cluster_centroids={},
-            acceptance_thresholds={},
-            algorithm=config.algorithm,
-        )
-        return SegmentationResult(
-            segments=[],
-            memberships=[],
-            outliers=[],
-            weak_clusters=[],
-            model_state=model_state,
-            diagnostics={"message": "No media provided"},
-        )
-    # Normalise and vectorise media
-    fe = FeatureExtractor(max_features=config.max_features)
+
+    fe = FeatureExtractor(
+        max_features=config.max_features,
+        min_df_count=config.min_df_count,
+        max_df_ratio=config.max_df_ratio,
+        block_weights=config.block_weights,
+    )
     fe.fit(media)
+
+    if not media:
+        return _empty_result(config, "No media provided", media, fe)
+
     vectors = [fe.transform(m) for m in media]
     vectors_np = np.array(vectors, dtype=float)
     n_samples = len(media)
-    # Determine candidate cluster counts
+    if vectors_np.size == 0:
+        return _empty_result(config, "No discriminative feature available", media, fe)
+
     if config.algorithm != "kmeans":
         raise ValueError(f"Unsupported algorithm: {config.algorithm}. Only 'kmeans' is available.")
     if config.candidate_cluster_counts:
@@ -135,80 +151,94 @@ def run_segmentation(
     if not candidate_k:
         # Not enough samples to cluster meaningfully
         candidate_k = [1]
+
     best_k = 1
-    best_score = -1.0
-    best_labels: Optional[List[int]] = None
+    best_score = -math.inf
     silhouette_scores: Dict[int, float] = {}
-    # Try each k and choose the one with the highest silhouette score
+    selection_scores: Dict[int, float] = {}
+    # Try each k; pick the best silhouette penalised by cluster imbalance
+    # so a trivial "one giant cluster" split does not win by default.
     for k in candidate_k:
         try:
             model = KMeans(n_clusters=k, random_state=config.random_state)
             labels = model.fit_predict(vectors_np)
-            score = compute_silhouette_scores(vectors_np, labels)
-            silhouette_scores[k] = score
-            if score > best_score:
-                best_score = score
+            silhouette = compute_silhouette_scores(vectors_np, labels)
+            largest_share = max(np.bincount(labels)) / n_samples
+            imbalance = max(0.0, largest_share - config.max_cluster_ratio)
+            selection = silhouette - config.cluster_imbalance_penalty * imbalance
+            silhouette_scores[k] = silhouette
+            selection_scores[k] = selection
+            if selection > best_score:
+                best_score = selection
                 best_k = k
-                best_labels = labels
         except Exception:
             continue
-    if best_labels is None:
-        # Fallback to single cluster
-        best_k = 1
-        best_labels = [0] * n_samples
+
     # Fit final model with best_k to obtain centroids and labels
-    model = KMeans(n_clusters=best_k, random_state=config.random_state)
-    final_labels = model.fit_predict(vectors_np)
-    centroids = model.cluster_centers_.tolist()
+    if best_k <= 1:
+        final_labels = np.zeros(n_samples, dtype=int)
+    else:
+        model = KMeans(n_clusters=best_k, random_state=config.random_state)
+        final_labels = model.fit_predict(vectors_np)
+
     # Group media by cluster index
     clusters: Dict[int, List[int]] = {}
     for idx, cluster_id in enumerate(final_labels):
-        clusters.setdefault(cluster_id, []).append(idx)
+        clusters.setdefault(int(cluster_id), []).append(idx)
+
+    # Mean vector per cluster, used both as reference vector and to
+    # compute a real separation score against the other clusters.
+    cluster_means: Dict[int, np.ndarray] = {
+        cluster_id: vectors_np[indices].mean(axis=0)
+        for cluster_id, indices in clusters.items()
+    }
+
     segments: List[ProgrammableSegment] = []
     memberships: List[SegmentMembership] = []
     outliers: List[str] = []
     weak_clusters: List[str] = []
     acceptance_thresholds: Dict[str, float] = {}
     centroid_map: Dict[str, List[float]] = {}
+    segment_primary_indices: Dict[str, set[int]] = {}
     diagnostics: Dict[str, Any] = {
         "candidate_k": candidate_k,
         "silhouette_scores": silhouette_scores,
+        "selection_scores": selection_scores,
         "selected_k": best_k,
-        "global_silhouette": best_score,
+        "global_silhouette": silhouette_scores.get(best_k, 0.0),
+        "allow_multi_segment": config.allow_multi_segment,
     }
+
     # Evaluate each cluster
     for cluster_id, indices in clusters.items():
         cluster_size = len(indices)
-        # Compute durations and total duration
         durations: List[float] = []
         total_duration_seconds = 0.0
         for idx in indices:
             m = media[idx]
-            avg = fe._average_duration(m)
+            avg = average_duration(m)
             if avg is not None:
                 durations.append(avg)
                 # Approximate total duration as average times number of items (if available)
                 count = m.item_count or 1
                 total_duration_seconds += avg * count
-            else:
-                # If no duration, count as one item of zero length
-                total_duration_seconds += 0.0
-        # Compute category counts
+
         category_counts: Dict[str, int] = {}
         for idx in indices:
             for cat in media[idx].categories or []:
                 key = cat.strip().lower()
                 if key:
                     category_counts[key] = category_counts.get(key, 0) + 1
-        # Compute cluster silhouette (cohesion + separation)
+
         cluster_vectors = vectors_np[indices]
-        cluster_silhouette = compute_cluster_silhouette(vectors_np, list(final_labels), cluster_id)
-        cohesion_score = cluster_silhouette
-        separation_score = cluster_silhouette  # Approximate separation with silhouette
+        cohesion_score = compute_cluster_silhouette(vectors_np, list(final_labels), cluster_id)
+        other_means = [mean for other_id, mean in cluster_means.items() if other_id != cluster_id]
+        separation_score = distinctiveness_score(cluster_means[cluster_id], other_means)
         fmt_score = format_consistency_score(durations)
         vol_score = volume_score(cluster_size, total_duration_seconds)
         lab_score = labelability_score(category_counts)
         prog_score = programmable_score(cohesion_score, separation_score, fmt_score, vol_score, lab_score)
+
         # Determine if this cluster qualifies as a segment
         if (
             cluster_size < config.min_cluster_size
@@ -223,57 +253,70 @@ def run_segmentation(
             else:
                 weak_clusters.extend([media[idx].id for idx in indices])
             continue
+
         # Create segment
         seg_id = str(uuid.uuid4())
-        # Determine dominant attributes
         natures = [str(media[idx].nature).strip().lower() for idx in indices if media[idx].nature is not None]
-        container_kinds = [str(media[idx].container_kind).strip().lower() for idx in indices if media[idx].container_kind is not None]
-        cats = []
+        container_kinds = [
+            str(media[idx].container_kind).strip().lower()
+            for idx in indices
+            if media[idx].container_kind is not None
+        ]
+        cats: List[str] = []
         for idx in indices:
             cats.extend([c.strip().lower() for c in media[idx].categories or [] if c])
-        langs = []
+        langs: List[str] = []
         for idx in indices:
-            langs.extend([l.strip().lower() for l in (media[idx].audio_languages or []) + (media[idx].subtitle_languages or []) + (media[idx].audio_languages_any or []) + (media[idx].subtitle_languages_any or []) if l])
-        # Compute dominant values
-        def _dominant(values: List[str]) -> Optional[str]:
-            if not values:
-                return None
-            counts = {}
-            for v in values:
-                counts[v] = counts.get(v, 0) + 1
-            return max(counts, key=counts.get)
+            langs.extend(
+                [
+                    lang.strip().lower()
+                    for lang in (media[idx].audio_languages or []) + (media[idx].audio_languages_any or [])
+                    if lang
+                ]
+            )
+        decades = [
+            decade_bucket(media[idx].release_year_min or media[idx].release_year_max)
+            for idx in indices
+        ]
+        age_buckets = [age_bucket(media[idx].min_age) for idx in indices]
+        anime_values = [anime_bucket(media[idx].is_anime) for idx in indices]
+
         dominant_nature = _dominant(natures)
         dominant_container = _dominant(container_kinds)
-        # Get top categories
-        cat_counts = {}
+        cat_counts: Dict[str, int] = {}
         for c in cats:
             cat_counts[c] = cat_counts.get(c, 0) + 1
         dominant_categories = sorted(cat_counts, key=cat_counts.get, reverse=True)[:3]
-        lang_counts = {}
-        for l in langs:
-            lang_counts[l] = lang_counts.get(l, 0) + 1
+        lang_counts: Dict[str, int] = {}
+        for lang in langs:
+            lang_counts[lang] = lang_counts.get(lang, 0) + 1
         dominant_languages = sorted(lang_counts, key=lang_counts.get, reverse=True)[:3]
-        avg_duration = sum(durations) / len(durations) if durations else None
-        bucket = _duration_bucket(avg_duration)
+        known_decades = sorted({d for d in decades if d != "unknown"})
+        avg_duration_value = sum(durations) / len(durations) if durations else None
+        bucket = duration_bucket(avg_duration_value)
         name = _generate_segment_name(dominant_nature, dominant_categories, bucket)
         description = f"Segment {name} composé de {cluster_size} médias."
         profile = {
             "dominant_nature": dominant_nature,
             "dominant_container_kind": dominant_container,
             "dominant_categories": dominant_categories,
-            "avg_duration_seconds": avg_duration,
+            "avg_duration_seconds": avg_duration_value,
             "duration_bucket": bucket,
             "dominant_languages": dominant_languages,
+            "decades": known_decades,
+            "dominant_decade": _dominant([d for d in decades if d != "unknown"]),
+            "dominant_age_bucket": _dominant([a for a in age_buckets if a != "unknown"]),
+            "dominant_anime": _dominant([a for a in anime_values if a != "unknown"]),
             "editorial_summary": description,
         }
-        reference_vector = list(np.mean(cluster_vectors, axis=0))
+        reference_vector = cluster_means[cluster_id].tolist()
         # Compute acceptance threshold: maximum distance inside cluster scaled
-        distances = [np.linalg.norm(cv - np.array(reference_vector)) for cv in cluster_vectors]
+        distances = [np.linalg.norm(cv - cluster_means[cluster_id]) for cv in cluster_vectors]
         if distances:
             threshold = float(np.percentile(distances, 90) * 1.1)
         else:
             threshold = 0.0
-        # Create ProgrammableSegment
+
         segment = ProgrammableSegment(
             segment_id=seg_id,
             name=name,
@@ -294,19 +337,62 @@ def run_segmentation(
         segments.append(segment)
         centroid_map[seg_id] = reference_vector
         acceptance_thresholds[seg_id] = threshold
-        # Record memberships
+        segment_primary_indices[seg_id] = set(indices)
+        # Record primary memberships
         for idx in indices:
-            m_id = media[idx].id
-            # Membership score based on similarity
             score = similarity(vectors[idx], reference_vector)
-            memberships.append(SegmentMembership(media_id=m_id, segment_id=seg_id, score=score, is_primary=True))
-    # Build model state
+            memberships.append(
+                SegmentMembership(media_id=media[idx].id, segment_id=seg_id, score=score, is_primary=True)
+            )
+
+    # Secondary memberships: a media may also belong to any other segment
+    # whose acceptance threshold it satisfies, or that sits at most
+    # ``multi_segment_distance_ratio`` times farther than its primary
+    # segment (scale-free, so it works whatever the corpus geometry).
+    # Segments then become unique by their full composition instead of
+    # forming a strict partition.
+    if config.allow_multi_segment and len(segments) > 1:
+        primary_distance_by_index: Dict[int, float] = {}
+        for segment in segments:
+            reference = np.array(segment.reference_vector, dtype=float)
+            for idx in segment_primary_indices[segment.segment_id]:
+                primary_distance_by_index[idx] = float(np.linalg.norm(vectors_np[idx] - reference))
+
+        secondary_count = 0
+        for segment in segments:
+            reference = np.array(segment.reference_vector, dtype=float)
+            threshold = acceptance_thresholds[segment.segment_id]
+            primary_indices = segment_primary_indices[segment.segment_id]
+            for idx in range(n_samples):
+                if idx in primary_indices:
+                    continue
+                distance = float(np.linalg.norm(vectors_np[idx] - reference))
+                primary_distance = primary_distance_by_index.get(idx)
+                within_threshold = distance <= threshold
+                within_ratio = (
+                    primary_distance is not None
+                    and primary_distance > 0
+                    and distance <= config.multi_segment_distance_ratio * primary_distance
+                )
+                if not within_threshold and not within_ratio:
+                    continue
+                memberships.append(
+                    SegmentMembership(
+                        media_id=media[idx].id,
+                        segment_id=segment.segment_id,
+                        score=similarity(vectors[idx], segment.reference_vector),
+                        is_primary=False,
+                    )
+                )
+                secondary_count += 1
+        diagnostics["secondary_membership_count"] = secondary_count
+
     model_state = SegmentationModelState(
         feature_state=fe.to_state(),
         cluster_centroids=centroid_map,
         acceptance_thresholds=acceptance_thresholds,
         algorithm=config.algorithm,
-        version="1.0",
+        version="2.0",
     )
     return SegmentationResult(
         segments=segments,

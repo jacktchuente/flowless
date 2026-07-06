@@ -276,11 +276,13 @@ class EditorialPlanningGenerationService:
             segments_by_key[segment.segment_id] = persisted_segment
 
         memberships = []
+        membership_counts: dict[str, int] = {}
         for membership in segmentation.memberships:
             segment = segments_by_key.get(membership.segment_id)
             container = containers_by_key.get(membership.media_id)
             if segment is None or container is None:
                 continue
+            membership_counts[membership.segment_id] = membership_counts.get(membership.segment_id, 0) + 1
             memberships.append(
                 EditorialSegmentMembership(
                     segment=segment,
@@ -291,6 +293,13 @@ class EditorialPlanningGenerationService:
                 )
             )
         EditorialSegmentMembership.objects.bulk_create(memberships)
+
+        # media_count reflects the full composition (primary + secondary members)
+        for segment_key, persisted_segment in segments_by_key.items():
+            count = membership_counts.get(segment_key, 0)
+            if count != persisted_segment.media_count:
+                persisted_segment.media_count = count
+                persisted_segment.save(update_fields=["media_count"])
 
         for candidate in channel_candidates:
             persisted_candidate = EditorialChannelCandidate.objects.create(
