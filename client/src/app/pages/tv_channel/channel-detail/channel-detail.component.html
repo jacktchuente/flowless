@@ -55,6 +55,16 @@
             <mat-icon>publish</mat-icon>
             {{ 'CHANNEL_DETAIL.PUSH' | translate }}
           </button>
+          <button
+            mat-stroked-button
+            *ngIf="channel.latest_generation_report"
+            [ngClass]="reportBadgeClass"
+            (click)="openGenerationReportsDialog()"
+          >
+            <mat-icon>{{ reportIssueCount ? 'report_problem' : 'task_alt' }}</mat-icon>
+            {{ 'CHANNEL_DETAIL.GENERATION_REPORTS' | translate }}
+            <ng-container *ngIf="reportIssueCount"> ({{ reportIssueCount }})</ng-container>
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
 import logging
 
@@ -14,6 +14,8 @@ from django.utils import timezone
 from editorial_planning.models import EditorialSegmentMembership, EditorialSegmentMembershipStatus
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import FlexiblePlayoutSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.services.playout_repair_service import PlayoutRepairService
+from grid_schedule.services.playout_validation_service import PlayoutValidationService
 from grid_schedule.services.post_roll_filler_service import PostRollFillerService
 from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer, MediaItem
@@ -29,6 +31,11 @@ class FlexibleGenerationResult:
     generated_items: int
     warnings: list[str]
     filled_items: int = 0
+    repaired_gaps: int = 0
+    trimmed_overlaps: int = 0
+    issues: list[dict] = field(default_factory=list)
+    window_start: datetime | None = None
+    window_end: datetime | None = None
 
 
 class FlexibleTvPlayoutGenerationService:
@@ -168,12 +175,29 @@ class FlexibleTvPlayoutGenerationService:
                     filled_items,
                 )
 
+            repair_result = PlayoutRepairService(
+                tv_playout=tv_playout,
+                editorial_line=self.editorial_line,
+                window_start=start_at,
+                window_end=end_at,
+            ).repair()
+
+            issues = PlayoutValidationService(
+                tv_playout=tv_playout,
+                editorial_line=self.editorial_line,
+            ).validate()
+
             return FlexibleGenerationResult(
                 tv_playout=tv_playout,
                 created=created,
                 generated_items=generated_items,
                 warnings=warnings,
                 filled_items=filled_items,
+                repaired_gaps=repair_result.repaired_gaps,
+                trimmed_overlaps=repair_result.trimmed_overlaps,
+                issues=issues,
+                window_start=start_at,
+                window_end=end_at,
             )
 
     def _validate_channel(self, tv_channel: TvChannel) -> GridLayout:

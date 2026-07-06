@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {BaseApiService, ObjectApiService} from "@kwyxyz/ngx-request";
 import {apiRoutes} from "../_utils/apiRoutes";
-import {TvChannel} from "../_interfaces/tv-channel";
+import {PlayoutGenerationReport, TvChannel} from "../_interfaces/tv-channel";
 import {Observable, Subject} from "rxjs";
 
 interface RequestResponseLike {
@@ -76,6 +76,10 @@ export class TvChannelApiService extends BaseApiService {
 
     getDetail(id: string | number): Observable<TvChannel> {
         return this.http.get<TvChannel>(`${this.getFullUrl()}${id}/`);
+    }
+
+    getGenerationReports(id: string | number): Observable<PlayoutGenerationReport[]> {
+        return this.http.get<PlayoutGenerationReport[]>(`${this.getFullUrl()}${id}/generation-reports/`);
     }
 }
 

@@ -176,3 +176,36 @@ class ScheduleMediaItem(models.Model):
             f"{self.flexible_selection.tv_playout.tv_channel.name} / flexible - "
             f"{self.flexible_selection.media_container.title}"
         )
+
+
+class PlayoutGenerationReport(models.Model):
+    """Resultat d'une passe de generation/extension: compteurs et issues de
+    validation (liste de {code, severity, message, schedule_item_id?, starts_at?, ends_at?})."""
+
+    TRIGGER_GENERATE = "generate"
+    TRIGGER_EXTEND = "extend"
+    TRIGGER_CHOICES = (
+        (TRIGGER_GENERATE, "generate"),
+        (TRIGGER_EXTEND, "extend"),
+    )
+
+    tv_playout = models.ForeignKey(
+        "TvPlayout",
+        on_delete=models.CASCADE,
+        related_name="generation_reports",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    trigger = models.CharField(max_length=16, choices=TRIGGER_CHOICES, default=TRIGGER_GENERATE)
+    window_start = models.DateTimeField(null=True, blank=True)
+    window_end = models.DateTimeField(null=True, blank=True)
+    generated_items = models.PositiveIntegerField(default=0)
+    filled_items = models.PositiveIntegerField(default=0)
+    repaired_gaps = models.PositiveIntegerField(default=0)
+    trimmed_overlaps = models.PositiveIntegerField(default=0)
+    issues = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+
+    def __str__(self):
+        return f"Report {self.pk} playout={self.tv_playout_id} trigger={self.trigger}"

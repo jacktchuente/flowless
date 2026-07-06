@@ -128,6 +128,39 @@ class PostRollFillerService:
             )
         return result
 
+    def fill_gap(self, *, parent_item: ScheduleMediaItem, gap_start: datetime, gap_end: datetime) -> int:
+        """Comble un trou du planning avec des fillers rattaches a l'item precedent.
+
+        Utilise par la passe de reparation: pas de trailer ici (la fenetre n'est
+        pas un post-roll editorial), uniquement les roles interstitiels.
+        """
+        allowed_roles = self._resolve_allowed_roles(parent_item)
+        filler_roles = tuple(role for role in allowed_roles if role != MediaProgrammingRole.TRAILER)
+        if not filler_roles:
+            filler_roles = (MediaProgrammingRole.FILLER,)
+
+        to_create: list[ScheduleMediaItem] = []
+        cursor = gap_start
+        while True:
+            remaining_seconds = int((gap_end - cursor).total_seconds())
+            if remaining_seconds <= 0:
+                break
+            filler_item = self._pick_filler(filler_roles, remaining_seconds)
+            if filler_item is None:
+                break
+            scheduled = self._build_child(
+                main_item=parent_item,
+                media_item=filler_item,
+                role=self._container_role(filler_item),
+                cursor=cursor,
+            )
+            to_create.append(scheduled)
+            cursor = scheduled.ends_at
+
+        if to_create:
+            ScheduleMediaItem.objects.bulk_create(to_create)
+        return len(to_create)
+
     def _load_main_items(self) -> list[ScheduleMediaItem]:
         items = list(
             ScheduleMediaItem.objects

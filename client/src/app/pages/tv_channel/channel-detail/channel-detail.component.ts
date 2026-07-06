@@ -1,5 +1,5 @@
 import {Component, DestroyRef, ElementRef, ViewChild, inject} from '@angular/core';
-import {DatePipe, NgFor, NgIf} from "@angular/common";
+import {DatePipe, NgClass, NgFor, NgIf} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {MatButtonModule} from "@angular/material/button";
 import {MatDialog} from "@angular/material/dialog";
@@ -17,6 +17,7 @@ import {NotificationService} from "@project-shared/services/notification.service
 import {BlueprintGenerationDialogComponent} from "../blueprint-generation-dialog/blueprint-generation-dialog.component";
 import {EditorialLineDetailDialogComponent} from "../editorial-line-detail-dialog/editorial-line-detail-dialog.component";
 import {GridBlockDetailDialogComponent} from "../grid-block-detail-dialog/grid-block-detail-dialog.component";
+import {GenerationReportDialogComponent} from "../generation-report-dialog/generation-report-dialog.component";
 import {PlayoutGenerationDialogComponent} from "../playout-generation-dialog/playout-generation-dialog.component";
 import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialog.component";
 import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-detail-dialog/schedule-media-item-detail-dialog.component";
@@ -38,6 +39,7 @@ type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
     MatIconModule,
     MatProgressSpinnerModule,
     TranslateModule,
+    NgClass,
     NgFor,
     NgIf,
     CalendarModule,
@@ -120,6 +122,39 @@ export class ChannelDetailComponent {
       this.calendarDate = this.getTodayDate()
       this.refreshCalendarData()
       this.isPageLoading = false
+    })
+  }
+
+  get reportIssueCount(): number {
+    const counts = this.channel?.latest_generation_report?.issue_counts
+    if (!counts) {
+      return 0
+    }
+    return counts.error + counts.warning
+  }
+
+  get reportBadgeClass(): string {
+    const counts = this.channel?.latest_generation_report?.issue_counts
+    if (counts?.error) {
+      return 'report-badge-error'
+    }
+    if (counts?.warning) {
+      return 'report-badge-warning'
+    }
+    return ''
+  }
+
+  openGenerationReportsDialog() {
+    if (!this.channel) {
+      return
+    }
+    this.dialog.open(GenerationReportDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        channelId: this.channel.id,
+        channelName: this.channel.name,
+      },
     })
   }
 

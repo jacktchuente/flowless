@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from grid_schedule.models import PlayoutGenerationReport
+from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSerializer
 from tv_channel.models import GridBlock, TvChannel
 from tv_channel.serializers.tv_channel_serializers import (
     TvChannelCreateSerializer,
@@ -90,6 +92,16 @@ class TvChannelViewSet(
         instance = self.get_object()
         push_tv_channel_to_etv.delay(instance.id)
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=("get",), url_name="generation-reports", url_path="generation-reports")
+    def generation_reports(self, request, pk=None):
+        instance = self.get_object()
+        reports = (
+            PlayoutGenerationReport.objects
+            .filter(tv_playout__tv_channel=instance, tv_playout__is_active=True)
+            .order_by("-created_at", "-id")[:10]
+        )
+        return Response(PlayoutGenerationReportSerializer(reports, many=True).data)
 
     @action(detail=True, methods=("post",), url_name="reset-rules", url_path="reset-rules")
     def reset_rules(self, request, pk=None):

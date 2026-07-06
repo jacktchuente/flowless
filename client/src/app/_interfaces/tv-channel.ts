@@ -62,6 +62,30 @@ export interface GridData {
   blocks: GridBlock[]
 }
 
+export interface PlayoutGenerationIssue {
+  code: string
+  severity: 'error' | 'warning' | 'info'
+  message: string
+  schedule_item_id?: string | number | null
+  starts_at?: string | null
+  ends_at?: string | null
+}
+
+export interface PlayoutGenerationReport {
+  id: string | number
+  tv_playout?: string | number
+  created_at: string
+  trigger: 'generate' | 'extend'
+  window_start?: string | null
+  window_end?: string | null
+  generated_items: number
+  filled_items: number
+  repaired_gaps: number
+  trimmed_overlaps: number
+  issues?: PlayoutGenerationIssue[]
+  issue_counts: {error: number, warning: number, info: number}
+}
+
 export interface TvChannel {
   id: string | number
   name: string
@@ -79,6 +103,7 @@ export interface TvChannel {
   editorial_line_data: EditorialLineData | null
   active_schedule_items: ScheduledMediaItem[]
   active_playout_id?: string | number | null
+  latest_generation_report?: PlayoutGenerationReport | null
 }
 
 export interface TvChannelPayload {

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Max, Q
 from django.utils import timezone
 
-from grid_schedule.models import ScheduleMediaItem, TvPlayout
+from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
 from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
@@ -93,12 +93,14 @@ def generate_tv_channel_playout(
     channel_id: int,
     days: int = 1,
     reset: bool = False,
+    trigger: str = PlayoutGenerationReport.TRIGGER_GENERATE,
 ):
     logger.info(
-        "generate_tv_channel_playout started channel_id=%s days=%s reset=%s",
+        "generate_tv_channel_playout started channel_id=%s days=%s reset=%s trigger=%s",
         channel_id,
         days,
         reset,
+        trigger,
     )
     try:
         instance = TvChannel.objects.get(pk=channel_id)
@@ -141,6 +143,7 @@ def generate_tv_channel_playout(
             days,
             reset,
         )
+        _save_generation_report(instance, trigger=trigger, error=exc)
         status = AnalyzeStatus.COMPLETE_WITH_ERRORS
     else:
         logger.info(
@@ -151,6 +154,7 @@ def generate_tv_channel_playout(
             result.generated_items,
             len(result.warnings),
         )
+        _save_generation_report(instance, trigger=trigger, result=result)
         status = AnalyzeStatus.COMPLETE
 
     save_status_and_broadcast(
@@ -158,6 +162,54 @@ def generate_tv_channel_playout(
         object_type="TvChannel",
         status=status,
     )
+
+
+def _save_generation_report(instance: TvChannel, *, trigger: str, result=None, error=None) -> None:
+    try:
+        if result is not None:
+            issues = [
+                {
+                    "code": "generation",
+                    "severity": "warning",
+                    "message": warning,
+                    "schedule_item_id": None,
+                    "starts_at": None,
+                    "ends_at": None,
+                }
+                for warning in result.warnings
+            ] + list(result.issues)
+            PlayoutGenerationReport.objects.create(
+                tv_playout=result.tv_playout,
+                trigger=trigger,
+                window_start=result.window_start,
+                window_end=result.window_end,
+                generated_items=result.generated_items,
+                filled_items=result.filled_items,
+                repaired_gaps=result.repaired_gaps,
+                trimmed_overlaps=result.trimmed_overlaps,
+                issues=issues,
+            )
+            return
+
+        playout = TvPlayout.objects.filter(tv_channel=instance, is_active=True).first()
+        if playout is None:
+            return
+        PlayoutGenerationReport.objects.create(
+            tv_playout=playout,
+            trigger=trigger,
+            issues=[
+                {
+                    "code": "generation_failed",
+                    "severity": "error",
+                    "message": str(error),
+                    "schedule_item_id": None,
+                    "starts_at": None,
+                    "ends_at": None,
+                }
+            ],
+        )
+    except Exception:
+        logger.exception("Failed to persist generation report channel_id=%s", instance.id)
 
 
 @shared_task
@@ -196,7 +248,12 @@ def extend_channel_playouts():
             last_end,
             horizon_target,
         )
-        generate_tv_channel_playout.delay(channel.id, days=settings.DAYS_TO_BUILD, reset=False)
+        generate_tv_channel_playout.delay(
+            channel.id,
+            days=settings.DAYS_TO_BUILD,
+            reset=False,
+            trigger=PlayoutGenerationReport.TRIGGER_EXTEND,
+        )
 
 
 @shared_task
