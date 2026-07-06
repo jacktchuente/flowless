@@ -1,0 +1,129 @@
+<app-dialog-container1>
+  <div dialogTitle>{{ title }}</div>
+
+  <div dialogContent class="run-dialog">
+    <div class="loading-state" *ngIf="isLoading; else runList">
+      <mat-spinner diameter="42"></mat-spinner>
+    </div>
+
+    <ng-template #runList>
+      <p class="muted" *ngIf="!runs.length">Aucun run pour ce catalogue.</p>
+
+      <div class="run-row" *ngFor="let run of runs">
+        <div class="run-head">
+          <div class="run-main">
+            <span class="run-name">
+              Run #{{ run.id }}
+              <span class="active-badge" *ngIf="run.is_active">actif</span>
+              <span class="status-badge" [class]="getStatusClass(run)">{{ getStatusLabel(run) }}</span>
+            </span>
+            <span class="run-meta">
+              {{ run.created_at | date:'dd/MM/yyyy HH:mm' }} ·
+              {{ run.segment_count }} segments · {{ run.channel_candidate_count }} candidates ·
+              {{ run.source_media_count }} médias
+            </span>
+            <span class="run-meta" *ngIf="getPromotedChannels(run).length">
+              Chaînes rattachées : {{ getPromotedChannels(run).join(', ') }}
+            </span>
+          </div>
+          <div class="run-actions">
+            <button mat-icon-button matTooltip="Détails / diagnostics" (click)="toggleDetails(run)">
+              <mat-icon>{{ expandedRunId === run.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Activer ce run"
+              *ngIf="!run.is_active"
+              [disabled]="isWorking"
+              (click)="activate(run)"
+            >
+              <mat-icon>play_circle</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Réconcilier les chaînes vers ce run"
+              *ngIf="run.is_active"
+              [disabled]="isWorking"
+              (click)="openReconciliation(run)"
+            >
+              <mat-icon>sync_alt</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Supprimer ce run"
+              *ngIf="!run.is_active"
+              [disabled]="isWorking"
+              (click)="deleteRun(run)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="run-details" *ngIf="expandedRunId === run.id">
+          <ng-container *ngIf="getSegmentationDiagnostics(run) as seg">
+            <div class="detail-line">
+              <strong>Segmentation</strong> — k retenu : {{ seg.selected_k ?? '—' }},
+              silhouette : {{ seg.global_silhouette !== undefined ? (seg.global_silhouette | number:'1.3-3') : '—' }},
+              memberships secondaires : {{ seg.secondary_membership_count ?? 0 }}
+            </div>
+            <div class="detail-line" *ngIf="getSilhouetteEntries(run).length">
+              Silhouettes par k :
+              <span class="silhouette-chip" *ngFor="let entry of getSilhouetteEntries(run)">
+                k={{ entry.k }} → {{ entry.value | number:'1.3-3' }}
+              </span>
+            </div>
+            <div class="detail-line" *ngIf="seg.refinement">
+              <strong>Raffinement</strong> (seuil {{ seg.refinement.threshold }}) :
+              {{ seg.refinement.skipped ? 'ignoré (corpus insuffisant)' :
+                 (seg.refinement.dropped_count + ' écartés, ' + seg.refinement.kept_count + ' conservés') }}
+            </div>
+          </ng-container>
+          <div class="detail-line">
+            <strong>Découverte</strong> — {{ getDiagnosticCount(run, 'attempts') }} tentative(s)
+          </div>
+          <div class="detail-line">
+            <strong>Écartés</strong> — weak : {{ getDiagnosticCount(run, 'weak_clusters') }},
+            outliers : {{ getDiagnosticCount(run, 'outliers') }},
+            collections ignorées : {{ getDiagnosticCount(run, 'ignored_collections') }}
+          </div>
+        </div>
+
+        <div class="reconcile-panel" *ngIf="reconcileRunId === run.id">
+          <p class="muted" *ngIf="!proposals.length && !isWorking">
+            Aucune chaîne d'un autre run à réconcilier.
+          </p>
+          <div class="proposal-row" *ngFor="let proposal of proposals">
+            <mat-checkbox
+              [disabled]="!proposal.proposed_candidate"
+              [checked]="selectedProposals.has(proposal.tv_channel.id)"
+              (change)="toggleProposal(proposal, $event.checked)"
+            >
+              <strong>{{ proposal.tv_channel.name }}</strong>
+              <span class="proposal-detail" *ngIf="proposal.proposed_candidate">
+                → {{ proposal.proposed_candidate.name }}
+                (recouvrement {{ proposal.confidence * 100 | number:'1.0-0' }}%)
+              </span>
+              <span class="proposal-detail" *ngIf="!proposal.proposed_candidate">
+                → aucun candidat équivalent trouvé
+              </span>
+            </mat-checkbox>
+          </div>
+          <button
+            mat-flat-button
+            color="primary"
+            *ngIf="proposals.length"
+            [disabled]="isWorking"
+            (click)="applyReconciliation()"
+          >
+            Appliquer la réconciliation
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button (click)="close()">Fermer</button>
+  </div>
+</app-dialog-container1>

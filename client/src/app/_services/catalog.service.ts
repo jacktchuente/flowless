@@ -10,6 +10,15 @@ interface RequestResponseLike {
   body: unknown
 }
 
+export interface EditorialPlanningPayload {
+  media_collection_ids: Array<string | number>
+  max_channel_candidates?: number | null
+  target_channel_count?: number | null
+  allow_multi_segment?: boolean
+  allow_segment_sharing?: boolean
+  refine_membership_threshold?: number | null
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +31,10 @@ export class CatalogApiService extends BaseApiService {
 
   generateChannels(id: string | number, reboot = false): Observable<null> {
     return this.http.post<null>(`${this.getFullUrl()}${id}/generate-channels/`, {reboot});
+  }
+
+  generateEditorialPlanning(id: string | number, payload: EditorialPlanningPayload): Observable<null> {
+    return this.http.post<null>(`${this.getFullUrl()}${id}/generate-editorial-planning/`, payload);
   }
 }
 
@@ -58,6 +71,15 @@ export class CatalogService extends ObjectApiService {
   generateChannels(id: string | number, reboot = false): Subject<RequestResponseLike> {
     const subject = new Subject<RequestResponseLike>()
     this.api.generateChannels(id, reboot).subscribe({
+      next: (body) => subject.next({isOk: true, body}),
+      error: (body) => subject.next({isOk: false, body}),
+    })
+    return subject
+  }
+
+  generateEditorialPlanning(id: string | number, payload: EditorialPlanningPayload): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    this.api.generateEditorialPlanning(id, payload).subscribe({
       next: (body) => subject.next({isOk: true, body}),
       error: (body) => subject.next({isOk: false, body}),
     })

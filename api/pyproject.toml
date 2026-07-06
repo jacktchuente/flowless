@@ -5,7 +5,7 @@ description = ""
 authors = ["jack <jack>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.12,<4.0"
 Django = "^5.2"
 djangorestframework = "^3.16.0"
 djangorestframework-simplejwt = "^5.5.0"
@@ -23,6 +23,8 @@ piper-tts = "^1.4.2"
 openai = "^2.36.0"
 Jinja2 = "^3.1.6"
 django-celery-beat = "^2.9.0"
+numpy = "^2.5.0"
+scikit-learn = "^1.9.0"
 
 
 [tool.poetry.dev-dependencies]

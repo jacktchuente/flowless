@@ -39,8 +39,8 @@ class EditorialLineAdmin(admin.ModelAdmin):
 
 @admin.register(GridLayout)
 class GridLayoutAdmin(admin.ModelAdmin):
-    list_display = ("id", "tv_channel", "is_active", "created_at")
-    list_select_related = ("tv_channel",)
+    list_display = ("id", "tv_channel", "mode", "post_filler_policy", "is_active", "created_at")
+    list_select_related = ("tv_channel", "post_filler_policy")
 
 
 @admin.register(GridBlock)

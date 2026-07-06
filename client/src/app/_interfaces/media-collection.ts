@@ -10,4 +10,5 @@ export interface MediaCollection {
   programming_role: number | null
   nature: number | null
   container_kind: number | null
+  is_anime: boolean | null
 }

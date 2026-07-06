@@ -68,7 +68,10 @@
     "CONFIRM_ANALYZE": "Analyser la collection {{name}} ?",
     "NOTIFY_TOGGLE_FAILED": "Activation impossible.",
     "NOTIFY_ANALYZE_FAILED": "Analyse de collection impossible.",
-    "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan."
+    "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan.",
+    "FORCE_REANALYZE": "Oui, tout réanalyser",
+    "ANALYZING_WARNING": "Une analyse semble déjà en cours pour cette collection. Si elle est restée bloquée (crash), seule la réanalyse forcée relancera le traitement.",
+    "IS_ANIME": "Anime"
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",
@@ -128,7 +131,8 @@
     "NOTIFY_LOGO_UPDATED": "Logo mis à jour.",
     "NOTIFY_LOGO_PROMPT_FAILED": "Export du prompt logo impossible.",
     "NOTIFY_LOGO_PROMPT_DOWNLOADED": "Prompt logo téléchargé.",
-    "NOTIFY_RULES_RESET": "Règles réinitialisées."
+    "NOTIFY_RULES_RESET": "Règles réinitialisées.",
+    "CALENDAR_HELP_FLEXIBLE": "Affichage journalier du programme généré par la planification flexible."
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",
@@ -178,5 +182,9 @@
       "COMPLETE_WITH_ERRORS": "Terminé avec erreurs",
       "CANCELLED": "Annulé"
     }
+  },
+  "TV_CHANNEL_DIALOG": {
+    "SUGGEST_NAME": "Suggérer un nom",
+    "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
   }
 }

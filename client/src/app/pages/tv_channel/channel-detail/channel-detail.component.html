@@ -39,7 +39,7 @@
             <mat-icon>edit</mat-icon>
             {{ 'COMMON.EDIT' | translate }}
           </button>
-          <button mat-stroked-button (click)="generateBlueprint()">
+          <button mat-stroked-button *ngIf="!isFlexibleChannel" (click)="generateBlueprint()">
             <mat-icon>auto_awesome</mat-icon>
             {{ 'CHANNELS.GENERATE_BLUEPRINT' | translate }}
           </button>
@@ -110,7 +110,7 @@
           <mat-icon>visibility</mat-icon>
           {{ 'CHANNEL_DETAIL.VIEW_DETAIL' | translate }}
         </button>
-        <button mat-stroked-button type="button" (click)="openResetRulesDialog()">
+        <button mat-stroked-button type="button" *ngIf="!isFlexibleChannel" (click)="openResetRulesDialog()">
           <mat-icon>restart_alt</mat-icon>
           {{ 'CHANNELS.RESET_RULES' | translate }}
         </button>
@@ -136,11 +136,13 @@
     <div class="timeline-card-head">
       <div>
         <span class="panel-label">{{ 'CHANNEL_DETAIL.CALENDARS' | translate }}</span>
-        <h3>{{ 'CHANNEL_DETAIL.GRID_AND_SCHEDULE' | translate }}</h3>
+        <h3>{{ (isFlexibleChannel ? 'CHANNELS.SCHEDULE' : 'CHANNEL_DETAIL.GRID_AND_SCHEDULE') | translate }}</h3>
       </div>
     </div>
     <div class="calendar-toolbar">
-      <div class="timeline-caption">{{ 'CHANNEL_DETAIL.CALENDAR_HELP' | translate }}</div>
+      <div class="timeline-caption">
+        {{ (isFlexibleChannel ? 'CHANNEL_DETAIL.CALENDAR_HELP_FLEXIBLE' : 'CHANNEL_DETAIL.CALENDAR_HELP') | translate }}
+      </div>
       <div class="calendar-nav">
         <button mat-stroked-button (click)="shiftCalendarDay(-1)">
           <mat-icon>chevron_left</mat-icon>
@@ -155,7 +157,7 @@
       </div>
     </div>
 
-    <div class="calendar-split">
+    <div class="calendar-split" [class.single-panel]="isFlexibleChannel">
       <article class="calendar-panel">
         <div class="calendar-panel-head">
           <span class="panel-label">{{ 'CHANNELS.SCHEDULE' | translate }}</span>
@@ -171,7 +173,7 @@
         />
       </article>
 
-      <article class="calendar-panel">
+      <article class="calendar-panel" *ngIf="!isFlexibleChannel">
         <div class="calendar-panel-head">
           <span class="panel-label">{{ 'CHANNELS.GRID' | translate }}</span>
           <h4>{{ 'CHANNEL_DETAIL.DAILY_CALENDAR' | translate }}</h4>

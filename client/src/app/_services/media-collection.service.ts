@@ -20,8 +20,8 @@ export class MediaCollectionApiService extends BaseApiService {
     super(http);
   }
 
-  analyze(id: string | number): Observable<null> {
-    return this.http.post<null>(`${this.getFullUrl()}${id}/analyze/`, {});
+  analyze(id: string | number, force = false): Observable<null> {
+    return this.http.post<null>(`${this.getFullUrl()}${id}/analyze/`, {force});
   }
 }
 
@@ -55,9 +55,9 @@ export class MediaCollectionService extends ObjectApiService {
     this.refreshFromSocket()
   }
 
-  analyze(id: string | number): Subject<RequestResponseLike> {
+  analyze(id: string | number, force = false): Subject<RequestResponseLike> {
     const subject = new Subject<RequestResponseLike>()
-    this.api.analyze(id).subscribe({
+    this.api.analyze(id, force).subscribe({
       next: (body) => subject.next({isOk: true, body}),
       error: (body) => subject.next({isOk: false, body}),
     })

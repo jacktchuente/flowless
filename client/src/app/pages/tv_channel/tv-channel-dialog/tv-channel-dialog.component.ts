@@ -1,15 +1,17 @@
 import {Component, Inject} from '@angular/core';
-import {FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {AbstractControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgFor, NgIf} from "@angular/common";
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {FormlyFieldConfig, FormlyModule} from "@ngx-formly/core";
+import {TranslateModule} from "@ngx-translate/core";
 import {Catalog} from "@project-interfaces/catalog";
 import {TvChannel, TvChannelPayload} from "@project-interfaces/tv-channel";
 import {NotificationService} from "@project-shared/services/notification.service";
 import {DialogContainer1Component} from "@project-templates/dialog-container1/dialog-container1.component";
-import {TvChannelService} from "@project-services/tv-channel.service";
+import {TvChannelNameSuggestionResponse, TvChannelService} from "@project-services/tv-channel.service";
 
 @Component({
   selector: 'app-tv-channel-dialog',
@@ -19,10 +21,12 @@ import {TvChannelService} from "@project-services/tv-channel.service";
     FormlyModule,
     MatButtonModule,
     MatDialogModule,
+    MatIconModule,
     MatProgressSpinnerModule,
     NgFor,
     NgIf,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslateModule
   ],
   templateUrl: './tv-channel-dialog.component.html',
   styleUrl: './tv-channel-dialog.component.css'
@@ -34,6 +38,7 @@ export class TvChannelDialogComponent {
   readonly editorialFields: Array<{label: string, value: string | number | null}>
 
   isSubmitting = false
+  isSuggestingName = false
   errorMessage: string | null = null
 
   constructor(
@@ -105,6 +110,29 @@ export class TvChannelDialogComponent {
       {label: 'End', value: editorial.end_at},
       {label: 'Allow filler', value: editorial.allow_filler ? 'Oui' : 'Non'},
     ] : []
+  }
+
+  suggestName() {
+    if (!this.data.channel || this.isSuggestingName || this.isSubmitting) {
+      return
+    }
+    this.isSuggestingName = true
+    this.tvChannelService.suggestName(this.data.channel.id).subscribe((response) => {
+      this.isSuggestingName = false
+      if (!response.isOk) {
+        this.notificationService.notify("TV_CHANNEL_DIALOG.NOTIFY_SUGGEST_NAME_FAILED")
+        return
+      }
+      const body = response.body as TvChannelNameSuggestionResponse
+      const name = body?.name?.trim()
+      if (!name) {
+        this.notificationService.notify("TV_CHANNEL_DIALOG.NOTIFY_SUGGEST_NAME_FAILED")
+        return
+      }
+      const nameControl = this.form.get('name') as AbstractControl<string> | null
+      nameControl?.setValue(name)
+      nameControl?.markAsDirty()
+    })
   }
 
   save() {

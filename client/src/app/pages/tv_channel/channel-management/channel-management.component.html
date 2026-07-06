@@ -31,10 +31,31 @@
     <button mat-button (click)="openEditCatalogDialog()" [disabled]="!selectedCatalogId">
       {{ 'CHANNELS.EDIT_CATALOG' | translate }}
     </button>
-    <button mat-stroked-button (click)="generateCatalogChannels()" [disabled]="!selectedCatalogId">
+    <button *ngIf="!flexMode" mat-stroked-button (click)="generateCatalogChannels()" [disabled]="!selectedCatalogId">
       <mat-icon>auto_awesome</mat-icon>
       {{ 'CHANNELS.GENERATE_CHANNELS' | translate }}
     </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="generateFlexibleProgramming()" [disabled]="!selectedCatalogId">
+      <mat-icon>account_tree</mat-icon>
+      Flexible
+    </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="openFlexibleCandidates()" [disabled]="!selectedCatalogId">
+      <mat-icon>playlist_add</mat-icon>
+      Candidates
+    </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="openMembershipReview()" [disabled]="!selectedCatalogId">
+      <mat-icon>fact_check</mat-icon>
+      Segments
+    </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="openRunDialog()" [disabled]="!selectedCatalogId">
+      <mat-icon>history</mat-icon>
+      Runs
+    </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="matchFlexibleNewMedia()" [disabled]="!selectedCatalogId">
+      <mat-icon>sync</mat-icon>
+      Nouveaux medias
+    </button>
+    <mat-slide-toggle class="flex-mode-toggle" [(ngModel)]="flexMode">Flex</mat-slide-toggle>
   </div>
 </section>
 
@@ -120,7 +141,7 @@
       <mat-icon>edit</mat-icon>
       <span>{{ 'CHANNELS.EDIT' | translate }}</span>
     </button>
-    <button mat-menu-item (click)="generateBlueprint(channel)">
+    <button mat-menu-item *ngIf="!isFlexibleChannel(channel)" (click)="generateBlueprint(channel)">
       <mat-icon>auto_awesome</mat-icon>
       <span>{{ 'CHANNELS.GENERATE_BLUEPRINT' | translate }}</span>
     </button>
@@ -128,7 +149,7 @@
       <mat-icon>schedule</mat-icon>
       <span>{{ 'CHANNELS.GENERATE_PLAYOUT' | translate }}</span>
     </button>
-    <button mat-menu-item (click)="openResetRulesDialog(channel)">
+    <button mat-menu-item *ngIf="!isFlexibleChannel(channel)" (click)="openResetRulesDialog(channel)">
       <mat-icon>restart_alt</mat-icon>
       <span>{{ 'CHANNELS.RESET_RULES' | translate }}</span>
     </button>

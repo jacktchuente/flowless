@@ -1,4 +1,5 @@
 from media_source.models import MediaSource, MediaCollection
+from media_source.services.media_collection_service import MediaCollectionService
 from media_source.services.media_server_services.jellyfin_service import JellyfinService
 
 
@@ -18,35 +19,53 @@ class MediaSourceService:
             collection[0]: collection[1] for collection in existing_collection
         }
 
-        existing_collection_external_ids = [collection[0] for collection in existing_collection]
-        new_collection_payload = []
-        old_collection_payload = []
+        collections_to_create = []
+        collections_to_update_with_kind = []
+        collections_to_update_name_only = []
 
         for founded_collection in founded_collections:
-            external_id = founded_collection['external_id']
-            if founded_collection['external_id'] in existing_collection_external_ids:
-                pk = existing_collection_map.get(external_id)
-                if pk:
-                    old_collection_payload.append({**founded_collection, "pk": pk})
-            else:
-                new_collection_payload.append({**founded_collection})
-
-        if new_collection_payload:
-            MediaCollection.objects.bulk_create(
-                [
-                    MediaCollection(
-                        **coll,
-                        media_source=self.media_source
-                    ) for coll in new_collection_payload
-                ]
+            external_id = founded_collection["external_id"]
+            container_kind = MediaCollectionService.CONTAINER_KIND_MAP.get(
+                founded_collection.get("container_kind"),
             )
-        if old_collection_payload:
+            pk = existing_collection_map.get(external_id)
+
+            if pk is None:
+                collections_to_create.append(
+                    MediaCollection(
+                        name=founded_collection["name"],
+                        external_id=external_id,
+                        container_kind=container_kind,
+                        media_source=self.media_source,
+                    )
+                )
+            elif container_kind is not None:
+                collections_to_update_with_kind.append(
+                    MediaCollection(
+                        pk=pk,
+                        name=founded_collection["name"],
+                        container_kind=container_kind,
+                    )
+                )
+            else:
+                collections_to_update_name_only.append(
+                    MediaCollection(
+                        pk=pk,
+                        name=founded_collection["name"],
+                    )
+                )
+
+        if collections_to_create:
+            MediaCollection.objects.bulk_create(collections_to_create)
+        if collections_to_update_with_kind:
             MediaCollection.objects.bulk_update(
-                [
-                    MediaCollection(**coll) for coll in old_collection_payload
-                ], fields=[
-                    "name"
-                ]
+                collections_to_update_with_kind,
+                fields=["name", "container_kind"],
+            )
+        if collections_to_update_name_only:
+            MediaCollection.objects.bulk_update(
+                collections_to_update_name_only,
+                fields=["name"],
             )
 
     def check_credentials(self) -> bool:

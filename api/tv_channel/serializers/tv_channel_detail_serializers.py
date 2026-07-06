@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from rest_framework import serializers
 
 from grid_schedule.models import ScheduleMediaItem, TvPlayout
@@ -62,8 +63,16 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
 
         queryset = (
             ScheduleMediaItem.objects
-            .filter(block_container_selection__tv_playout=active_playout)
-            .select_related("item", "item__container", "block_container_selection__block")
+            .filter(
+                Q(block_container_selection__tv_playout=active_playout)
+                | Q(flexible_selection__tv_playout=active_playout)
+            )
+            .select_related(
+                "item",
+                "item__container",
+                "block_container_selection__block",
+                "flexible_selection",
+            )
             .order_by("starts_at")
         )
         return ScheduleMediaItemSerializer(queryset, many=True).data

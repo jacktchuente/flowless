@@ -50,6 +50,15 @@
         </option>
       </select>
     </label>
+
+    <label class="field">
+      <span>Anime</span>
+      <select [(ngModel)]="draft.is_anime" [ngModelOptions]="{standalone: true}">
+        <option [ngValue]="null">—</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </label>
   </section>
 </mat-dialog-content>
 

@@ -1,0 +1,83 @@
+<app-dialog-container1>
+  <div dialogTitle>{{ title }}</div>
+
+  <div dialogContent>
+    <div class="review-dialog">
+      <div class="loading-state" *ngIf="isLoadingSegments">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+
+      <ng-container *ngIf="!isLoadingSegments">
+        <div class="segment-list" *ngIf="segments.length; else emptyState">
+          <button
+            type="button"
+            class="segment-row"
+            *ngFor="let segment of segments"
+            [class.selected]="selectedSegment?.id === segment.id"
+            (click)="selectSegment(segment)"
+          >
+            <span class="segment-name">{{ segment.name }}</span>
+            <span class="segment-meta">
+              {{ segment.media_count }} medias · score {{ segment.programmable_score | number:'1.2-2' }}
+            </span>
+            <span class="segment-meta" *ngIf="getDominantCategories(segment)">
+              {{ getDominantCategories(segment) }}
+            </span>
+          </button>
+        </div>
+
+        <ng-template #emptyState>
+          <p class="muted">Aucun segment pour ce catalogue. Lance d'abord une programmation flexible.</p>
+        </ng-template>
+
+        <section class="membership-panel" *ngIf="selectedSegment">
+          <div class="loading-state" *ngIf="isLoadingMemberships">
+            <mat-spinner diameter="24"></mat-spinner>
+          </div>
+
+          <div class="membership-list" *ngIf="!isLoadingMemberships">
+            <div class="membership-row" *ngFor="let membership of memberships">
+              <div class="membership-main">
+                <span class="membership-title">{{ membership.media_container_title }}</span>
+                <span class="membership-meta">
+                  score {{ membership.score | number:'1.2-2' }}
+                  <ng-container *ngIf="!membership.is_primary"> · secondaire</ng-container>
+                </span>
+              </div>
+              <span class="status-badge" [class]="'status-badge ' + getStatusClass(membership)"
+                    [matTooltip]="membership.decision_reason">
+                {{ membership.status }}
+              </span>
+              <div class="membership-actions">
+                <button
+                  mat-icon-button
+                  matTooltip="Forcer dans le segment"
+                  [disabled]="isUpdating(membership) || isPlayable(membership)"
+                  (click)="setStatus(membership, 'manual_override')"
+                >
+                  <mat-icon>add_task</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  matTooltip="Retirer du segment"
+                  [disabled]="isUpdating(membership) || membership.status === 'rejected'"
+                  (click)="setStatus(membership, 'rejected')"
+                >
+                  <mat-icon>block</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <p class="muted" *ngIf="!memberships.length">Aucun membership pour ce segment.</p>
+          </div>
+        </section>
+      </ng-container>
+
+      <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </div>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button mat-dialog-close>Fermer</button>
+  </div>
+</app-dialog-container1>

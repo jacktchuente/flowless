@@ -1,0 +1,53 @@
+<app-dialog-container1>
+  <div dialogTitle>{{ title }}</div>
+
+  <div dialogContent>
+    <div class="candidate-dialog">
+      <div class="loading-state" *ngIf="isLoading">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+
+      <ng-container *ngIf="!isLoading">
+        <div class="candidate-list" *ngIf="candidates.length; else emptyState">
+          <button
+            type="button"
+            class="candidate-row"
+            *ngFor="let candidate of candidates"
+            [class.selected]="selectedCandidate?.id === candidate.id"
+            (click)="selectCandidate(candidate)"
+          >
+            <span class="candidate-name">{{ candidate.name }}</span>
+            <span class="candidate-meta">
+              {{ candidate.viability_score | number:'1.2-2' }} · {{ candidate.status }}
+            </span>
+          </button>
+        </div>
+
+        <ng-template #emptyState>
+          <p class="muted">Aucune candidate disponible. Lance d'abord une programmation flexible.</p>
+        </ng-template>
+
+        <section class="candidate-detail" *ngIf="selectedCandidate">
+          <label for="channel-name">Nom de la chaine</label>
+          <input id="channel-name" name="channelName" [(ngModel)]="channelName" maxlength="50" />
+
+          <div class="path-list" *ngIf="selectedCandidate.segment_path?.elements?.length">
+            <span class="path-item" *ngFor="let element of selectedCandidate.segment_path?.elements">
+              {{ element.position }}. {{ element.segment_name }}
+            </span>
+          </div>
+        </section>
+      </ng-container>
+
+      <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </div>
+  </div>
+
+  <div dialogActions>
+    <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
+    <button mat-flat-button color="primary" (click)="createChannel()" [disabled]="!selectedCandidate || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+      <span *ngIf="!isSubmitting">Creer la chaine</span>
+    </button>
+  </div>
+</app-dialog-container1>

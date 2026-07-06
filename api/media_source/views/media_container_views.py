@@ -19,12 +19,13 @@ class MediaContainerViewSet(
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        queryset = MediaContainer.objects.all()
+        queryset = MediaContainer.objects.filter(media_collection__is_active=True)
         title = self.request.query_params.get("title")
         status_value = self.request.query_params.get("status")
         category = self.request.query_params.get("category")
         nature = self.request.query_params.get("nature")
         container_kind = self.request.query_params.get("container_kind")
+        is_anime = self.request.query_params.get("is_anime")
         media_collection_id = self.request.query_params.get("media_collection")
 
         if media_collection_id:
@@ -39,6 +40,8 @@ class MediaContainerViewSet(
             queryset = queryset.filter(media_collection__nature=nature)
         if container_kind not in (None, ""):
             queryset = queryset.filter(media_collection__container_kind=container_kind)
+        if is_anime not in (None, ""):
+            queryset = queryset.filter(media_collection__is_anime=str(is_anime).lower() in {"1", "true", "yes"})
 
         return queryset.order_by("pk")
 

@@ -102,6 +102,10 @@ export class ChannelDetailComponent {
     return this.channel?.editorial_line_data ?? null
   }
 
+  get isFlexibleChannel(): boolean {
+    return this.channel?.grid_data?.mode === 2
+  }
+
   loadChannel(channelId: string) {
     this.isLoading = true
     this.tvChannelService.getDetail(channelId).subscribe((response) => {

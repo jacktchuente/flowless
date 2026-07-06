@@ -30,6 +30,10 @@ export interface TvChannelLogoPromptResponse {
     prompt: string
 }
 
+export interface TvChannelNameSuggestionResponse {
+    name: string
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -58,6 +62,10 @@ export class TvChannelApiService extends BaseApiService {
 
     exportLogoPrompt(id: string | number): Observable<TvChannelLogoPromptResponse> {
         return this.http.post<TvChannelLogoPromptResponse>(`${this.getFullUrl()}${id}/export-logo-prompt/`, {});
+    }
+
+    suggestName(id: string | number): Observable<TvChannelNameSuggestionResponse> {
+        return this.http.post<TvChannelNameSuggestionResponse>(`${this.getFullUrl()}${id}/suggest-name/`, {});
     }
 
     uploadLogo(id: string | number, file: File): Observable<TvChannel> {
@@ -140,6 +148,15 @@ export class TvChannelService extends ObjectApiService {
     exportLogoPrompt(id: string | number): Subject<RequestResponseLike> {
         const subject = new Subject<RequestResponseLike>()
         this.api.exportLogoPrompt(id).subscribe({
+            next: (body) => subject.next({isOk: true, body}),
+            error: (body) => subject.next({isOk: false, body}),
+        })
+        return subject
+    }
+
+    suggestName(id: string | number): Subject<RequestResponseLike> {
+        const subject = new Subject<RequestResponseLike>()
+        this.api.suggestName(id).subscribe({
             next: (body) => subject.next({isOk: true, body}),
             error: (body) => subject.next({isOk: false, body}),
         })

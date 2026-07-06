@@ -74,19 +74,24 @@ export class MediaCollectionComponent {
       return
     }
 
+    const alreadyAnalyzed = !!collection.analyzed_at
+    const isAnalyzing = collection.analyze_status === 1
     this.dialog.open(ConfirmationDialogComponent, {
       width: '520px',
       maxWidth: '92vw',
       data: {
-        confirmationMessage: this.translateService.instant('MEDIA_COLLECTION.CONFIRM_ANALYZE', {name: collection.name})
+        confirmationMessage: this.translateService.instant('MEDIA_COLLECTION.CONFIRM_ANALYZE', {name: collection.name}),
+        warningMessage: isAnalyzing ? 'MEDIA_COLLECTION.ANALYZING_WARNING' : null,
+        extraActionLabel: alreadyAnalyzed || isAnalyzing ? 'MEDIA_COLLECTION.FORCE_REANALYZE' : null,
       }
-    }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed) {
+    }).afterClosed().subscribe((result) => {
+      if (!result) {
         return
       }
+      const force = result === 'extra'
       this.syncingIds.add(key)
       this.isPageLoading = true
-      this.mediaCollectionService.analyze(collection.id).subscribe((response) => {
+      this.mediaCollectionService.analyze(collection.id, force).subscribe((response) => {
         this.syncingIds.delete(key)
         this.isPageLoading = false
         if (!response.isOk) {

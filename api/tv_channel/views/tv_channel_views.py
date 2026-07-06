@@ -14,6 +14,10 @@ from tv_channel.serializers.tv_channel_serializers import (
     TvChannelSerializer,
     TvChannelUpdateSerializer,
 )
+from tv_channel.services.channel_name_suggestion_service import (
+    ChannelNameSuggestionError,
+    ChannelNameSuggestionService,
+)
 from tv_channel.services.logo_prompt_service import LogoPromptService
 from tv_channel.tasks import generate_channel_editorial_line, generate_tv_channel_playout, push_tv_channel_to_etv
 
@@ -124,6 +128,19 @@ class TvChannelViewSet(
                 GridBlock.objects.bulk_update(blocks, fields=fields_to_reset)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=("post",), url_name="suggest-name", url_path="suggest-name")
+    def suggest_name(self, request, pk=None):
+        instance = self.get_object()
+        service = ChannelNameSuggestionService(instance)
+        try:
+            name = service.suggest_name()
+        except ChannelNameSuggestionError as exc:
+            return Response(
+                status=status.HTTP_502_BAD_GATEWAY,
+                data={"detail": str(exc)},
+            )
+        return Response({"name": name})
 
     @action(detail=True, methods=("post",), url_name="export-logo-prompt", url_path="export-logo-prompt")
     def export_logo_prompt(self, request, pk=None):

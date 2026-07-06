@@ -1,10 +1,16 @@
 import logging
+from datetime import timedelta
 
 from celery import shared_task
+from django.conf import settings
+from django.db.models import Max
+from django.utils import timezone
 
+from grid_schedule.models import ScheduleMediaItem, TvPlayout
+from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
-from tv_channel.models import Catalog, TvChannel
+from tv_channel.models import Catalog, GridLayoutMode, TvChannel
 from tv_channel.services.catalog_service import CatalogService
 from tv_channel.services.etv_channel_push_service import EtvChannelPushService
 from tv_channel.services.tv_channel_service import TvChannelService
@@ -109,11 +115,24 @@ def generate_tv_channel_playout(
         status=AnalyzeStatus.ANALYZING,
     )
     try:
-        service = TvPlayoutGenerationService(
-            tv_channel=instance,
-            days=days,
-            reset=reset,
+        active_grid = (
+            instance.gridlayout_set.filter(is_active=True)
+            .only("id", "mode")
+            .order_by("-created_at", "-id")
+            .first()
         )
+        if active_grid is not None and active_grid.mode == GridLayoutMode.FLEXIBLE:
+            service = FlexibleTvPlayoutGenerationService(
+                tv_channel=instance,
+                days=days,
+                reset=reset,
+            )
+        else:
+            service = TvPlayoutGenerationService(
+                tv_channel=instance,
+                days=days,
+                reset=reset,
+            )
         result = service.generate()
     except Exception as exc:
         logger.exception(
@@ -139,6 +158,43 @@ def generate_tv_channel_playout(
         object_type="TvChannel",
         status=status,
     )
+
+
+@shared_task
+def extend_flexible_playouts():
+    """Keeps flexible channels programmed ahead of time.
+
+    For each enabled channel with an active flexible grid layout and an
+    existing active playout, the playout is regenerated when its horizon
+    (last scheduled end) drops below DAYS_TO_BUILD days from now.
+    Channels that were never generated stay untouched (first generation
+    remains a manual decision), and the ErsatzTV push stays manual too.
+    """
+    horizon_target = timezone.now() + timedelta(days=settings.DAYS_TO_BUILD)
+    channels = (
+        TvChannel.objects.filter(
+            is_enabled=True,
+            gridlayout__is_active=True,
+            gridlayout__mode=GridLayoutMode.FLEXIBLE,
+        )
+        .distinct()
+    )
+    for channel in channels:
+        playout = TvPlayout.objects.filter(tv_channel=channel, is_active=True).first()
+        if playout is None:
+            continue
+        last_end = ScheduleMediaItem.objects.filter(
+            flexible_selection__tv_playout=playout,
+        ).aggregate(value=Max("ends_at"))["value"]
+        if last_end is None or last_end >= horizon_target:
+            continue
+        logger.info(
+            "extend_flexible_playouts channel_id=%s horizon=%s target=%s",
+            channel.id,
+            last_end,
+            horizon_target,
+        )
+        generate_tv_channel_playout.delay(channel.id, days=settings.DAYS_TO_BUILD, reset=False)
 
 
 @shared_task

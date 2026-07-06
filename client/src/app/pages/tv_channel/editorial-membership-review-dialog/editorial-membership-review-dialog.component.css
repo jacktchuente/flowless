@@ -1,0 +1,118 @@
+.review-dialog {
+  display: grid;
+  gap: 14px;
+}
+
+.loading-state {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+}
+
+.segment-list {
+  display: grid;
+  gap: 8px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.segment-row {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 6px;
+  background: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.segment-row.selected {
+  border-color: #1976d2;
+  background: rgba(25, 118, 210, 0.08);
+}
+
+.segment-name {
+  font-weight: 600;
+}
+
+.segment-meta,
+.membership-meta,
+.muted {
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 12px;
+}
+
+.membership-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.membership-list {
+  display: grid;
+  gap: 6px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.membership-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.membership-main {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.membership-title {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-badge {
+  border-radius: 10px;
+  padding: 3px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.status-badge.is-accepted {
+  background: rgba(46, 125, 50, 0.14);
+  color: #2e7d32;
+}
+
+.status-badge.is-override {
+  background: rgba(25, 118, 210, 0.14);
+  color: #1565c0;
+}
+
+.status-badge.is-rejected {
+  background: rgba(176, 0, 32, 0.12);
+  color: #b00020;
+}
+
+.status-badge.is-secondary,
+.status-badge.is-other {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.membership-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.error-message {
+  color: #b00020;
+  margin: 0;
+}

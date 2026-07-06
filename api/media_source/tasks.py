@@ -43,13 +43,13 @@ def analyze_media_source_data(media_source_id: int):
 
 
 @shared_task
-def analyze_media_collection_data(media_collection_id: int):
+def analyze_media_collection_data(media_collection_id: int, force: bool = False):
     try:
         media_collection = MediaCollection.objects.get(pk=media_collection_id)
     except MediaCollection.DoesNotExist:
         print("Not found")
     else:
-        if media_collection.analyze_status == AnalyzeStatus.ANALYZING:
+        if media_collection.analyze_status == AnalyzeStatus.ANALYZING and not force:
             print("analyzing already")
             return
         save_status_and_broadcast(
@@ -62,7 +62,10 @@ def analyze_media_collection_data(media_collection_id: int):
             print("retrieve data")
             service.load_collection_data()
             print("normalize & clean up")
-            service.analyze_collection_data(use_llm=settings.MEDIA_CONTAINER_ANALYSE_USE_LLM)
+            service.analyze_collection_data(
+                use_llm=settings.MEDIA_CONTAINER_ANALYSE_USE_LLM,
+                new_data_only=not force,
+            )
             print("done")
         except Exception as e:
             print(e)
@@ -76,6 +79,12 @@ def analyze_media_collection_data(media_collection_id: int):
             status=status,
         )
         broadcast_refresh("MediaContainer")
+        if status == AnalyzeStatus.COMPLETE:
+            # New media may have arrived: attach them to the active
+            # editorial runs covering this collection right away.
+            from editorial_planning.tasks import match_new_media_for_active_runs
+
+            match_new_media_for_active_runs.delay(media_collection_id=media_collection.id)
 
 
 @shared_task

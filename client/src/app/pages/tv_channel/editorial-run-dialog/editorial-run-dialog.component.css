@@ -1,0 +1,112 @@
+.run-dialog {
+  display: grid;
+  gap: 10px;
+  min-width: min(720px, 82vw);
+}
+
+.loading-state {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+}
+
+.run-row {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.run-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.run-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.run-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.run-meta,
+.muted {
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 12px;
+}
+
+.run-actions {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.active-badge {
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: rgba(46, 125, 50, 0.14);
+  color: #2e7d32;
+}
+
+.status-badge {
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.status-badge.is-complete {
+  background: rgba(25, 118, 210, 0.12);
+  color: #1565c0;
+}
+
+.status-badge.is-warning {
+  background: rgba(176, 0, 32, 0.12);
+  color: #b00020;
+}
+
+.run-details {
+  border-top: 1px dashed rgba(0, 0, 0, 0.14);
+  padding-top: 8px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.detail-line {
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.silhouette-chip {
+  display: inline-block;
+  margin: 2px 4px 0 0;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+}
+
+.reconcile-panel {
+  border-top: 1px dashed rgba(0, 0, 0, 0.14);
+  padding-top: 8px;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.proposal-detail {
+  color: rgba(0, 0, 0, 0.6);
+  margin-left: 6px;
+}

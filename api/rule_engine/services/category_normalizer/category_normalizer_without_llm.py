@@ -27,8 +27,8 @@ class CategoryNormalizerWithoutLlm:
         "categories": "categories",
     }
 
-    def __init__(self, media_container_raw_data):
-        self.media_container_raw_data = media_container_raw_data
+    def __init__(self, media_container):
+        self.media_container = media_container
 
     def get_categories(self) -> list[str]:
         matched_categories: list[str] = []
@@ -82,7 +82,7 @@ class CategoryNormalizerWithoutLlm:
     def _get_field_values(self, field: str) -> list[str]:
         model_field = self.FIELD_ALIASES.get(field, field)
 
-        value = getattr(self.media_container_raw_data, model_field, None)
+        value = getattr(self.media_container, model_field, None)
 
         if value is None:
             return []

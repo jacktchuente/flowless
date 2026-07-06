@@ -12,6 +12,23 @@
   color: #10233d;
 }
 
+.confirmation-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(230, 145, 20, 0.12);
+  border: 1px solid rgba(230, 145, 20, 0.32);
+  color: #9a5b00;
+}
+
+.confirmation-warning mat-icon {
+  flex: 0 0 auto;
+}
+
 .confirmation-spacer {
   display: flex;
   justify-content: space-around;

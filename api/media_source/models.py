@@ -28,6 +28,7 @@ class MediaCollection(models.Model):
     nature = models.IntegerField(choices=MediaNature, null=True, blank=True)
     hash_data = models.TextField()
     container_kind = models.IntegerField(choices=MediaContainerKind, null=True, blank=True)
+    is_anime = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.media_source.name} - {self.name}"
@@ -64,12 +65,25 @@ class MediaContainer(models.Model):
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
     release_date = models.DateField(null=True, blank=True)
+    release_date_start = models.DateField(null=True, blank=True)
+    release_date_end = models.DateField(null=True, blank=True)
+    release_year_min = models.PositiveSmallIntegerField(null=True, blank=True)
+    release_year_max = models.PositiveSmallIntegerField(null=True, blank=True)
     countries = models.JSONField(default=list)
     audio_languages = models.JSONField(default=list)
     subtitle_languages = models.JSONField(default=list)
     audio_languages_any = models.JSONField(default=list)
     subtitle_languages_any = models.JSONField(default=list)
+    community_rating_score = models.FloatField(null=True, blank=True)
+    critic_rating_score = models.FloatField(null=True, blank=True)
     overall_rating_score = models.FloatField(null=True, blank=True)
+
+    people = models.JSONField(default=list)
+    directors = models.JSONField(default=list)
+    writers = models.JSONField(default=list)
+    creators = models.JSONField(default=list)
+    actors = models.JSONField(default=list)
+    studios = models.JSONField(default=list)
 
     tags = models.JSONField(default=list)
     genres = models.JSONField(default=list)
@@ -94,6 +108,7 @@ class MediaItem(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    item_kind = models.CharField(max_length=32, null=True, blank=True)
 
     duration_seconds = models.PositiveIntegerField(null=True, blank=True)
     # utile pour séries / ordre / redondance
@@ -110,7 +125,19 @@ class MediaItem(models.Model):
     subtitle_languages = models.JSONField(default=list)
     video_width = models.PositiveIntegerField(null=True, blank=True)
     video_height = models.PositiveIntegerField(null=True, blank=True)
+    community_rating_score = models.FloatField(null=True, blank=True)
+    critic_rating_score = models.FloatField(null=True, blank=True)
     overall_rating_score = models.FloatField(null=True, blank=True)
+
+    tags = models.JSONField(default=list)
+    genres = models.JSONField(default=list)
+
+    people = models.JSONField(default=list)
+    directors = models.JSONField(default=list)
+    writers = models.JSONField(default=list)
+    creators = models.JSONField(default=list)
+    actors = models.JSONField(default=list)
+    studios = models.JSONField(default=list)
 
     is_active = models.BooleanField(default=True)
     media_source = models.ForeignKey("MediaSource", on_delete=models.CASCADE)

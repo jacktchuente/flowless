@@ -33,6 +33,7 @@ export class MediaCollectionDetailDialogComponent {
     programming_role: number | null
     nature: number | null
     container_kind: number | null
+    is_anime: boolean | null
   }
   isSubmitting = false
 
@@ -76,6 +77,7 @@ export class MediaCollectionDetailDialogComponent {
       programming_role: data.collection.programming_role ?? null,
       nature: data.collection.nature ?? null,
       container_kind: data.collection.container_kind ?? null,
+      is_anime: data.collection.is_anime ?? null,
     }
   }
 

@@ -1,0 +1,207 @@
+from rest_framework import serializers
+
+from editorial_planning.models import (
+    EditorialChannelCandidate,
+    EditorialChannelSegment,
+    EditorialFlowRun,
+    EditorialPlannedGrid,
+    EditorialSegment,
+    EditorialSegmentMembership,
+    EditorialSegmentMembershipStatus,
+    EditorialSegmentPath,
+    EditorialSegmentPathElement,
+)
+
+
+class EditorialPlanningGenerationRequestSerializer(serializers.Serializer):
+    media_collection_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=False,
+    )
+    max_channel_candidates = serializers.IntegerField(min_value=1, required=False, allow_null=True)
+    target_channel_count = serializers.IntegerField(min_value=1, required=False, allow_null=True)
+    allow_multi_segment = serializers.BooleanField(required=False, default=True)
+    allow_segment_sharing = serializers.BooleanField(required=False, default=False)
+    refine_membership_threshold = serializers.FloatField(
+        required=False,
+        allow_null=True,
+        default=None,
+        min_value=0.0,
+        max_value=1.0,
+    )
+
+    def validate_media_collection_ids(self, value):
+        return list(dict.fromkeys(value))
+
+
+class EditorialFlexibleChannelCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False, allow_blank=True, max_length=50)
+
+
+class EditorialRunReconcileMappingSerializer(serializers.Serializer):
+    tv_channel = serializers.IntegerField(min_value=1)
+    candidate = serializers.IntegerField(min_value=1)
+
+
+class EditorialRunReconcileApplySerializer(serializers.Serializer):
+    mappings = serializers.ListField(
+        child=EditorialRunReconcileMappingSerializer(),
+        allow_empty=False,
+    )
+
+
+class EditorialSegmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EditorialSegment
+        fields = (
+            "id",
+            "segment_key",
+            "name",
+            "description",
+            "profile",
+            "programmable_score",
+            "cohesion_score",
+            "separation_score",
+            "format_consistency_score",
+            "volume_score",
+            "labelability_score",
+            "acceptance_threshold",
+            "media_count",
+        )
+
+
+class EditorialSegmentMembershipSerializer(serializers.ModelSerializer):
+    media_container_title = serializers.CharField(source="media_container.title", read_only=True)
+    media_container_categories = serializers.JSONField(source="media_container.categories", read_only=True)
+
+    class Meta:
+        model = EditorialSegmentMembership
+        fields = (
+            "id",
+            "segment",
+            "media_container",
+            "media_container_title",
+            "media_container_categories",
+            "score",
+            "is_primary",
+            "status",
+            "decision_reason",
+            "updated_at",
+        )
+
+
+class EditorialSegmentMembershipStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=(
+            EditorialSegmentMembershipStatus.ACCEPTED,
+            EditorialSegmentMembershipStatus.MANUAL_OVERRIDE,
+            EditorialSegmentMembershipStatus.REJECTED,
+        ),
+    )
+
+
+class EditorialChannelSegmentSerializer(serializers.ModelSerializer):
+    segment_name = serializers.CharField(source="segment.name", read_only=True)
+
+    class Meta:
+        model = EditorialChannelSegment
+        fields = (
+            "id",
+            "segment",
+            "segment_name",
+            "role",
+            "weight",
+            "position",
+        )
+
+
+class EditorialSegmentPathElementSerializer(serializers.ModelSerializer):
+    segment_name = serializers.CharField(source="segment.name", read_only=True)
+
+    class Meta:
+        model = EditorialSegmentPathElement
+        fields = (
+            "id",
+            "segment",
+            "segment_name",
+            "position",
+            "role",
+            "reason",
+            "transition_from_previous_score",
+        )
+
+
+class EditorialSegmentPathSerializer(serializers.ModelSerializer):
+    elements = EditorialSegmentPathElementSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = EditorialSegmentPath
+        fields = (
+            "id",
+            "is_loop",
+            "global_score",
+            "diagnostics",
+            "elements",
+        )
+
+
+class EditorialPlannedGridSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EditorialPlannedGrid
+        fields = (
+            "id",
+            "grid_layout",
+            "created_at",
+            "updated_at",
+        )
+
+
+class EditorialChannelCandidateSerializer(serializers.ModelSerializer):
+    channel_segments = EditorialChannelSegmentSerializer(many=True, read_only=True)
+    segment_path = EditorialSegmentPathSerializer(read_only=True)
+    planned_grid = EditorialPlannedGridSerializer(read_only=True)
+    tv_channel_name = serializers.CharField(source="tv_channel.name", read_only=True)
+
+    class Meta:
+        model = EditorialChannelCandidate
+        fields = (
+            "id",
+            "channel_key",
+            "tv_channel",
+            "tv_channel_name",
+            "name",
+            "description",
+            "viability_score",
+            "status",
+            "profile",
+            "diagnostics",
+            "channel_segments",
+            "segment_path",
+            "planned_grid",
+            "created_at",
+            "updated_at",
+        )
+
+
+class EditorialFlowRunSerializer(serializers.ModelSerializer):
+    channel_candidates = EditorialChannelCandidateSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = EditorialFlowRun
+        fields = (
+            "id",
+            "catalog",
+            "status",
+            "is_active",
+            "algorithm_version",
+            "config",
+            "diagnostics",
+            "source_media_count",
+            "segment_count",
+            "channel_candidate_count",
+            "started_at",
+            "completed_at",
+            "created_at",
+            "updated_at",
+            "channel_candidates",
+        )

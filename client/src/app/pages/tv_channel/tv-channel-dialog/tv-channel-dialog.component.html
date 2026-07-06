@@ -21,6 +21,17 @@
 
   <div dialogActions>
     <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
+    <button
+      mat-stroked-button
+      type="button"
+      *ngIf="data.channel"
+      (click)="suggestName()"
+      [disabled]="isSuggestingName || isSubmitting"
+    >
+      <mat-spinner *ngIf="isSuggestingName" diameter="18"></mat-spinner>
+      <mat-icon *ngIf="!isSuggestingName">lightbulb</mat-icon>
+      <span>{{ 'TV_CHANNEL_DIALOG.SUGGEST_NAME' | translate }}</span>
+    </button>
     <button mat-flat-button color="primary" (click)="save()" [disabled]="isSubmitting">
       <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
       <span>Enregistrer</span>
