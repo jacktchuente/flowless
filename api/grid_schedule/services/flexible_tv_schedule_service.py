@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Max
@@ -33,6 +34,8 @@ class FlexibleTvPlayoutGenerationService:
         EditorialSegmentMembershipStatus.ACCEPTED,
         EditorialSegmentMembershipStatus.MANUAL_OVERRIDE,
     )
+    OVERFLOW_STRICT = "strict"
+    OVERFLOW_SOFT = "soft"
 
     def __init__(self, *, tv_channel: TvChannel, days: int, reset: bool = False):
         self.tv_channel = tv_channel
@@ -40,6 +43,11 @@ class FlexibleTvPlayoutGenerationService:
         self.reset = reset
         self.editorial_line = self._get_editorial_line(tv_channel)
         self.grid_layout: GridLayout | None = None
+        self.day_start = self._parse_day_time(settings.FLEXIBLE_PLAYOUT_DAY_START)
+        self.day_end = self._parse_day_time(settings.FLEXIBLE_PLAYOUT_DAY_END)
+        self.overflow_mode = str(settings.FLEXIBLE_PLAYOUT_OVERFLOW_MODE).strip().lower()
+        if self.overflow_mode not in (self.OVERFLOW_STRICT, self.OVERFLOW_SOFT):
+            self.overflow_mode = self.OVERFLOW_STRICT
 
     def generate(self) -> FlexibleGenerationResult:
         if self.days <= 0:
@@ -74,9 +82,19 @@ class FlexibleTvPlayoutGenerationService:
                 if cursor >= end_at:
                     break
 
+                day_end_at = self._resolve_day_end_at(cursor)
+                if cursor >= day_end_at:
+                    cursor = self._next_day_start_at(cursor)
+                    continue
+
+                if self.overflow_mode == self.OVERFLOW_SOFT:
+                    fit_window_end = end_at
+                else:
+                    fit_window_end = min(day_end_at, end_at)
+
                 path_element = path_elements[path_index % len(path_elements)]
                 path_index += 1
-                remaining_seconds = int((end_at - cursor).total_seconds())
+                remaining_seconds = int((fit_window_end - cursor).total_seconds())
                 selection_data = self._select_next_container(
                     segment_id=path_element.segment_id,
                     remaining_seconds=remaining_seconds,
@@ -86,8 +104,13 @@ class FlexibleTvPlayoutGenerationService:
                     warnings.append(f"No flexible candidate for segment {path_element.segment_id}.")
                     consecutive_misses += 1
                     if consecutive_misses >= len(path_elements):
-                        warnings.append("No flexible candidate for any segment of the path, stopping generation.")
-                        break
+                        consecutive_misses = 0
+                        next_day_start_at = self._next_day_start_at(cursor)
+                        if next_day_start_at >= end_at:
+                            warnings.append("No flexible candidate for any segment of the path, stopping generation.")
+                            break
+                        warnings.append("No flexible candidate fits the current day window, moving to the next day.")
+                        cursor = next_day_start_at
                     continue
                 consecutive_misses = 0
 
@@ -108,7 +131,7 @@ class FlexibleTvPlayoutGenerationService:
                     selection=selection,
                     item=item,
                     cursor=cursor,
-                    window_end=end_at,
+                    window_end=fit_window_end,
                 )
                 if scheduled is None:
                     warnings.append(f"Could not schedule item {item.id}.")
@@ -171,17 +194,47 @@ class FlexibleTvPlayoutGenerationService:
 
         return TvPlayout.objects.create(tv_channel=tv_channel, is_active=True, grid=grid_layout), True
 
+    @staticmethod
+    def _parse_day_time(value: str) -> time:
+        hour, minute = str(value).strip().split(":")
+        return time(hour=int(hour), minute=int(minute))
+
     def _resolve_window_start(self) -> datetime:
         now = timezone.now()
         cycle_anchor = now.replace(
-            hour=self.editorial_line.start_at.hour,
-            minute=self.editorial_line.start_at.minute,
-            second=self.editorial_line.start_at.second,
+            hour=self.day_start.hour,
+            minute=self.day_start.minute,
+            second=0,
             microsecond=0,
         )
-        if now.time() < self.editorial_line.start_at:
+        if now.time() < self.day_start:
             cycle_anchor -= timedelta(days=1)
         return cycle_anchor
+
+    def _resolve_day_end_at(self, cursor: datetime) -> datetime:
+        day_anchor = cursor.replace(
+            hour=self.day_start.hour,
+            minute=self.day_start.minute,
+            second=0,
+            microsecond=0,
+        )
+        if cursor.time() < self.day_start:
+            day_anchor -= timedelta(days=1)
+        day_end_at = day_anchor.replace(hour=self.day_end.hour, minute=self.day_end.minute)
+        if self.day_end <= self.day_start:
+            day_end_at += timedelta(days=1)
+        return day_end_at
+
+    def _next_day_start_at(self, cursor: datetime) -> datetime:
+        candidate = cursor.replace(
+            hour=self.day_start.hour,
+            minute=self.day_start.minute,
+            second=0,
+            microsecond=0,
+        )
+        while candidate <= cursor:
+            candidate += timedelta(days=1)
+        return candidate
 
     def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> None:
         future_qs = ScheduleMediaItem.objects.filter(
