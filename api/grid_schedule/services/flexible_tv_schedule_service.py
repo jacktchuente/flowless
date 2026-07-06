@@ -43,11 +43,17 @@ class FlexibleTvPlayoutGenerationService:
         self.reset = reset
         self.editorial_line = self._get_editorial_line(tv_channel)
         self.grid_layout: GridLayout | None = None
-        self.day_start = self._parse_day_time(settings.FLEXIBLE_PLAYOUT_DAY_START)
-        self.day_end = self._parse_day_time(settings.FLEXIBLE_PLAYOUT_DAY_END)
         self.overflow_mode = str(settings.FLEXIBLE_PLAYOUT_OVERFLOW_MODE).strip().lower()
         if self.overflow_mode not in (self.OVERFLOW_STRICT, self.OVERFLOW_SOFT):
             self.overflow_mode = self.OVERFLOW_STRICT
+
+    @property
+    def day_start(self) -> time:
+        return self.editorial_line.start_at
+
+    @property
+    def day_end(self) -> time:
+        return self.editorial_line.end_at
 
     def generate(self) -> FlexibleGenerationResult:
         if self.days <= 0:
@@ -194,17 +200,12 @@ class FlexibleTvPlayoutGenerationService:
 
         return TvPlayout.objects.create(tv_channel=tv_channel, is_active=True, grid=grid_layout), True
 
-    @staticmethod
-    def _parse_day_time(value: str) -> time:
-        hour, minute = str(value).strip().split(":")
-        return time(hour=int(hour), minute=int(minute))
-
     def _resolve_window_start(self) -> datetime:
         now = timezone.now()
         cycle_anchor = now.replace(
             hour=self.day_start.hour,
             minute=self.day_start.minute,
-            second=0,
+            second=self.day_start.second,
             microsecond=0,
         )
         if now.time() < self.day_start:
@@ -215,12 +216,16 @@ class FlexibleTvPlayoutGenerationService:
         day_anchor = cursor.replace(
             hour=self.day_start.hour,
             minute=self.day_start.minute,
-            second=0,
+            second=self.day_start.second,
             microsecond=0,
         )
         if cursor.time() < self.day_start:
             day_anchor -= timedelta(days=1)
-        day_end_at = day_anchor.replace(hour=self.day_end.hour, minute=self.day_end.minute)
+        day_end_at = day_anchor.replace(
+            hour=self.day_end.hour,
+            minute=self.day_end.minute,
+            second=self.day_end.second,
+        )
         if self.day_end <= self.day_start:
             day_end_at += timedelta(days=1)
         return day_end_at
@@ -229,7 +234,7 @@ class FlexibleTvPlayoutGenerationService:
         candidate = cursor.replace(
             hour=self.day_start.hour,
             minute=self.day_start.minute,
-            second=0,
+            second=self.day_start.second,
             microsecond=0,
         )
         while candidate <= cursor:

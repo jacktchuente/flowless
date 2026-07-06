@@ -294,10 +294,8 @@ LLM_RETRY_GRID_PRESET = int(os.getenv("LLM_RETRY_GRID_PRESET", 3))
 LLM_DELAY = int(os.getenv("LLM_DELAY", 0))
 GRID_END_ADJUSTMENT_MAX_SECONDS = int(os.getenv("GRID_END_ADJUSTMENT_MAX_SECONDS", 15 * 60))
 
-# Fenetre de programmation journaliere du playout flexible (HH:MM)
-FLEXIBLE_PLAYOUT_DAY_START = os.getenv("FLEXIBLE_PLAYOUT_DAY_START", "06:00")
-FLEXIBLE_PLAYOUT_DAY_END = os.getenv("FLEXIBLE_PLAYOUT_DAY_END", "21:00")
-# strict: aucun item ne doit finir apres DAY_END; soft: accepte tant que l'item commence avant DAY_END
+# Depassement de la fin de journee (editorial line end_at) par le playout flexible
+# strict: aucun item ne doit finir apres la borne; soft: accepte tant que l'item commence avant la borne
 FLEXIBLE_PLAYOUT_OVERFLOW_MODE = os.getenv("FLEXIBLE_PLAYOUT_OVERFLOW_MODE", "strict")
 
 
