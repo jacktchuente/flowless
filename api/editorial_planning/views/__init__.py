@@ -4,11 +4,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from editorial_planning.models import EditorialChannelCandidate, EditorialFlowRun
+from editorial_planning.models import (
+    EditorialChannelCandidate,
+    EditorialFlowRun,
+    EditorialSegment,
+    EditorialSegmentMembership,
+)
 from editorial_planning.serializers.planning_serializers import (
     EditorialChannelCandidateSerializer,
     EditorialFlexibleChannelCreateSerializer,
     EditorialFlowRunSerializer,
+    EditorialSegmentMembershipSerializer,
+    EditorialSegmentMembershipStatusSerializer,
+    EditorialSegmentSerializer,
 )
 from editorial_planning.services.channel_creation_service import EditorialFlexibleChannelCreationService
 from editorial_planning.tasks import match_new_media_to_editorial_run
@@ -46,6 +54,62 @@ class EditorialFlowRunViewSet(
         if catalog_id:
             queryset = queryset.filter(catalog_id=catalog_id)
         return queryset.order_by("-created_at", "-id")
+
+
+class EditorialSegmentViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    serializer_class = EditorialSegmentSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        queryset = EditorialSegment.objects.select_related("run").all()
+        run_id = self.request.query_params.get("run")
+        if run_id:
+            queryset = queryset.filter(run_id=run_id)
+        catalog_id = self.request.query_params.get("catalog")
+        if catalog_id:
+            queryset = queryset.filter(run__catalog_id=catalog_id)
+        if self.request.query_params.get("active_run") in {"1", "true"}:
+            queryset = queryset.filter(run__is_active=True)
+        return queryset.order_by("-programmable_score", "name", "id")
+
+
+class EditorialSegmentMembershipViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    serializer_class = EditorialSegmentMembershipSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        queryset = EditorialSegmentMembership.objects.select_related(
+            "segment",
+            "media_container",
+        ).all()
+        segment_id = self.request.query_params.get("segment")
+        if segment_id:
+            queryset = queryset.filter(segment_id=segment_id)
+        status_value = self.request.query_params.get("status")
+        if status_value:
+            queryset = queryset.filter(status=status_value)
+        return queryset.order_by("-score", "media_container_id")
+
+    @action(detail=True, methods=("post",), url_name="set-status", url_path="set-status")
+    def set_status(self, request, pk=None):
+        membership = self.get_object()
+        serializer = EditorialSegmentMembershipStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        membership.status = serializer.validated_data["status"]
+        membership.decision_reason = "Manual review"
+        membership.save(update_fields=["status", "decision_reason", "updated_at"])
+        return Response(
+            EditorialSegmentMembershipSerializer(membership, context=self.get_serializer_context()).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class EditorialChannelCandidateViewSet(

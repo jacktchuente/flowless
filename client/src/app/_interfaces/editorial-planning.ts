@@ -16,6 +16,35 @@ export interface EditorialSegmentPath {
   elements: EditorialSegmentPathElement[]
 }
 
+export interface EditorialSegment {
+  id: string | number
+  segment_key: string
+  name: string
+  description: string
+  profile: Record<string, unknown>
+  programmable_score: number
+  cohesion_score: number
+  separation_score: number
+  format_consistency_score: number
+  volume_score: number
+  labelability_score: number
+  acceptance_threshold: number
+  media_count: number
+}
+
+export interface EditorialSegmentMembership {
+  id: string | number
+  segment: string | number
+  media_container: string | number
+  media_container_title: string
+  media_container_categories: string[]
+  score: number
+  is_primary: boolean
+  status: string
+  decision_reason: string
+  updated_at: string
+}
+
 export interface EditorialFlowRun {
   id: string | number
   catalog: string | number

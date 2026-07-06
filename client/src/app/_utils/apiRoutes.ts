@@ -8,4 +8,6 @@ export const apiRoutes = {
     gridBlock: "grid-block",
     editorialChannelCandidate: "editorial-channel-candidate",
     editorialFlowRun: "editorial-flow-run",
+    editorialSegment: "editorial-segment",
+    editorialSegmentMembership: "editorial-segment-membership",
 }

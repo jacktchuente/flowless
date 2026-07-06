@@ -73,7 +73,8 @@
 }
 
 .flex-mode-toggle {
-  margin-right: 6px;
+  margin-left: 6px;
+  order: 99;
 }
 
 .channel-selection-banner {

@@ -28,6 +28,7 @@ import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-det
 import {TvChannelDialogComponent} from "../tv-channel-dialog/tv-channel-dialog.component";
 import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
 import {EditorialCandidateDialogComponent} from "../editorial-candidate-dialog/editorial-candidate-dialog.component";
+import {EditorialMembershipReviewDialogComponent} from "../editorial-membership-review-dialog/editorial-membership-review-dialog.component";
 
 type ChannelCalendarEventMeta =
   | {kind: 'schedule', item: ScheduledMediaItem}
@@ -250,6 +251,20 @@ export class ChannelManagementComponent implements AfterViewInit {
       if (result) {
         this.notificationService.notify("Chaine flexible creee.")
         this.loadChannels()
+      }
+    })
+  }
+
+  openMembershipReview() {
+    if (!this.selectedCatalog) {
+      return
+    }
+    this.dialog.open(EditorialMembershipReviewDialogComponent, {
+      width: '860px',
+      maxWidth: '96vw',
+      data: {
+        catalogId: this.selectedCatalog.id,
+        catalogName: this.selectedCatalog.name,
       }
     })
   }

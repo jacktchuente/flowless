@@ -6,6 +6,8 @@ from editorial_planning.models import (
     EditorialFlowRun,
     EditorialPlannedGrid,
     EditorialSegment,
+    EditorialSegmentMembership,
+    EditorialSegmentMembershipStatus,
     EditorialSegmentPath,
     EditorialSegmentPathElement,
 )
@@ -45,6 +47,36 @@ class EditorialSegmentSerializer(serializers.ModelSerializer):
             "acceptance_threshold",
             "media_count",
         )
+
+
+class EditorialSegmentMembershipSerializer(serializers.ModelSerializer):
+    media_container_title = serializers.CharField(source="media_container.title", read_only=True)
+    media_container_categories = serializers.JSONField(source="media_container.categories", read_only=True)
+
+    class Meta:
+        model = EditorialSegmentMembership
+        fields = (
+            "id",
+            "segment",
+            "media_container",
+            "media_container_title",
+            "media_container_categories",
+            "score",
+            "is_primary",
+            "status",
+            "decision_reason",
+            "updated_at",
+        )
+
+
+class EditorialSegmentMembershipStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=(
+            EditorialSegmentMembershipStatus.ACCEPTED,
+            EditorialSegmentMembershipStatus.MANUAL_OVERRIDE,
+            EditorialSegmentMembershipStatus.REJECTED,
+        ),
+    )
 
 
 class EditorialChannelSegmentSerializer(serializers.ModelSerializer):

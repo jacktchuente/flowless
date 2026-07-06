@@ -28,7 +28,6 @@
   </div>
 
   <div class="catalog-toolbar-actions">
-    <mat-slide-toggle class="flex-mode-toggle" [(ngModel)]="flexMode">Flex</mat-slide-toggle>
     <button mat-button (click)="openEditCatalogDialog()" [disabled]="!selectedCatalogId">
       {{ 'CHANNELS.EDIT_CATALOG' | translate }}
     </button>
@@ -44,10 +43,15 @@
       <mat-icon>playlist_add</mat-icon>
       Candidates
     </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="openMembershipReview()" [disabled]="!selectedCatalogId">
+      <mat-icon>fact_check</mat-icon>
+      Segments
+    </button>
     <button *ngIf="flexMode" mat-stroked-button (click)="matchFlexibleNewMedia()" [disabled]="!selectedCatalogId">
       <mat-icon>sync</mat-icon>
       Nouveaux medias
     </button>
+    <mat-slide-toggle class="flex-mode-toggle" [(ngModel)]="flexMode">Flex</mat-slide-toggle>
   </div>
 </section>
 
