@@ -93,7 +93,7 @@ class ChannelDiscoveryConfig:
     min_total_duration_seconds: int = 0
     compatibility_threshold: float = 0.3
     allow_segment_sharing: bool = False
-    duplicate_similarity_threshold: float = 0.97
+    duplicate_similarity_threshold: float = 0.95
     max_channel_candidates: int = 10
 
 

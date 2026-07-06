@@ -249,8 +249,10 @@ class ChannelDiscoverySharingTests(SimpleTestCase):
         ]
 
     def base_config(self, **kwargs) -> ChannelDiscoveryConfig:
+        # Raw cosine scale: the s1-s2 and s2-s3 edges sit at ~0.7, the
+        # s1-s3 pair at 0.0.
         return ChannelDiscoveryConfig(
-            compatibility_threshold=0.8,
+            compatibility_threshold=0.6,
             min_segments_per_channel=1,
             min_channel_score=0.0,
             **kwargs,

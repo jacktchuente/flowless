@@ -43,12 +43,13 @@ from .features import (
 from .scoring import (
     compute_silhouette_scores,
     compute_cluster_silhouette,
+    cosine_similarity,
     distinctiveness_score,
     format_consistency_score,
     volume_score,
     labelability_score,
+    normalised_cohesion,
     programmable_score,
-    similarity,
 )
 
 DURATION_BUCKET_LABELS = {
@@ -241,7 +242,8 @@ def run_segmentation(
                     category_counts[key] = category_counts.get(key, 0) + 1
 
         cluster_vectors = vectors_np[indices]
-        cohesion_score = compute_cluster_silhouette(vectors_np, list(final_labels), cluster_id)
+        cluster_silhouette = compute_cluster_silhouette(vectors_np, list(final_labels), cluster_id)
+        cohesion_score = normalised_cohesion(cluster_silhouette)
         other_means = [mean for other_id, mean in cluster_means.items() if other_id != cluster_id]
         separation_score = distinctiveness_score(cluster_means[cluster_id], other_means)
         fmt_score = format_consistency_score(durations)
@@ -350,7 +352,7 @@ def run_segmentation(
         segment_primary_indices[seg_id] = set(indices)
         # Record primary memberships
         for idx in indices:
-            score = similarity(vectors[idx], reference_vector)
+            score = cosine_similarity(vectors[idx], reference_vector)
             memberships.append(
                 SegmentMembership(media_id=media[idx].id, segment_id=seg_id, score=score, is_primary=True)
             )
@@ -390,7 +392,7 @@ def run_segmentation(
                     SegmentMembership(
                         media_id=media[idx].id,
                         segment_id=segment.segment_id,
-                        score=similarity(vectors[idx], segment.reference_vector),
+                        score=cosine_similarity(vectors[idx], segment.reference_vector),
                         is_primary=False,
                     )
                 )

@@ -23,7 +23,7 @@ from .outputs import (
     ChannelDiscoveryResult,
 )
 from .configs import ChannelDiscoveryConfig
-from .scoring import similarity, diversity_score, distinctiveness_score
+from .scoring import cosine_similarity, diversity_score, distinctiveness_score
 
 import math
 
@@ -62,7 +62,7 @@ def discover_channel_candidates(
     adjacency: Dict[int, List[int]] = {i: [] for i in range(n)}
     for i in range(n):
         for j in range(i + 1, n):
-            sim = similarity(vectors[i], vectors[j])
+            sim = cosine_similarity(vectors[i], vectors[j])
             if sim >= config.compatibility_threshold:
                 # Record undirected edge
                 adjacency[i].append(j)
@@ -124,7 +124,7 @@ def discover_channel_candidates(
         internal_scores = []
         for i in range(len(segs)):
             for j in range(i + 1, len(segs)):
-                sim = similarity(segs[i].reference_vector, segs[j].reference_vector)
+                sim = cosine_similarity(segs[i].reference_vector, segs[j].reference_vector)
                 internal_scores.append(sim)
         if internal_scores:
             internal_coherence = float(np.mean(internal_scores))
@@ -255,7 +255,7 @@ def discover_channel_candidates(
         if len(channel_candidates) >= config.max_channel_candidates:
             break
         if any(
-            similarity(centroid, accepted) >= config.duplicate_similarity_threshold
+            cosine_similarity(centroid, accepted) >= config.duplicate_similarity_threshold
             for accepted in accepted_centroids
         ):
             duplicates_dropped += 1

@@ -23,8 +23,8 @@ from .outputs import (
     MediaSegmentMatchingResult,
 )
 from .configs import MatchingConfig
-from .features import FeatureExtractor
-from .scoring import similarity
+from .features import FEATURE_STATE_VERSION, FeatureExtractor
+from .scoring import cosine_similarity, similarity
 
 
 def match_media_to_segments(
@@ -48,6 +48,12 @@ def match_media_to_segments(
         config = MatchingConfig()
     # Reconstruct feature extractor
     fe = FeatureExtractor.from_state(model_state.feature_state)
+    # The similarity scale must match the one used when the model state
+    # was persisted: raw cosine for v2 states, mapped cosine for legacy.
+    if (model_state.feature_state or {}).get("version") == FEATURE_STATE_VERSION:
+        similarity_fn = cosine_similarity
+    else:
+        similarity_fn = similarity
     # Build lookup maps for segment centroids and thresholds
     centroids = model_state.cluster_centroids
     thresholds = model_state.acceptance_thresholds
@@ -64,7 +70,7 @@ def match_media_to_segments(
         for sid, centroid_vec in centroid_arrays.items():
             # Euclidean distance for acceptance threshold
             dist = float(np.linalg.norm(m_vec - centroid_vec))
-            sim = similarity(m_vec, centroid_vec)
+            sim = similarity_fn(m_vec, centroid_vec)
             scores.append((sid, sim, dist))
         # Sort by similarity descending
         scores.sort(key=lambda x: x[1], reverse=True)

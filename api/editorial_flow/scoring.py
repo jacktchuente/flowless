@@ -97,13 +97,26 @@ def labelability_score(category_counts: Dict[str, int]) -> float:
     return float(sum(top_counts) / total)
 
 
+# A silhouette of 0.5 is already excellent on sparse multi-tag data, so the
+# cohesion input is normalised against this realistic ceiling instead of the
+# theoretical 1.0 (which no real corpus ever reaches).
+COHESION_REFERENCE_SILHOUETTE = 0.5
+
+
+def normalised_cohesion(silhouette_value: float) -> float:
+    """Maps a raw silhouette onto [0, 1] against a realistic ceiling."""
+    return float(max(0.0, min(1.0, silhouette_value / COHESION_REFERENCE_SILHOUETTE)))
+
+
 def programmable_score(cohesion: float, separation: float, format_consistency: float, volume: float, labelability: float) -> float:
     """Combines various cluster scores into a single programmability score.
 
     The weights reflect the importance of each criterion. Cohesion and
     separation are emphasised, as well as consistency of duration and
     sufficient volume. Labelability contributes modestly. The result
-    is clamped between 0 and 1.
+    is clamped between 0 and 1. Callers are expected to pass a cohesion
+    already normalised onto [0, 1] (see ``normalised_cohesion``) so that
+    a good cluster lands around 0.7-0.8 instead of plateauing at ~0.6.
     """
     score = (
         0.3 * cohesion
@@ -116,11 +129,13 @@ def programmable_score(cohesion: float, separation: float, format_consistency: f
 
 
 def similarity(a: Iterable[float], b: Iterable[float]) -> float:
-    """Computes a simple cosine similarity between two vectors.
+    """Cosine similarity remapped from [-1, 1] to [0, 1].
 
-    Returns a value in [0, 1] (mapped from [-1, 1]) where 0 indicates
-    orthogonality or opposite directions and 1 indicates identical
-    vectors. If either vector is all zeros the similarity is 0.0.
+    Frozen legacy scale: model states persisted with version "1.0" were
+    scored and thresholded on this mapping, so it must keep producing
+    identical values for those runs. New (v2) code paths use
+    ``cosine_similarity`` instead, whose scale is meaningful for
+    non-negative feature vectors (0 = unrelated, 1 = identical).
     """
     a_arr = np.array(list(a), dtype=float)
     b_arr = np.array(list(b), dtype=float)
@@ -131,6 +146,23 @@ def similarity(a: Iterable[float], b: Iterable[float]) -> float:
     cos = float(np.dot(a_arr, b_arr) / (norm_a * norm_b))
     # Map from [-1,1] to [0,1]
     return max(0.0, min(1.0, (cos + 1.0) / 2.0))
+
+
+def cosine_similarity(a: Iterable[float], b: Iterable[float]) -> float:
+    """Raw cosine similarity clipped to [0, 1].
+
+    With the non-negative v2 feature vectors the cosine already lives in
+    [0, 1], so no remapping is needed: 0 means unrelated and 1 identical,
+    which keeps membership scores and thresholds interpretable.
+    """
+    a_arr = np.array(list(a), dtype=float)
+    b_arr = np.array(list(b), dtype=float)
+    norm_a = np.linalg.norm(a_arr)
+    norm_b = np.linalg.norm(b_arr)
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    cos = float(np.dot(a_arr, b_arr) / (norm_a * norm_b))
+    return max(0.0, min(1.0, cos))
 
 
 def diversity_score(category_sets: List[List[str]]) -> float:
@@ -155,15 +187,20 @@ def diversity_score(category_sets: List[List[str]]) -> float:
     return float(max(0.0, 1.0 - abs(avg_ratio - 0.5) * 2.0))
 
 
-def distinctiveness_score(community_centroid: Iterable[float], other_centroids: List[Iterable[float]]) -> float:
+def distinctiveness_score(
+    community_centroid: Iterable[float],
+    other_centroids: List[Iterable[float]],
+    similarity_fn=cosine_similarity,
+) -> float:
     """Computes how distinct a community is from other communities.
 
     The score decreases if the centroid of this community is very
-    similar to any other centroid. It uses cosine similarity. If
-    there are no other centroids the score is 1.0.
+    similar to any other centroid. It uses the raw cosine similarity by
+    default; legacy callers may pass the mapped ``similarity``. If there
+    are no other centroids the score is 1.0.
     """
     if not other_centroids:
         return 1.0
-    scores = [similarity(community_centroid, centroid) for centroid in other_centroids]
+    scores = [similarity_fn(community_centroid, centroid) for centroid in other_centroids]
     max_sim = max(scores) if scores else 0.0
     return float(1.0 - max_sim)
