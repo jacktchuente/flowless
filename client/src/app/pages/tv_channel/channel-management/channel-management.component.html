@@ -47,6 +47,10 @@
       <mat-icon>fact_check</mat-icon>
       Segments
     </button>
+    <button *ngIf="flexMode" mat-stroked-button (click)="openRunDialog()" [disabled]="!selectedCatalogId">
+      <mat-icon>history</mat-icon>
+      Runs
+    </button>
     <button *ngIf="flexMode" mat-stroked-button (click)="matchFlexibleNewMedia()" [disabled]="!selectedCatalogId">
       <mat-icon>sync</mat-icon>
       Nouveaux medias

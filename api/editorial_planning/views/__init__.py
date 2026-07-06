@@ -18,14 +18,20 @@ from editorial_planning.serializers.planning_serializers import (
     EditorialSegmentMembershipStatusSerializer,
     EditorialSegmentSerializer,
 )
+from editorial_planning.serializers.planning_serializers import (
+    EditorialRunReconcileApplySerializer,
+)
 from editorial_planning.services.channel_creation_service import EditorialFlexibleChannelCreationService
+from editorial_planning.services.reconciliation_service import EditorialRunReconciliationService
 from editorial_planning.tasks import match_new_media_to_editorial_run
+from project_ops.constants import AnalyzeStatus
 from tv_channel.serializers.tv_channel_serializers import TvChannelSerializer
 
 
 class EditorialFlowRunViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
     GenericViewSet,
 ):
     serializer_class = EditorialFlowRunSerializer
@@ -36,6 +42,81 @@ class EditorialFlowRunViewSet(
         run = self.get_object()
         match_new_media_to_editorial_run.delay(run.id)
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=("post",), url_name="activate", url_path="activate")
+    def activate(self, request, pk=None):
+        run = self.get_object()
+        if run.status != AnalyzeStatus.COMPLETE:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"detail": "Seul un run terminé peut être activé."},
+            )
+        EditorialFlowRun.objects.filter(catalog=run.catalog, is_active=True).exclude(pk=run.pk).update(
+            is_active=False
+        )
+        run.is_active = True
+        run.save(update_fields=["is_active", "updated_at"])
+        return Response(EditorialFlowRunSerializer(run, context=self.get_serializer_context()).data)
+
+    def destroy(self, request, *args, **kwargs):
+        run = self.get_object()
+        if run.is_active:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"detail": "Le run actif ne peut pas être supprimé. Active un autre run d'abord."},
+            )
+        promoted = list(
+            run.channel_candidates.filter(tv_channel__isnull=False).values_list("tv_channel__name", flat=True)
+        )
+        if promoted:
+            return Response(
+                status=status.HTTP_409_CONFLICT,
+                data={
+                    "detail": "Des chaînes sont encore rattachées à ce run. Réconcilie-les d'abord.",
+                    "channels": promoted,
+                },
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=("post",), url_name="reconcile", url_path="reconcile")
+    def reconcile(self, request, pk=None):
+        run = self.get_object()
+        service = EditorialRunReconciliationService(run=run)
+
+        mappings = request.data.get("mappings")
+        applied = []
+        if mappings:
+            serializer = EditorialRunReconcileApplySerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            applied = service.apply(serializer.validated_data["mappings"])
+
+        proposals = service.build_proposals()
+        return Response(
+            {
+                "applied": applied,
+                "proposals": [
+                    {
+                        "tv_channel": {
+                            "id": proposal.tv_channel.id,
+                            "name": proposal.tv_channel.name,
+                        },
+                        "old_candidate": {
+                            "id": proposal.old_candidate.id,
+                            "name": proposal.old_candidate.name,
+                            "run": proposal.old_candidate.run_id,
+                        },
+                        "proposed_candidate": {
+                            "id": proposal.proposed_candidate.id,
+                            "name": proposal.proposed_candidate.name,
+                        }
+                        if proposal.proposed_candidate
+                        else None,
+                        "confidence": round(proposal.confidence, 3),
+                    }
+                    for proposal in proposals
+                ],
+            }
+        )
 
     def get_queryset(self):
         queryset = (

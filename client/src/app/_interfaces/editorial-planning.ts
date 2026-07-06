@@ -51,6 +51,8 @@ export interface EditorialFlowRun {
   status: string | number
   is_active: boolean
   algorithm_version: string
+  config?: Record<string, unknown>
+  diagnostics?: Record<string, unknown>
   source_media_count: number
   segment_count: number
   channel_candidate_count: number
@@ -58,6 +60,19 @@ export interface EditorialFlowRun {
   completed_at: string | null
   created_at: string
   updated_at: string
+  channel_candidates?: EditorialChannelCandidate[]
+}
+
+export interface EditorialRunReconciliationProposal {
+  tv_channel: {id: number, name: string}
+  old_candidate: {id: number, name: string, run: number}
+  proposed_candidate: {id: number, name: string} | null
+  confidence: number
+}
+
+export interface EditorialRunReconciliationResponse {
+  applied: Array<{tv_channel: number, candidate: number, previous_candidate: number | null}>
+  proposals: EditorialRunReconciliationProposal[]
 }
 
 export interface EditorialChannelCandidate {

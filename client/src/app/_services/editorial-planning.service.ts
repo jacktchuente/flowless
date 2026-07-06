@@ -5,6 +5,7 @@ import {Observable, Subject} from "rxjs";
 import {
   EditorialChannelCandidate,
   EditorialFlowRun,
+  EditorialRunReconciliationResponse,
   EditorialSegment,
   EditorialSegmentMembership,
 } from "@project-interfaces/editorial-planning";
@@ -51,6 +52,22 @@ export class EditorialFlowRunApiService extends BaseApiService {
 
   matchNewMedia(id: string | number): Observable<null> {
     return this.http.post<null>(`${this.getFullUrl()}${id}/match-new-media/`, {});
+  }
+
+  activate(id: string | number): Observable<EditorialFlowRun> {
+    return this.http.post<EditorialFlowRun>(`${this.getFullUrl()}${id}/activate/`, {});
+  }
+
+  deleteRun(id: string | number): Observable<null> {
+    return this.http.delete<null>(`${this.getFullUrl()}${id}/`);
+  }
+
+  reconcile(
+    id: string | number,
+    mappings?: Array<{tv_channel: number, candidate: number}>,
+  ): Observable<EditorialRunReconciliationResponse> {
+    const payload = mappings?.length ? {mappings} : {};
+    return this.http.post<EditorialRunReconciliationResponse>(`${this.getFullUrl()}${id}/reconcile/`, payload);
   }
 }
 
@@ -138,6 +155,45 @@ export class EditorialPlanningService {
   setMembershipStatus(id: string | number, status: string): Subject<RequestResponseLike> {
     const subject = new Subject<RequestResponseLike>()
     this.membershipApi.setStatus(id, status).subscribe({
+      next: (body) => subject.next({isOk: true, body}),
+      error: (body) => subject.next({isOk: false, body}),
+    })
+    return subject
+  }
+
+  listRuns(catalogId: string | number): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    this.flowRunApi.listRuns({catalog: catalogId}).subscribe({
+      next: (body) => subject.next({isOk: true, body}),
+      error: (body) => subject.next({isOk: false, body}),
+    })
+    return subject
+  }
+
+  activateRun(id: string | number): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    this.flowRunApi.activate(id).subscribe({
+      next: (body) => subject.next({isOk: true, body}),
+      error: (body) => subject.next({isOk: false, body}),
+    })
+    return subject
+  }
+
+  deleteRun(id: string | number): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    this.flowRunApi.deleteRun(id).subscribe({
+      next: (body) => subject.next({isOk: true, body}),
+      error: (body) => subject.next({isOk: false, body}),
+    })
+    return subject
+  }
+
+  reconcileRun(
+    id: string | number,
+    mappings?: Array<{tv_channel: number, candidate: number}>,
+  ): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    this.flowRunApi.reconcile(id, mappings).subscribe({
       next: (body) => subject.next({isOk: true, body}),
       error: (body) => subject.next({isOk: false, body}),
     })

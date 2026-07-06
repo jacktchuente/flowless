@@ -29,6 +29,7 @@ import {TvChannelDialogComponent} from "../tv-channel-dialog/tv-channel-dialog.c
 import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
 import {EditorialCandidateDialogComponent} from "../editorial-candidate-dialog/editorial-candidate-dialog.component";
 import {EditorialMembershipReviewDialogComponent} from "../editorial-membership-review-dialog/editorial-membership-review-dialog.component";
+import {EditorialRunDialogComponent} from "../editorial-run-dialog/editorial-run-dialog.component";
 
 type ChannelCalendarEventMeta =
   | {kind: 'schedule', item: ScheduledMediaItem}
@@ -266,6 +267,22 @@ export class ChannelManagementComponent implements AfterViewInit {
         catalogId: this.selectedCatalog.id,
         catalogName: this.selectedCatalog.name,
       }
+    })
+  }
+
+  openRunDialog() {
+    if (!this.selectedCatalog) {
+      return
+    }
+    this.dialog.open(EditorialRunDialogComponent, {
+      width: '900px',
+      maxWidth: '96vw',
+      data: {
+        catalogId: this.selectedCatalog.id,
+        catalogName: this.selectedCatalog.name,
+      }
+    }).afterClosed().subscribe(() => {
+      this.loadChannels()
     })
   }
 

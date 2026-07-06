@@ -38,6 +38,18 @@ class EditorialFlexibleChannelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, allow_blank=True, max_length=50)
 
 
+class EditorialRunReconcileMappingSerializer(serializers.Serializer):
+    tv_channel = serializers.IntegerField(min_value=1)
+    candidate = serializers.IntegerField(min_value=1)
+
+
+class EditorialRunReconcileApplySerializer(serializers.Serializer):
+    mappings = serializers.ListField(
+        child=EditorialRunReconcileMappingSerializer(),
+        allow_empty=False,
+    )
+
+
 class EditorialSegmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = EditorialSegment
