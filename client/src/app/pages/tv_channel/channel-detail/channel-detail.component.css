@@ -222,6 +222,10 @@
   margin-top: 18px;
 }
 
+.calendar-split.single-panel {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .prompt-card pre {
   margin: 0;
   padding: 14px;

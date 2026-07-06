@@ -130,7 +130,8 @@
     "NOTIFY_LOGO_UPDATED": "Logo mis à jour.",
     "NOTIFY_LOGO_PROMPT_FAILED": "Export du prompt logo impossible.",
     "NOTIFY_LOGO_PROMPT_DOWNLOADED": "Prompt logo téléchargé.",
-    "NOTIFY_RULES_RESET": "Règles réinitialisées."
+    "NOTIFY_RULES_RESET": "Règles réinitialisées.",
+    "CALENDAR_HELP_FLEXIBLE": "Affichage journalier du programme généré par la planification flexible."
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",
