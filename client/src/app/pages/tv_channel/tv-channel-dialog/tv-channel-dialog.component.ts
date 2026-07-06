@@ -39,7 +39,6 @@ export class TvChannelDialogComponent {
 
   isSubmitting = false
   isSuggestingName = false
-  suggestedName: string | null = null
   errorMessage: string | null = null
 
   constructor(
@@ -118,7 +117,6 @@ export class TvChannelDialogComponent {
       return
     }
     this.isSuggestingName = true
-    this.suggestedName = null
     this.tvChannelService.suggestName(this.data.channel.id).subscribe((response) => {
       this.isSuggestingName = false
       if (!response.isOk) {
@@ -131,22 +129,10 @@ export class TvChannelDialogComponent {
         this.notificationService.notify("TV_CHANNEL_DIALOG.NOTIFY_SUGGEST_NAME_FAILED")
         return
       }
-      this.suggestedName = name
+      const nameControl = this.form.get('name') as AbstractControl<string> | null
+      nameControl?.setValue(name)
+      nameControl?.markAsDirty()
     })
-  }
-
-  applySuggestedName() {
-    if (!this.suggestedName) {
-      return
-    }
-    const nameControl = this.form.get('name') as AbstractControl<string> | null
-    nameControl?.setValue(this.suggestedName)
-    nameControl?.markAsDirty()
-    this.suggestedName = null
-  }
-
-  dismissSuggestedName() {
-    this.suggestedName = null
   }
 
   save() {

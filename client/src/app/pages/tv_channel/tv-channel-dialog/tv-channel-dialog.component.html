@@ -16,19 +16,6 @@
         </div>
       </div>
     </section>
-    <section class="name-suggestion-banner" *ngIf="suggestedName">
-      <mat-icon>lightbulb</mat-icon>
-      <div class="name-suggestion-body">
-        <span class="name-suggestion-label">{{ 'TV_CHANNEL_DIALOG.SUGGESTED_NAME' | translate }}</span>
-        <strong>{{ suggestedName }}</strong>
-      </div>
-      <button mat-stroked-button color="primary" type="button" (click)="applySuggestedName()">
-        {{ 'TV_CHANNEL_DIALOG.USE_SUGGESTED_NAME' | translate }}
-      </button>
-      <button mat-icon-button type="button" (click)="dismissSuggestedName()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </section>
     <p *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</p>
   </div>
 

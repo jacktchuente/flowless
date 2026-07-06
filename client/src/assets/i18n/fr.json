@@ -184,8 +184,6 @@
   },
   "TV_CHANNEL_DIALOG": {
     "SUGGEST_NAME": "Suggérer un nom",
-    "SUGGESTED_NAME": "Nom suggéré",
-    "USE_SUGGESTED_NAME": "Utiliser",
     "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
   }
 }
