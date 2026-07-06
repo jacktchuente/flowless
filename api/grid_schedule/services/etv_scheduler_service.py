@@ -226,6 +226,11 @@ class ETVSchedulerService:
             if episode_number is not None and season_number is not None:
                 return f'show_title:"{title}" AND type:episode AND episode_number:{episode_number} AND season_number:{season_number}'
             return f'show_title:"{title}" AND type:episode'
+        item_title = ETVSchedulerService._escape_query_value(element.get("media_item_title") or "")
+        if container_kind == MediaContainerKind.MUSIC_VIDEO_RELEASE:
+            return f'title:"{item_title or title}" AND type:music_video'
+        if container_kind == MediaContainerKind.MUSIC_RELEASE:
+            return f'title:"{item_title or title}" AND type:song'
         return f'title:"{title}"'
 
     @staticmethod
