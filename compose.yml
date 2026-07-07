@@ -46,6 +46,10 @@ services:
       - internal
     env_file:
       - .env
+    cpus: "1.0"
+    mem_limit: 999m
+    memswap_limit: 999m
+    pids_limit: 256
 
   postgres:
     image: postgres
