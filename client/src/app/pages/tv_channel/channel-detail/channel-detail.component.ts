@@ -1,9 +1,10 @@
 import {Component, DestroyRef, ElementRef, ViewChild, inject} from '@angular/core';
-import {DatePipe, NgFor, NgIf} from "@angular/common";
+import {DatePipe, NgClass, NgFor, NgIf} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {MatButtonModule} from "@angular/material/button";
 import {MatDialog} from "@angular/material/dialog";
 import {MatIconModule} from "@angular/material/icon";
+import {MatMenuModule} from "@angular/material/menu";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {filter} from "rxjs/operators";
 import {CalendarEvent, CalendarModule} from "angular-calendar";
@@ -17,6 +18,7 @@ import {NotificationService} from "@project-shared/services/notification.service
 import {BlueprintGenerationDialogComponent} from "../blueprint-generation-dialog/blueprint-generation-dialog.component";
 import {EditorialLineDetailDialogComponent} from "../editorial-line-detail-dialog/editorial-line-detail-dialog.component";
 import {GridBlockDetailDialogComponent} from "../grid-block-detail-dialog/grid-block-detail-dialog.component";
+import {GenerationReportDialogComponent} from "../generation-report-dialog/generation-report-dialog.component";
 import {PlayoutGenerationDialogComponent} from "../playout-generation-dialog/playout-generation-dialog.component";
 import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialog.component";
 import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-detail-dialog/schedule-media-item-detail-dialog.component";
@@ -36,8 +38,10 @@ type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
     DatePipe,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     TranslateModule,
+    NgClass,
     NgFor,
     NgIf,
     CalendarModule,
@@ -120,6 +124,39 @@ export class ChannelDetailComponent {
       this.calendarDate = this.getTodayDate()
       this.refreshCalendarData()
       this.isPageLoading = false
+    })
+  }
+
+  get reportIssueCount(): number {
+    const counts = this.channel?.latest_generation_report?.issue_counts
+    if (!counts) {
+      return 0
+    }
+    return counts.error + counts.warning
+  }
+
+  get reportBadgeClass(): string {
+    const counts = this.channel?.latest_generation_report?.issue_counts
+    if (counts?.error) {
+      return 'report-badge-error'
+    }
+    if (counts?.warning) {
+      return 'report-badge-warning'
+    }
+    return ''
+  }
+
+  openGenerationReportsDialog() {
+    if (!this.channel) {
+      return
+    }
+    this.dialog.open(GenerationReportDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        channelId: this.channel.id,
+        channelName: this.channel.name,
+      },
     })
   }
 
@@ -234,6 +271,21 @@ export class ChannelDetailComponent {
       this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_UPDATED")
       this.loadChannel(this.channel!.id.toString())
     })
+  }
+
+  generateLogo(backend: 'comfyui' | 'openai') {
+    if (!this.channel) {
+      return
+    }
+    this.tvChannelService.generateLogo(this.channel.id, backend)
+      .subscribe((response) => {
+        if (!response.isOk) {
+          this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_FAILED")
+          return
+        }
+        this.logoLoadFailed = false
+        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_STARTED")
+      })
   }
 
   downloadLogoPrompt() {
@@ -402,14 +454,21 @@ export class ChannelDetailComponent {
           dayEnd,
         )
 
+        const isInterstitial = this.isInterstitialItem(item)
+        const titlePrefix = isInterstitial ? `▸ ${item.role_label ?? 'interlude'} · ` : ''
+
         return {
           start: clippedRange.start,
           end: clippedRange.end,
-        title: `${item.media_item_title} · ${item.block_name} · ${this.getScheduleTimeLabel(item)}`,
+        title: `${titlePrefix}${item.media_item_title} · ${item.block_name} · ${this.getScheduleTimeLabel(item)}`,
         color: this.buildScheduleCalendarColor(item),
         meta: {kind: 'schedule', item},
         }
       })
+  }
+
+  private isInterstitialItem(item: ScheduledMediaItem): boolean {
+    return item.parent_schedule_item !== null && item.parent_schedule_item !== undefined
   }
 
   private buildGridCalendarEvents(dayStart: Date, dayEnd: Date): ChannelCalendarEvent[] {
@@ -440,6 +499,12 @@ export class ChannelDetailComponent {
   }
 
   private buildScheduleCalendarColor(item: ScheduledMediaItem) {
+    if (this.isInterstitialItem(item)) {
+      return {
+        primary: 'hsla(0, 0%, 42%, 0.85)',
+        secondary: 'hsla(0, 0%, 68%, 0.9)',
+      }
+    }
     const itemKey = item.id?.toString?.() ?? `${item.media_container_id}-${item.media_item_title}`
     const seed = Array.from(itemKey).reduce((total, char) => total + char.charCodeAt(0), 0)
     const hue = (seed * 43) % 360

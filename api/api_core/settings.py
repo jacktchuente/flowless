@@ -298,6 +298,18 @@ GRID_END_ADJUSTMENT_MAX_SECONDS = int(os.getenv("GRID_END_ADJUSTMENT_MAX_SECONDS
 # strict: aucun item ne doit finir apres la borne; soft: accepte tant que l'item commence avant la borne
 FLEXIBLE_PLAYOUT_OVERFLOW_MODE = os.getenv("FLEXIBLE_PLAYOUT_OVERFLOW_MODE", "strict")
 
+# Generation d'images (logos de chaines): "comfyui" (GPU local) ou "openai" (API cloud)
+IMAGE_GENERATION_BACKEND = os.getenv("IMAGE_GENERATION_BACKEND", "comfyui")
+COMFYUI_URL = os.getenv("COMFYUI_URL", "http://127.0.0.1:8188")
+COMFYUI_WORKFLOW_TEMPLATE = os.getenv(
+    "COMFYUI_WORKFLOW_TEMPLATE",
+    str(BASE_DIR / "templates" / "tv_channel" / "comfyui" / "logo_workflow.json.j2"),
+)
+COMFYUI_TIMEOUT_SECONDS = int(os.getenv("COMFYUI_TIMEOUT_SECONDS", "300"))
+OPENAI_IMAGE_API_KEY = os.getenv("OPENAI_IMAGE_API_KEY")
+OPENAI_IMAGE_URL = os.getenv("OPENAI_IMAGE_URL")  # None = API OpenAI officielle
+OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
+
 
 GREEDY_MODE_NATURES = True
 GREEDY_MODE_KINDS = True

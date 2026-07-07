@@ -1,0 +1,139 @@
+.report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 480px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.report-loading,
+.report-empty {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  opacity: 0.7;
+}
+
+.report-card {
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.report-trigger {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(63, 81, 181, 0.15);
+}
+
+.trigger-extend {
+  background: rgba(0, 150, 136, 0.15);
+}
+
+.report-date {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.report-counters {
+  flex: 1;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.report-issues {
+  display: flex;
+  gap: 4px;
+}
+
+.issue-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.issue-chip.severity-error {
+  background: rgba(220, 60, 60, 0.2);
+  color: #d33;
+}
+
+.issue-chip.severity-warning {
+  background: rgba(230, 160, 30, 0.2);
+  color: #c80;
+}
+
+.issue-chip.severity-info {
+  background: rgba(90, 140, 220, 0.2);
+  color: #58c;
+}
+
+.issue-chip.severity-ok {
+  background: rgba(80, 180, 100, 0.2);
+  color: #4a4;
+}
+
+.issue-list {
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.issue-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.issue-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.issue-row.severity-error .issue-icon {
+  color: #d33;
+}
+
+.issue-row.severity-warning .issue-icon {
+  color: #c80;
+}
+
+.issue-row.severity-info .issue-icon {
+  color: #58c;
+}
+
+.issue-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.issue-code {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.65;
+  text-transform: uppercase;
+}

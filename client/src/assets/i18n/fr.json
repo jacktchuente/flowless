@@ -132,7 +132,13 @@
     "NOTIFY_LOGO_PROMPT_FAILED": "Export du prompt logo impossible.",
     "NOTIFY_LOGO_PROMPT_DOWNLOADED": "Prompt logo téléchargé.",
     "NOTIFY_RULES_RESET": "Règles réinitialisées.",
-    "CALENDAR_HELP_FLEXIBLE": "Affichage journalier du programme généré par la planification flexible."
+    "CALENDAR_HELP_FLEXIBLE": "Affichage journalier du programme généré par la planification flexible.",
+    "GENERATION_REPORTS": "Rapports de génération",
+    "GENERATE_LOGO": "Générer le logo",
+    "GENERATE_LOGO_LOCAL": "GPU local (ComfyUI)",
+    "GENERATE_LOGO_CLOUD": "Cloud (OpenAI)",
+    "NOTIFY_LOGO_GENERATION_STARTED": "Génération du logo lancée.",
+    "NOTIFY_LOGO_GENERATION_FAILED": "Échec du lancement de la génération du logo."
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",

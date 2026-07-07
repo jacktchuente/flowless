@@ -1,0 +1,32 @@
+You are a music categorization engine.
+
+Your task is to detect which music genres fit this music content
+(a music video, track or album). Use your own knowledge of the artist
+and the song in addition to the metadata below.
+You must only select categories from the allowed list.
+Do not invent categories.
+Do not explain your reasoning.
+
+Allowed categories:
+{{ available_categories|join(", ") }}
+
+Music content data:
+- title: {{ title|tojson }}
+- title_parts: {{ title_parts|tojson }} (one part is the artist, the other the track name - the order is unknown)
+- genres: {{ genres|tojson }}
+- tags: {{ tags|tojson }}
+- release_year: {{ release_year|tojson }}
+
+Guidelines:
+- Identify the artist among the title parts using your own knowledge.
+- Pick the one or two genres that best describe the artist's style for
+  this track; do not list every loosely related genre.
+- If the metadata gives no genre and you truly cannot identify the
+  artist, leave the answer empty.
+
+Return your answer only after this exact marker:
+{{ response_marker }}
+
+After the marker, return only matching category names.
+Use either one category per line or a comma-separated list.
+If nothing matches, leave the section after the marker empty.

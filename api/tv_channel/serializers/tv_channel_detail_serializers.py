@@ -2,7 +2,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from rest_framework import serializers
 
-from grid_schedule.models import ScheduleMediaItem, TvPlayout
+from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
+from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSummarySerializer
 from grid_schedule.serializers.schedule_media_item_serializers import ScheduleMediaItemSerializer
 from tv_channel.models import TvChannel
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer
@@ -15,6 +16,7 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
     editorial_line_data = serializers.SerializerMethodField()
     active_schedule_items = serializers.SerializerMethodField()
     active_playout_id = serializers.SerializerMethodField()
+    latest_generation_report = serializers.SerializerMethodField()
     logo = serializers.FileField(read_only=True)
 
     class Meta:
@@ -36,6 +38,7 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
             "editorial_line_data",
             "active_schedule_items",
             "active_playout_id",
+            "latest_generation_report",
         )
 
     def get_grid_data(self, obj):
@@ -66,6 +69,8 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
             .filter(
                 Q(block_container_selection__tv_playout=active_playout)
                 | Q(flexible_selection__tv_playout=active_playout)
+                | Q(parent_schedule_item__block_container_selection__tv_playout=active_playout)
+                | Q(parent_schedule_item__flexible_selection__tv_playout=active_playout)
             )
             .select_related(
                 "item",
@@ -80,6 +85,20 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
     def get_active_playout_id(self, obj):
         active_playout = self._get_active_playout(obj)
         return active_playout.id if active_playout is not None else None
+
+    def get_latest_generation_report(self, obj):
+        active_playout = self._get_active_playout(obj)
+        if active_playout is None:
+            return None
+        report = (
+            PlayoutGenerationReport.objects
+            .filter(tv_playout=active_playout)
+            .order_by("-created_at", "-id")
+            .first()
+        )
+        if report is None:
+            return None
+        return PlayoutGenerationReportSummarySerializer(report).data
 
     def _get_active_playout(self, obj):
         active_playout = self.context.get("active_playout")

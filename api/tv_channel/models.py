@@ -110,11 +110,13 @@ class GridBlock(models.Model):
 
 class FillerPolicy(models.Model):
     """
-    The slot for fillers. Handle based on duration only. For now. 
-    Eventually, count &
+    The slot for fillers: a post-roll window of duration_seconds filled with
+    content from collections whose programming_role is in allowed_roles
+    (labels of MediaProgrammingRole; empty means ["trailer", "filler"]).
     """
     name = models.CharField(max_length=80)
     duration_seconds = models.PositiveIntegerField(default=180)
+    allowed_roles = models.JSONField(default=list, blank=True)
 
     def __str__(self):
         return self.name

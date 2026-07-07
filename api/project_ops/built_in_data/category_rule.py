@@ -550,4 +550,239 @@ CATEGORY_RULES = {
             ],
         },
     ],
+
+    # Genres musicaux (blocs thematiques type MTV). Un contenu musical garde
+    # aussi la categorie generique "music" via la regle ci-dessus.
+    "rock": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "rock",
+                "hard rock",
+                "classic rock",
+                "punk",
+                "punk rock",
+                "grunge",
+                "indie rock",
+                "alternative rock",
+                "garage rock",
+                "psychedelic rock",
+                "rock and roll",
+                "rock'n'roll",
+            ],
+        },
+    ],
+
+    "pop": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "pop",
+                "pop music",
+                "synthpop",
+                "synth-pop",
+                "electropop",
+                "dance pop",
+                "k-pop",
+                "kpop",
+                "j-pop",
+                "jpop",
+                "teen pop",
+                "pop rock",
+            ],
+        },
+    ],
+
+    "hip-hop": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "hip hop",
+                "hip-hop",
+                "hiphop",
+                "rap",
+                "rap francais",
+                "gangsta rap",
+                "trap",
+                "drill",
+                "boom bap",
+                "grime",
+            ],
+        },
+    ],
+
+    "electronic": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "electronic",
+                "electro",
+                "electronica",
+                "techno",
+                "house",
+                "deep house",
+                "edm",
+                "trance",
+                "drum and bass",
+                "drum & bass",
+                "dubstep",
+                "ambient",
+                "synthwave",
+            ],
+        },
+    ],
+
+    "jazz": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "jazz",
+                "blues",
+                "swing",
+                "bebop",
+                "big band",
+                "smooth jazz",
+                "fusion",
+                "ragtime",
+                "gospel",
+            ],
+        },
+    ],
+
+    "classical": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "classical",
+                "classique",
+                "musique classique",
+                "symphony",
+                "symphonie",
+                "opera",
+                "orchestra",
+                "orchestre",
+                "baroque",
+                "chamber music",
+                "piano solo",
+                "concerto",
+            ],
+        },
+    ],
+
+    "metal": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "metal",
+                "heavy metal",
+                "thrash metal",
+                "death metal",
+                "black metal",
+                "doom metal",
+                "power metal",
+                "nu metal",
+                "metalcore",
+                "hardcore",
+            ],
+        },
+    ],
+
+    "rnb-soul": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "rnb",
+                "r&b",
+                "r'n'b",
+                "rhythm and blues",
+                "soul",
+                "neo soul",
+                "funk",
+                "motown",
+                "disco",
+            ],
+        },
+    ],
+
+    "latin": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "latin",
+                "latino",
+                "salsa",
+                "reggaeton",
+                "bachata",
+                "merengue",
+                "cumbia",
+                "flamenco",
+                "tango",
+                "bossa nova",
+                "samba",
+            ],
+        },
+    ],
+
+    "country": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "country",
+                "country music",
+                "folk",
+                "folk music",
+                "bluegrass",
+                "americana",
+                "honky tonk",
+                "western swing",
+            ],
+        },
+    ],
+
+    "reggae": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "reggae",
+                "ska",
+                "dub",
+                "dancehall",
+                "roots reggae",
+                "ragga",
+            ],
+        },
+    ],
+
+    "variete-francaise": [
+        {
+            "fields": ["tag", "genre"],
+            "values": [
+                "variete francaise",
+                "variete",
+                "chanson francaise",
+                "chanson",
+                "french pop",
+                "french touch",
+                "yeye",
+            ],
+        },
+    ],
 }
+
+
+# Genres musicaux du vocabulaire: matches uniquement sur tag/genre, et
+# reserves aux containers musicaux par les normaliseurs.
+MUSIC_GENRE_CATEGORIES = frozenset({
+    "rock",
+    "pop",
+    "hip-hop",
+    "electronic",
+    "jazz",
+    "classical",
+    "metal",
+    "rnb-soul",
+    "latin",
+    "country",
+    "reggae",
+    "variete-francaise",
+})

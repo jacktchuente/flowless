@@ -4,6 +4,8 @@ import re
 import unicodedata
 from typing import Any, TypedDict
 
+from media_source.constants import MUSIC_CONTAINER_KINDS
+from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
 from rule_engine.models import CategoryRule as CategoryRuleModel
 
 
@@ -32,6 +34,7 @@ class CategoryNormalizerWithoutLlm:
 
     def get_categories(self) -> list[str]:
         matched_categories: list[str] = []
+        is_music = self._is_music_container()
 
         category_rules = CategoryRuleModel.objects.select_related(
             "category",
@@ -39,6 +42,14 @@ class CategoryNormalizerWithoutLlm:
 
         for category_rule in category_rules:
             category_name = category_rule.category.category
+            # Vocabulaire scinde par type de contenu: un container musical ne
+            # recoit que des genres musicaux ("music" serait redondant avec son
+            # kind), les autres containers jamais un genre (mais "music" reste
+            # possible: concerts filmes, biopics...).
+            if is_music and category_name not in MUSIC_GENRE_CATEGORIES:
+                continue
+            if not is_music and category_name in MUSIC_GENRE_CATEGORIES:
+                continue
             rules = category_rule.rules or []
 
             if not isinstance(rules, list):
@@ -48,6 +59,10 @@ class CategoryNormalizerWithoutLlm:
                 matched_categories.append(category_name)
 
         return matched_categories
+
+    def _is_music_container(self) -> bool:
+        collection = getattr(self.media_container, "media_collection", None)
+        return getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS
 
     def _rules_match(self, rules: list[dict[str, Any]]) -> bool:
         return any(

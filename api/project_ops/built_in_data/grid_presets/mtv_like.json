@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Chaîne musicale (MTV-like)",
+    "description": "Blocs de clips vidéo (container kind 4 = music_video_release) thématisés par genre, entrecoupés de petites émissions (container kind 2 = series), de 06:00 à 00:00.",
+    "blocks": [
+      {
+        "starts_at": "06:00:00",
+        "ends_at": "09:00:00",
+        "priority": 45,
+        "min_items": 10,
+        "max_items": 40,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 600,
+        "allowed_container_kinds": [4],
+        "preferred_categories": ["pop", "variete-francaise"],
+        "post_filler_policy": {
+          "name": "Jingle clips",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "09:00:00",
+        "ends_at": "12:00:00",
+        "priority": 50,
+        "min_items": 10,
+        "max_items": 40,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 600,
+        "allowed_container_kinds": [4],
+        "post_filler_policy": {
+          "name": "Jingle clips",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "12:00:00",
+        "ends_at": "12:45:00",
+        "priority": 65,
+        "min_items": 1,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 900,
+        "max_duration_seconds_per_item": 2400,
+        "allowed_container_kinds": [2],
+        "post_filler_policy": {
+          "name": "Inter-émission musique",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "12:45:00",
+        "ends_at": "16:00:00",
+        "priority": 55,
+        "min_items": 10,
+        "max_items": 40,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 600,
+        "allowed_container_kinds": [4],
+        "preferred_categories": ["rock", "metal"],
+        "post_filler_policy": {
+          "name": "Jingle clips",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "16:00:00",
+        "ends_at": "19:00:00",
+        "priority": 55,
+        "min_items": 10,
+        "max_items": 40,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 600,
+        "allowed_container_kinds": [4],
+        "preferred_categories": ["hip-hop", "rnb-soul", "electronic"],
+        "post_filler_policy": {
+          "name": "Jingle clips",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "19:00:00",
+        "ends_at": "19:45:00",
+        "priority": 70,
+        "min_items": 1,
+        "max_items": 2,
+        "min_duration_seconds_per_item": 900,
+        "max_duration_seconds_per_item": 2400,
+        "allowed_container_kinds": [2],
+        "post_filler_policy": {
+          "name": "Inter-émission musique",
+          "duration_seconds": 120
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "19:45:00",
+        "ends_at": "22:00:00",
+        "priority": 75,
+        "min_items": 10,
+        "max_items": 30,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 600,
+        "allowed_container_kinds": [4],
+        "post_filler_policy": {
+          "name": "Jingle clips",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      },
+      {
+        "starts_at": "22:00:00",
+        "ends_at": "00:00:00",
+        "priority": 60,
+        "min_items": 8,
+        "max_items": 30,
+        "min_duration_seconds_per_item": 60,
+        "max_duration_seconds_per_item": 900,
+        "allowed_container_kinds": [4],
+        "preferred_categories": ["electronic", "metal", "rock"],
+        "post_filler_policy": {
+          "name": "Jingle clips nuit",
+          "duration_seconds": 30
+        },
+        "required_fields": []
+      }
+    ]
+  }
+]

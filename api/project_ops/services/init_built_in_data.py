@@ -19,19 +19,15 @@ class Initializer:
         keys = set([element.lower() for element in CATEGORY_RULES.keys()])
         Category.objects.bulk_create([Category(category=element) for element in keys], ignore_conflicts=True)
         category_name_to_pk = {element[1]: element[0] for element in Category.objects.values_list("pk", "category")}
-        data = []
         for key in CATEGORY_RULES:
             pk = category_name_to_pk.get(key)
             if pk:
-                data.append(
-                    CategoryRule(
-                        category_id=pk,
-                        rules=CATEGORY_RULES.get(key)
-                    )
+                # update_or_create: une regle modifiee dans le vocabulaire embarque
+                # doit ecraser la version deja seedee en base.
+                CategoryRule.objects.update_or_create(
+                    category_id=pk,
+                    defaults={"rules": CATEGORY_RULES.get(key)},
                 )
-        CategoryRule.objects.bulk_create(
-            data, ignore_conflicts=True
-        )
 
     @staticmethod
     def init_grid_layout_presets():

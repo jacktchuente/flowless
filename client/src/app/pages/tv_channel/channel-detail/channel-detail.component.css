@@ -312,3 +312,13 @@
     justify-content: flex-start;
   }
 }
+
+.report-badge-error {
+  border-color: rgba(220, 60, 60, 0.6) !important;
+  color: #d33 !important;
+}
+
+.report-badge-warning {
+  border-color: rgba(230, 160, 30, 0.6) !important;
+  color: #c80 !important;
+}

@@ -6,6 +6,20 @@ Channel name:
 Channel description:
 {{ channel_description }}
 
+{% if channel_specification %}
+Channel profile (content mix, formats, eras, audience):
+{{ channel_specification }}
+
+{% endif %}
+{% if editorial_summary %}
+Editorial line:
+{{ editorial_summary }}
+
+{% endif %}
+{% if catalog_name %}
+Part of the catalog: {{ catalog_name }}.
+
+{% endif %}
 Instructions:
 - Design a polished, broadcast-ready TV channel logo.
 - The logo should reflect the channel identity, tone, themes, target audience, and programming promise described above.

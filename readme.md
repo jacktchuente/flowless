@@ -79,12 +79,18 @@ Flowless can currently:
     - random generation
     - AI generation based on presets
 - Match media to generated programming blocks
+- Schedule real trailers and fillers in post-roll windows
+    - interstitial collections marked via a programming role (trailer, filler, bumper...)
+    - trailers matched to upcoming programs through a provider-id folder convention
+- Validate and repair generated schedules, with a per-generation report in the UI
+- Program MTV-like music blocks (music genre vocabulary + built-in preset)
 - Build channels bottom-up from the media library
     - segment the library into programmable segments
     - discover coherent channel candidates
     - promote a candidate into a flexible channel
     - generate flexible playouts from the segment path
     - match newly imported media to existing segments
+- Generate channel logos from the channel theme (local ComfyUI or OpenAI-compatible API)
 - Create channels in an IPTV app
     - currently only ErsatzTV is supported
 
@@ -151,7 +157,7 @@ New media matching into existing segments
 - [x] **Catalog-level channel generation**
     - [x] Generate channels from a catalog
     - [x] Define channel intent, theme, and positioning
-    - [ ] Generate logo
+    - [x] Generate logo (local ComfyUI or OpenAI-compatible image API)
 
 - [x] **Editorial line & grid generation**
     - [x] AI-based grid generation
@@ -161,11 +167,12 @@ New media matching into existing segments
 - [ ] **Playout generation**
   - [x] Build candidates for each programming block
   - [x] Match media to blocks based on labels, duration, type, and editorial intent
-  - [ ] Generate a full forward-looking playout
-  - [ ] Handle fillers, reruns, and fallback content
-  - [ ] Validate and repair generated schedules
-  - [ ] Generate music programming
-  - [ ] Set trailers based on the playout
+  - [x] Generate a full forward-looking playout (sliding extension for both grid modes)
+  - [x] Handle fillers and fallback content (interstitial collections via programming role)
+  - [ ] Handle reruns
+  - [x] Validate and repair generated schedules (per-generation report, auto trim/backfill)
+  - [x] Generate music programming (music genres vocabulary + MTV-like preset)
+  - [x] Set trailers based on the playout (trailer of an upcoming program in post-roll windows)
 
 - [x] **ErsatzTV synchronization**
     - [x] Create channels in ErsatzTV
@@ -179,10 +186,10 @@ New media matching into existing segments
     - [x] Promote a candidate into a flexible channel
     - [x] Generate flexible playouts from the segment path
     - [x] Match newly imported media to existing segments
-    - [ ] Review / override segment memberships manually
+    - [x] Review / override segment memberships manually
 
-- [ ] **Layout & channel branding**
-    - [ ] Generate visual identity based on each channel’s theme
+- [x] **Layout & channel branding**
+    - [x] Generate visual identity based on each channel’s theme (theme-driven logo generation)
 
 ## Quickstart
 
@@ -217,6 +224,12 @@ LLM_API_KEY="ollama"
 
 LLM_DELAY=0
 MEDIA_CONTAINER_ANALYSE_USE_LLM=1
+
+# Logo generation (optional): "comfyui" (local GPU) or "openai" (cloud image API)
+IMAGE_GENERATION_BACKEND=comfyui
+COMFYUI_URL=http://192.168.1.223:8188
+#OPENAI_IMAGE_API_KEY=
+#OPENAI_IMAGE_MODEL=gpt-image-1
 
 PUBLIC_ORIGINS=http://192.168.1.204:8004
 ```

@@ -8,11 +8,15 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils import timezone
 
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import BlockContainerSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.services.playout_repair_service import PlayoutRepairService
+from grid_schedule.services.playout_validation_service import PlayoutValidationService
+from grid_schedule.services.post_roll_filler_service import PostRollFillerService
+from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer, MediaItem
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import EditorialLine, GridBlock, GridLayout, TvChannel
@@ -40,6 +44,12 @@ class GenerationResult:
     created: bool
     generated_items: int
     warnings: list[str]
+    filled_items: int = 0
+    repaired_gaps: int = 0
+    trimmed_overlaps: int = 0
+    issues: list[dict] = field(default_factory=list)
+    window_start: datetime | None = None
+    window_end: datetime | None = None
 
 
 class NextItemState(Enum):
@@ -176,27 +186,61 @@ class TvPlayoutGenerationService:
                         warning,
                     )
 
-            validation_errors = self._validate_playout(tv_playout=tv_playout, occurrences=occurrences)
-            if validation_errors:
+            filled_items = 0
+            if self.editorial_line.allow_filler:
+                filler_result = PostRollFillerService(
+                    tv_playout=tv_playout,
+                    window_start=start_at,
+                    window_end=end_at,
+                ).fill()
+                filled_items = filler_result.created_items
+                warnings.extend(filler_result.warnings)
+                logger.info(
+                    "TvPlayoutGenerationService.generate post-roll fill done playout_id=%s filled_items=%s",
+                    tv_playout.id,
+                    filled_items,
+                )
+
+            repair_result = PlayoutRepairService(
+                tv_playout=tv_playout,
+                editorial_line=self.editorial_line,
+                window_start=start_at,
+                window_end=end_at,
+            ).repair()
+
+            issues = PlayoutValidationService(
+                tv_playout=tv_playout,
+                editorial_line=self.editorial_line,
+            ).validate(occurrences=occurrences)
+
+            mismatches = [issue for issue in issues if issue["code"] == "item_container_mismatch"]
+            if mismatches:
                 logger.error(
                     "TvPlayoutGenerationService.generate validation failed playout_id=%s errors=%s",
                     tv_playout.id,
-                    validation_errors,
+                    mismatches,
                 )
-                raise ValidationError(validation_errors)
+                raise ValidationError([issue["message"] for issue in mismatches])
 
             logger.info(
-                "TvPlayoutGenerationService.generate completed channel_id=%s playout_id=%s generated_items=%s warnings=%s",
+                "TvPlayoutGenerationService.generate completed channel_id=%s playout_id=%s generated_items=%s warnings=%s issues=%s",
                 tv_channel.id,
                 tv_playout.id,
                 generated_items,
                 len(warnings),
+                len(issues),
             )
             return GenerationResult(
                 tv_playout=tv_playout,
                 created=created,
                 generated_items=generated_items,
                 warnings=warnings,
+                filled_items=filled_items,
+                repaired_gaps=repair_result.repaired_gaps,
+                trimmed_overlaps=repair_result.trimmed_overlaps,
+                issues=issues,
+                window_start=start_at,
+                window_end=end_at,
             )
 
     def _validate_channel(self, tv_channel: TvChannel) -> GridLayout:
@@ -249,6 +293,12 @@ class TvPlayoutGenerationService:
         return cycle_anchor
 
     def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> None:
+        # Enfants post-roll dont le parent (avant start_at) est conserve mais dont la
+        # fenetre depasse start_at: le CASCADE ne les couvre pas, suppression explicite.
+        ScheduleMediaItem.objects.filter(
+            parent_schedule_item__block_container_selection__tv_playout=tv_playout,
+            starts_at__gte=start_at,
+        ).delete()
         future_qs = ScheduleMediaItem.objects.filter(
             block_container_selection__tv_playout=tv_playout,
             starts_at__gte=start_at,
@@ -415,6 +465,8 @@ class TvPlayoutGenerationService:
         qs = (
             MediaContainer.objects
             .filter(
+                Q(media_collection__programming_role__isnull=True)
+                | Q(media_collection__programming_role=MediaProgrammingRole.MAIN),
                 analyze_status=AnalyzeStatus.COMPLETE,
                 media_collection__is_active=True,
                 is_missing=False,
@@ -952,44 +1004,6 @@ class TvPlayoutGenerationService:
         history["used_container_ids_by_block"][block_id].add(container_id)
         history["scheduled_in_run"].append(scheduled.id)
         history["scheduled_item_ids_in_run"].add(scheduled.item_id)
-
-    def _validate_playout(self, *, tv_playout: TvPlayout, occurrences: list[BlockOccurrence]) -> list[str]:
-        errors: list[str] = []
-        scheduled_items = list(
-            ScheduleMediaItem.objects
-            .filter(block_container_selection__tv_playout=tv_playout)
-            .select_related("item", "block_container_selection", "block_container_selection__block")
-            .order_by("starts_at")
-        )
-
-        previous = None
-        for scheduled in scheduled_items:
-            if scheduled.ends_at <= scheduled.starts_at:
-                errors.append(f"Scheduled item {scheduled.id} has invalid time bounds.")
-            if scheduled.item.container_id != scheduled.block_container_selection.media_container_id:
-                errors.append(f"Scheduled item {scheduled.id} item/container mismatch.")
-
-            previous_occupied_end = previous.post_roll_filler_ends_at or previous.ends_at if previous else None
-            if previous and previous_occupied_end and scheduled.starts_at < previous_occupied_end:
-                errors.append(f"Overlap between scheduled item {previous.id} and {scheduled.id}.")
-            previous = scheduled
-
-        for occurrence in occurrences:
-            qs = ScheduleMediaItem.objects.filter(
-                block_container_selection__tv_playout=tv_playout,
-                block_container_selection__block=occurrence.block,
-                starts_at__lt=occurrence.ends_at,
-                ends_at__gt=occurrence.starts_at,
-            ).order_by("starts_at")
-
-            for scheduled in qs:
-                occupied_end = scheduled.post_roll_filler_ends_at or scheduled.ends_at
-                if scheduled.starts_at < occurrence.starts_at or occupied_end > occurrence.ends_at:
-                    errors.append(
-                        f"Scheduled item {scheduled.id} falls outside block occurrence {self._block_label(occurrence.block)}."
-                    )
-
-        return errors
 
     @staticmethod
     def _container_categories(container: MediaContainer) -> set[str]:

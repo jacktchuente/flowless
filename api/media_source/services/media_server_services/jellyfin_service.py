@@ -64,6 +64,7 @@ class MediaItem(TypedDict, total=False):
 
 class MediaServerMediaContainer(TypedDict, total=False):
     external_id: str
+    provider_ids: dict[str, str]
     title: str
     description: str | None
 
@@ -141,7 +142,7 @@ class JellyfinService:
         "Genres,Tags,Overview,RunTimeTicks,CommunityRating,CriticRating,ProductionYear,PremiereDate,"
         "OfficialRating,RecursiveItemCount,ChildCount,ProductionLocations,"
         "People,Studios,Taglines,MediaStreams,Path,ParentId,AlbumId,Album,IndexNumber,"
-        "ParentIndexNumber,CollectionType"
+        "ParentIndexNumber,CollectionType,ProviderIds"
     )
 
     SERIES_EPISODE_FIELDS = (
@@ -628,6 +629,17 @@ class JellyfinService:
         return "other"
 
     @staticmethod
+    def _extract_provider_ids(item: dict[str, Any]) -> dict[str, str]:
+        provider_ids = item.get("ProviderIds")
+        if not isinstance(provider_ids, dict):
+            return {}
+        return {
+            str(provider).lower(): str(value)
+            for provider, value in provider_ids.items()
+            if isinstance(provider, str) and value not in (None, "")
+        }
+
+    @staticmethod
     def _item_kind(item_type: Any) -> ItemKind:
         if item_type == "Movie":
             return "movie"
@@ -874,6 +886,7 @@ class JellyfinService:
 
         return {
             "external_id": external_id,
+            "provider_ids": cls._extract_provider_ids(container_item),
             "title": container_item.get("Name")
             if isinstance(container_item.get("Name"), str)
             else external_id,

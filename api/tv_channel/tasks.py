@@ -6,13 +6,14 @@ from django.conf import settings
 from django.db.models import Max, Q
 from django.utils import timezone
 
-from grid_schedule.models import ScheduleMediaItem, TvPlayout
+from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
 from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import Catalog, GridLayoutMode, TvChannel
 from tv_channel.services.catalog_service import CatalogService
 from tv_channel.services.etv_channel_push_service import EtvChannelPushService
+from tv_channel.services.logo_generation import LogoGenerationService
 from tv_channel.services.tv_channel_service import TvChannelService
 from utils.task_status_service import broadcast_refresh, save_status_and_broadcast
 
@@ -93,12 +94,14 @@ def generate_tv_channel_playout(
     channel_id: int,
     days: int = 1,
     reset: bool = False,
+    trigger: str = PlayoutGenerationReport.TRIGGER_GENERATE,
 ):
     logger.info(
-        "generate_tv_channel_playout started channel_id=%s days=%s reset=%s",
+        "generate_tv_channel_playout started channel_id=%s days=%s reset=%s trigger=%s",
         channel_id,
         days,
         reset,
+        trigger,
     )
     try:
         instance = TvChannel.objects.get(pk=channel_id)
@@ -141,6 +144,7 @@ def generate_tv_channel_playout(
             days,
             reset,
         )
+        _save_generation_report(instance, trigger=trigger, error=exc)
         status = AnalyzeStatus.COMPLETE_WITH_ERRORS
     else:
         logger.info(
@@ -151,6 +155,7 @@ def generate_tv_channel_playout(
             result.generated_items,
             len(result.warnings),
         )
+        _save_generation_report(instance, trigger=trigger, result=result)
         status = AnalyzeStatus.COMPLETE
 
     save_status_and_broadcast(
@@ -158,6 +163,54 @@ def generate_tv_channel_playout(
         object_type="TvChannel",
         status=status,
     )
+
+
+def _save_generation_report(instance: TvChannel, *, trigger: str, result=None, error=None) -> None:
+    try:
+        if result is not None:
+            issues = [
+                {
+                    "code": "generation",
+                    "severity": "warning",
+                    "message": warning,
+                    "schedule_item_id": None,
+                    "starts_at": None,
+                    "ends_at": None,
+                }
+                for warning in result.warnings
+            ] + list(result.issues)
+            PlayoutGenerationReport.objects.create(
+                tv_playout=result.tv_playout,
+                trigger=trigger,
+                window_start=result.window_start,
+                window_end=result.window_end,
+                generated_items=result.generated_items,
+                filled_items=result.filled_items,
+                repaired_gaps=result.repaired_gaps,
+                trimmed_overlaps=result.trimmed_overlaps,
+                issues=issues,
+            )
+            return
+
+        playout = TvPlayout.objects.filter(tv_channel=instance, is_active=True).first()
+        if playout is None:
+            return
+        PlayoutGenerationReport.objects.create(
+            tv_playout=playout,
+            trigger=trigger,
+            issues=[
+                {
+                    "code": "generation_failed",
+                    "severity": "error",
+                    "message": str(error),
+                    "schedule_item_id": None,
+                    "starts_at": None,
+                    "ends_at": None,
+                }
+            ],
+        )
+    except Exception:
+        logger.exception("Failed to persist generation report channel_id=%s", instance.id)
 
 
 @shared_task
@@ -196,7 +249,49 @@ def extend_channel_playouts():
             last_end,
             horizon_target,
         )
-        generate_tv_channel_playout.delay(channel.id, days=settings.DAYS_TO_BUILD, reset=False)
+        generate_tv_channel_playout.delay(
+            channel.id,
+            days=settings.DAYS_TO_BUILD,
+            reset=False,
+            trigger=PlayoutGenerationReport.TRIGGER_EXTEND,
+        )
+
+
+@shared_task
+def generate_tv_channel_logo(channel_id: int, backend: str | None = None):
+    try:
+        instance = TvChannel.objects.get(pk=channel_id)
+    except TvChannel.DoesNotExist:
+        logger.warning("generate_tv_channel_logo skipped unknown channel_id=%s", channel_id)
+        return
+
+    if instance.analyze_status == AnalyzeStatus.ANALYZING:
+        logger.info("generate_tv_channel_logo skipped channel_id=%s already_analyzing=true", channel_id)
+        return
+
+    save_status_and_broadcast(
+        instance,
+        object_type="TvChannel",
+        status=AnalyzeStatus.ANALYZING,
+    )
+    try:
+        LogoGenerationService(instance, backend=backend).generate()
+    except Exception:
+        logger.exception(
+            "generate_tv_channel_logo failed channel_id=%s backend=%s",
+            channel_id,
+            backend,
+        )
+        status = AnalyzeStatus.COMPLETE_WITH_ERRORS
+    else:
+        logger.info("generate_tv_channel_logo completed channel_id=%s", channel_id)
+        status = AnalyzeStatus.COMPLETE
+
+    save_status_and_broadcast(
+        instance,
+        object_type="TvChannel",
+        status=status,
+    )
 
 
 @shared_task

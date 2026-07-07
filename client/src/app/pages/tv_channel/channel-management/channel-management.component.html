@@ -88,6 +88,13 @@
       <div class="channel-name-col">
         <div class="channel-name-card">
           <button class="channel-name-button" [title]="channel.name" (click)="openChannelDetail(channel)">
+            <img
+              *ngIf="channel.logo"
+              class="channel-card-logo"
+              [src]="channel.logo"
+              [alt]="channel.name"
+              loading="lazy"
+            >
             <span class="channel-name-text">{{ channel.name }}</span>
             <span class="channel-status-badge">
               {{ getChannelStatusLabel(channel) }}

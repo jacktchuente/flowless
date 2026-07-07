@@ -27,6 +27,7 @@ export class ScheduleMediaItemDetailDialogComponent {
     this.fields = [
       {label: 'Titre item', value: item.media_item_title},
       {label: 'Description', value: item.media_item_description},
+      {label: 'Role', value: item.role_label ?? 'main'},
       {label: 'Container', value: item.media_container_title},
       {label: 'Container ID', value: item.media_container_id.toString()},
       {label: 'Block source', value: item.block_name},

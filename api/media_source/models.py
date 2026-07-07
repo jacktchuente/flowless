@@ -41,6 +41,7 @@ class MediaContainer(models.Model):
     original_data_hash = models.TextField()
 
     external_id = models.CharField(max_length=255)
+    provider_ids = models.JSONField(default=dict, blank=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)

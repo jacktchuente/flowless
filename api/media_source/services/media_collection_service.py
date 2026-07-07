@@ -118,6 +118,7 @@ class MediaCollectionService:
         for media in medias:
             payload = {
                 "external_id": media["external_id"],
+                "provider_ids": media.get("provider_ids", {}),
                 "title": (media.get("title") or "")[:255],
                 "description": media.get("description"),
                 "categories": media.get("categories", []),
@@ -191,6 +192,7 @@ class MediaCollectionService:
                 media_to_update,
                 [
                     "title",
+                    "provider_ids",
                     "description",
                     "categories",
                     "item_count",
