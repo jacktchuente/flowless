@@ -78,14 +78,12 @@ class CategoryNormalizerWithLlm:
         if not available_categories:
             return []
 
-        artist, track = self._split_artist_and_track(self.media_container.title)
         prompt = format_with_jinja(
             self.MUSIC_TEMPLATE_PATH,
             context={
                 "available_categories": available_categories,
                 "title": self.media_container.title,
-                "artist": artist,
-                "track": track,
+                "title_parts": self._split_title_parts(self.media_container.title),
                 "genres": self.media_container.genres or [],
                 "tags": self.media_container.tags or [],
                 "release_year": self.media_container.release_year_min,
@@ -93,17 +91,23 @@ class CategoryNormalizerWithLlm:
             },
         )
         response = LLMService().complete(prompt=prompt)
-        return self._filter_available_categories(
+        categories = self._filter_available_categories(
             self._parse_categories(response.content),
             available_categories,
         )
+        # Un container musical est musical par definition: la categorie
+        # generique ne depend pas de la reponse du modele.
+        if "music" in available_categories and "music" not in categories:
+            categories.append("music")
+        return categories
 
     @staticmethod
-    def _split_artist_and_track(title: str | None) -> tuple[str | None, str | None]:
+    def _split_title_parts(title: str | None) -> list[str]:
+        # Convention "Artiste - Morceau" ou l'inverse selon les bibliotheques:
+        # on fournit les deux parties sans presumer de l'ordre.
         if not title or " - " not in title:
-            return None, None
-        artist, track = title.split(" - ", 1)
-        return artist.strip() or None, track.strip() or None
+            return []
+        return [part.strip() for part in title.split(" - ") if part.strip()]
 
     @classmethod
     def _parse_categories(cls, response_content: str) -> list[str]:

@@ -151,7 +151,8 @@ class LlmNormalizerVocabularySplitTests(MusicCategoryFixtureMixin, TestCase):
         with patcher:
             categories = CategoryNormalizerWithLlm(container).get_categories()
 
-        self.assertEqual(categories, ["pop"])
+        # romance/action filtrees, music ajoutee d'office pour un container musical
+        self.assertEqual(categories, ["pop", "music"])
 
     def test_series_prompt_does_not_expose_music_genres(self):
         container = self._container(
