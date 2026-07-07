@@ -555,7 +555,7 @@ CATEGORY_RULES = {
     # aussi la categorie generique "music" via la regle ci-dessus.
     "rock": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "rock",
                 "hard rock",
@@ -575,7 +575,7 @@ CATEGORY_RULES = {
 
     "pop": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "pop",
                 "pop music",
@@ -595,7 +595,7 @@ CATEGORY_RULES = {
 
     "hip-hop": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "hip hop",
                 "hip-hop",
@@ -613,7 +613,7 @@ CATEGORY_RULES = {
 
     "electronic": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "electronic",
                 "electro",
@@ -634,7 +634,7 @@ CATEGORY_RULES = {
 
     "jazz": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "jazz",
                 "blues",
@@ -651,7 +651,7 @@ CATEGORY_RULES = {
 
     "classical": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "classical",
                 "classique",
@@ -671,7 +671,7 @@ CATEGORY_RULES = {
 
     "metal": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "metal",
                 "heavy metal",
@@ -689,7 +689,7 @@ CATEGORY_RULES = {
 
     "rnb-soul": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "rnb",
                 "r&b",
@@ -706,7 +706,7 @@ CATEGORY_RULES = {
 
     "latin": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "latin",
                 "latino",
@@ -725,7 +725,7 @@ CATEGORY_RULES = {
 
     "country": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "country",
                 "country music",
@@ -741,7 +741,7 @@ CATEGORY_RULES = {
 
     "reggae": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "reggae",
                 "ska",
@@ -755,7 +755,7 @@ CATEGORY_RULES = {
 
     "variete-francaise": [
         {
-            "fields": ["title", "description", "tag", "genre", "category"],
+            "fields": ["tag", "genre"],
             "values": [
                 "variete francaise",
                 "variete",
@@ -768,3 +768,24 @@ CATEGORY_RULES = {
         },
     ],
 }
+
+
+# Genres musicaux du vocabulaire: matches uniquement sur tag/genre, et
+# reserves aux containers musicaux par les normaliseurs.
+MUSIC_GENRE_CATEGORIES = frozenset({
+    "rock",
+    "pop",
+    "hip-hop",
+    "electronic",
+    "jazz",
+    "classical",
+    "metal",
+    "rnb-soul",
+    "latin",
+    "country",
+    "reggae",
+    "variete-francaise",
+})
+
+# Vocabulaire applicable aux containers musicaux (genres + categorie generique).
+MUSIC_CATEGORIES = MUSIC_GENRE_CATEGORIES | {"music"}

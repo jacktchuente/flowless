@@ -46,3 +46,8 @@ class MediaProgrammingRole(models.IntegerChoices):
     FILLER = 7, "filler"             # contenu de remplissage
     PSA = 8, "psa"                   # message d’intérêt public
     OTHER = 99, "other"
+
+MUSIC_CONTAINER_KINDS = (
+    MediaContainerKind.MUSIC_RELEASE,
+    MediaContainerKind.MUSIC_VIDEO_RELEASE,
+)
