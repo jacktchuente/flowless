@@ -786,6 +786,3 @@ MUSIC_GENRE_CATEGORIES = frozenset({
     "reggae",
     "variete-francaise",
 })
-
-# Vocabulaire applicable aux containers musicaux (genres + categorie generique).
-MUSIC_CATEGORIES = MUSIC_GENRE_CATEGORIES | {"music"}

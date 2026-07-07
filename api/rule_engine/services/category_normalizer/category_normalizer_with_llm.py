@@ -5,7 +5,7 @@ import re
 from django.conf import settings
 
 from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_CATEGORIES, MUSIC_GENRE_CATEGORIES
+from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
 from rule_engine.models import Category
 from utils.format_with_jinja import format_with_jinja
 from utils.llm_service import LLMService
@@ -70,10 +70,11 @@ class CategoryNormalizerWithLlm:
         )
 
     def _get_music_categories(self) -> list[str]:
+        # Genres uniquement: "music" serait redondant avec le kind du container.
         available_categories = [
             category
             for category in Category.objects.values_list("category", flat=True)
-            if category in MUSIC_CATEGORIES
+            if category in MUSIC_GENRE_CATEGORIES
         ]
         if not available_categories:
             return []
@@ -91,15 +92,10 @@ class CategoryNormalizerWithLlm:
             },
         )
         response = LLMService().complete(prompt=prompt)
-        categories = self._filter_available_categories(
+        return self._filter_available_categories(
             self._parse_categories(response.content),
             available_categories,
         )
-        # Un container musical est musical par definition: la categorie
-        # generique ne depend pas de la reponse du modele.
-        if "music" in available_categories and "music" not in categories:
-            categories.append("music")
-        return categories
 
     @staticmethod
     def _split_title_parts(title: str | None) -> list[str]:

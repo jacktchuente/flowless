@@ -5,7 +5,7 @@ import unicodedata
 from typing import Any, TypedDict
 
 from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_CATEGORIES, MUSIC_GENRE_CATEGORIES
+from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
 from rule_engine.models import CategoryRule as CategoryRuleModel
 
 
@@ -43,8 +43,10 @@ class CategoryNormalizerWithoutLlm:
         for category_rule in category_rules:
             category_name = category_rule.category.category
             # Vocabulaire scinde par type de contenu: un container musical ne
-            # recoit que music + genres musicaux, les autres jamais un genre.
-            if is_music and category_name not in MUSIC_CATEGORIES:
+            # recoit que des genres musicaux ("music" serait redondant avec son
+            # kind), les autres containers jamais un genre (mais "music" reste
+            # possible: concerts filmes, biopics...).
+            if is_music and category_name not in MUSIC_GENRE_CATEGORIES:
                 continue
             if not is_music and category_name in MUSIC_GENRE_CATEGORIES:
                 continue

@@ -66,26 +66,29 @@ class MusicCategoryRulesTests(MusicCategoryFixtureMixin, TestCase):
 
         self.assertIn("metal", categories)
 
-    def test_generic_music_category_still_matches(self):
+    def test_generic_music_category_stays_for_non_music_containers(self):
+        # Un film-concert dans une bibliotheque non musicale garde "music".
         container = self._container(
-            collection=self.music_collection, title="Live concert", genres=["Concert"]
+            collection=self.series_collection, title="Live concert", genres=["Concert"]
         )
 
         categories = CategoryNormalizerWithoutLlm(container).get_categories()
 
         self.assertIn("music", categories)
 
-    def test_music_container_never_gets_fiction_categories(self):
+    def test_music_container_gets_genres_only(self):
         container = self._container(
             collection=self.music_collection,
             title="Thriller",
-            genres=["Pop"],
+            genres=["Pop", "Concert"],
             description="A scary horror story with zombies in space.",
         )
 
         categories = CategoryNormalizerWithoutLlm(container).get_categories()
 
         self.assertIn("pop", categories)
+        # "music" est redondant avec le kind du container: jamais assignee ici.
+        self.assertNotIn("music", categories)
         for excluded in ("horror", "science-fiction", "suspense"):
             self.assertNotIn(excluded, categories)
 
@@ -140,7 +143,8 @@ class LlmNormalizerVocabularySplitTests(MusicCategoryFixtureMixin, TestCase):
         self.assertIn('"Daft Punk"', prompt)
         self.assertIn('"Around the World"', prompt)
         self.assertNotIn("western", prompt)
-        self.assertEqual(categories, ["music", "electronic"])
+        # "music" hors vocabulaire des containers musicaux: seuls les genres restent.
+        self.assertEqual(categories, ["electronic"])
 
     def test_music_response_outside_vocabulary_is_filtered(self):
         container = self._container(
@@ -151,8 +155,7 @@ class LlmNormalizerVocabularySplitTests(MusicCategoryFixtureMixin, TestCase):
         with patcher:
             categories = CategoryNormalizerWithLlm(container).get_categories()
 
-        # romance/action filtrees, music ajoutee d'office pour un container musical
-        self.assertEqual(categories, ["pop", "music"])
+        self.assertEqual(categories, ["pop"])
 
     def test_series_prompt_does_not_expose_music_genres(self):
         container = self._container(
