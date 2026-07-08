@@ -1,4 +1,8 @@
+from datetime import datetime, timedelta
+from unittest.mock import patch
+
 from django.test import TestCase
+from django.utils import timezone
 
 from grid_schedule.models import ScheduleMediaItem
 from grid_schedule.services.etv_scheduler_service import ETVSchedulerService
@@ -85,3 +89,116 @@ class MusicBlockGenerationTests(PostRollFillerFixtureMixin, TestCase):
             duration = (entry.ends_at - entry.starts_at).total_seconds()
             self.assertGreaterEqual(duration, 60)
             self.assertLessEqual(duration, 600)
+
+
+class FixedPlayoutExtensionTests(PostRollFillerFixtureMixin, TestCase):
+    def setUp(self):
+        self.build_fixtures()
+        self.editorial_line.allow_filler = False
+        self.editorial_line.save(update_fields=["allow_filler"])
+        self.block.min_items = 1
+        self.block.max_items = 6
+        self.block.post_filler_policy = None
+        self.block.save(update_fields=["min_items", "max_items", "post_filler_policy"])
+
+        self.container = self._create_container(self.main_collection, "main-a")
+        self.container.duration_min_seconds = 3600
+        self.container.duration_max_seconds = 3600
+        self.container.total_duration_seconds = 120 * 3600
+        self.container.item_count = 120
+        self.container.save()
+        for index in range(120):
+            self._create_item(self.container, f"item-{index:03d}", duration_seconds=3600)
+
+    def _item_signature(self, scheduled):
+        return (
+            scheduled.id,
+            scheduled.starts_at,
+            scheduled.ends_at,
+            scheduled.item_id,
+            scheduled.block_container_selection_id,
+        )
+
+    def test_extend_preserves_existing_items_and_converges(self):
+        now = timezone.make_aware(datetime(2026, 1, 1, 9, 0))
+
+        with patch("grid_schedule.services.tv_schedule_service.timezone.now", return_value=now):
+            initial = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=1,
+                reset=True,
+            ).generate()
+
+            existing = list(
+                ScheduleMediaItem.objects
+                .filter(block_container_selection__tv_playout=initial.tv_playout)
+                .order_by("starts_at", "id")
+            )
+            existing_signatures = [self._item_signature(item) for item in existing]
+            existing_ids = [item.id for item in existing]
+            self.assertTrue(any(item.starts_at < now for item in existing))
+
+            extended = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=3,
+                reset=False,
+                extend=True,
+            ).generate()
+
+            preserved = list(
+                ScheduleMediaItem.objects
+                .filter(id__in=existing_ids)
+                .order_by("starts_at", "id")
+            )
+            self.assertEqual([self._item_signature(item) for item in preserved], existing_signatures)
+            self.assertGreater(extended.generated_items, 0)
+            self.assertGreaterEqual(extended.window_end, now + timedelta(days=3))
+
+            after_extend_ids = set(
+                ScheduleMediaItem.objects
+                .filter(block_container_selection__tv_playout=initial.tv_playout)
+                .values_list("id", flat=True)
+            )
+
+            second = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=3,
+                reset=False,
+                extend=True,
+            ).generate()
+
+            after_second_ids = set(
+                ScheduleMediaItem.objects
+                .filter(block_container_selection__tv_playout=initial.tv_playout)
+                .values_list("id", flat=True)
+            )
+            self.assertEqual(second.generated_items, 0)
+            self.assertEqual(after_second_ids, after_extend_ids)
+
+    def test_manual_regeneration_resumes_after_current_item(self):
+        initial_now = timezone.make_aware(datetime(2026, 1, 1, 9, 0))
+        regenerate_now = timezone.make_aware(datetime(2026, 1, 1, 8, 30))
+
+        with patch("grid_schedule.services.tv_schedule_service.timezone.now", return_value=initial_now):
+            initial = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=1,
+                reset=True,
+            ).generate()
+
+        with patch("grid_schedule.services.tv_schedule_service.timezone.now", return_value=regenerate_now):
+            regenerated = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=1,
+                reset=False,
+                extend=False,
+            ).generate()
+
+        self.assertEqual(regenerated.window_start, timezone.make_aware(datetime(2026, 1, 1, 9, 0)))
+        main_items = list(
+            ScheduleMediaItem.objects
+            .filter(block_container_selection__tv_playout=initial.tv_playout)
+            .order_by("starts_at", "id")
+        )
+        for previous, current in zip(main_items, main_items[1:]):
+            self.assertLessEqual(previous.ends_at, current.starts_at)

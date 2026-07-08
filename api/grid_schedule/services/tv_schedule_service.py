@@ -73,21 +73,24 @@ class TvPlayoutGenerationService:
         tv_channel: TvChannel,
         days: int,
         reset: bool = False,
+        extend: bool = False,
     ):
         self.tv_channel = tv_channel
         self.days = days
         self.reset = reset
+        self.extend = extend
         self.editorial_line = self._get_editorial_line(tv_channel)
 
     def generate(self) -> GenerationResult:
         if self.days <= 0:
             raise ValidationError("days must be > 0")
         logger.info(
-            "TvPlayoutGenerationService.generate starting channel_id=%s channel_name=%s days=%s reset=%s",
+            "TvPlayoutGenerationService.generate starting channel_id=%s channel_name=%s days=%s reset=%s extend=%s",
             self.tv_channel.id,
             self.tv_channel.name,
             self.days,
             self.reset,
+            self.extend,
         )
 
         with transaction.atomic():
@@ -102,7 +105,7 @@ class TvPlayoutGenerationService:
 
             tv_playout, created = self._get_or_create_playout(tv_channel, grid_layout=grid_layout, reset=self.reset)
             start_at = self._resolve_window_start(tv_playout)
-            end_at = start_at + timedelta(days=self.days)
+            end_at = self._resolve_window_end(start_at)
             logger.info(
                 "TvPlayoutGenerationService.generate playout ready channel_id=%s playout_id=%s created=%s window_start=%s window_end=%s",
                 tv_channel.id,
@@ -112,7 +115,15 @@ class TvPlayoutGenerationService:
                 end_at.isoformat(),
             )
 
-            self._delete_future_items_and_rollback_cursors(tv_playout=tv_playout, start_at=start_at)
+            cleanup_start = self._delete_future_items_and_rollback_cursors(tv_playout=tv_playout, start_at=start_at)
+            adjusted_start = self._resolve_post_cleanup_window_start(
+                tv_playout=tv_playout,
+                cleanup_start=cleanup_start,
+            )
+            if adjusted_start > start_at:
+                start_at = adjusted_start
+                if not self.extend:
+                    end_at = start_at + timedelta(days=self.days)
             logger.info(
                 "TvPlayoutGenerationService.generate future items cleanup done playout_id=%s start_at=%s",
                 tv_playout.id,
@@ -290,18 +301,50 @@ class TvPlayoutGenerationService:
         )
         if now.time() < self.editorial_line.start_at:
             cycle_anchor -= timedelta(days=1)
+        if self.extend and not self.reset:
+            last_end = self._get_playout_last_end(tv_playout)
+            if last_end is not None:
+                return max(last_end, now)
         return cycle_anchor
 
-    def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> None:
+    def _resolve_window_end(self, start_at: datetime) -> datetime:
+        if self.extend and not self.reset:
+            return timezone.now() + timedelta(days=self.days)
+        return start_at + timedelta(days=self.days)
+
+    @staticmethod
+    def _get_playout_last_end(tv_playout: TvPlayout) -> datetime | None:
+        bounds = ScheduleMediaItem.objects.filter(
+            Q(block_container_selection__tv_playout=tv_playout)
+            | Q(parent_schedule_item__block_container_selection__tv_playout=tv_playout),
+        ).aggregate(
+            ends_at=Max("ends_at"),
+            post_roll_filler_ends_at=Max("post_roll_filler_ends_at"),
+        )
+        values = [value for value in bounds.values() if value is not None]
+        return max(values) if values else None
+
+    def _resolve_post_cleanup_window_start(self, *, tv_playout: TvPlayout, cleanup_start: datetime) -> datetime:
+        if self.reset:
+            return cleanup_start
+        last_end = self._get_playout_last_end(tv_playout)
+        if last_end is None:
+            return cleanup_start
+        return max(cleanup_start, last_end)
+
+    def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> datetime:
+        cleanup_start = start_at
+        if not self.reset:
+            cleanup_start = max(cleanup_start, timezone.now())
         # Enfants post-roll dont le parent (avant start_at) est conserve mais dont la
         # fenetre depasse start_at: le CASCADE ne les couvre pas, suppression explicite.
         ScheduleMediaItem.objects.filter(
             parent_schedule_item__block_container_selection__tv_playout=tv_playout,
-            starts_at__gte=start_at,
+            starts_at__gte=cleanup_start,
         ).delete()
         future_qs = ScheduleMediaItem.objects.filter(
             block_container_selection__tv_playout=tv_playout,
-            starts_at__gte=start_at,
+            starts_at__gte=cleanup_start,
         )
         affected_selection_ids = set(future_qs.values_list("block_container_selection_id", flat=True).distinct())
         deleted_count, _ = future_qs.delete()
@@ -313,7 +356,7 @@ class TvPlayoutGenerationService:
         )
 
         if not affected_selection_ids:
-            return
+            return cleanup_start
 
         selections = (
             BlockContainerSelection.objects
@@ -323,7 +366,7 @@ class TvPlayoutGenerationService:
         for selection in selections:
             last_scheduled = (
                 ScheduleMediaItem.objects
-                .filter(block_container_selection=selection, starts_at__lt=start_at)
+                .filter(block_container_selection=selection, starts_at__lt=cleanup_start)
                 .order_by("-starts_at", "-id")
                 .select_related("item")
                 .first()
@@ -337,6 +380,7 @@ class TvPlayoutGenerationService:
             else:
                 selection.status = ScheduledContainerStatus.PENDING
             selection.save(update_fields=["last_scheduled_item", "status"])
+        return cleanup_start
 
     def _build_block_occurrences(
         self,
