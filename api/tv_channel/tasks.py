@@ -118,6 +118,7 @@ def generate_tv_channel_playout(
         status=AnalyzeStatus.ANALYZING,
     )
     try:
+        extend = trigger == PlayoutGenerationReport.TRIGGER_EXTEND
         active_grid = (
             instance.gridlayout_set.filter(is_active=True)
             .only("id", "mode")
@@ -129,12 +130,14 @@ def generate_tv_channel_playout(
                 tv_channel=instance,
                 days=days,
                 reset=reset,
+                extend=extend,
             )
         else:
             service = TvPlayoutGenerationService(
                 tv_channel=instance,
                 days=days,
                 reset=reset,
+                extend=extend,
             )
         result = service.generate()
     except Exception as exc:
@@ -237,10 +240,7 @@ def extend_channel_playouts():
         playout = TvPlayout.objects.filter(tv_channel=channel, is_active=True).first()
         if playout is None:
             continue
-        last_end = ScheduleMediaItem.objects.filter(
-            Q(flexible_selection__tv_playout=playout)
-            | Q(block_container_selection__tv_playout=playout),
-        ).aggregate(value=Max("ends_at"))["value"]
+        last_end = _get_playout_last_end(playout)
         if last_end is None or last_end >= horizon_target:
             continue
         logger.info(
@@ -255,6 +255,20 @@ def extend_channel_playouts():
             reset=False,
             trigger=PlayoutGenerationReport.TRIGGER_EXTEND,
         )
+
+
+def _get_playout_last_end(playout: TvPlayout):
+    bounds = ScheduleMediaItem.objects.filter(
+        Q(flexible_selection__tv_playout=playout)
+        | Q(block_container_selection__tv_playout=playout)
+        | Q(parent_schedule_item__flexible_selection__tv_playout=playout)
+        | Q(parent_schedule_item__block_container_selection__tv_playout=playout),
+    ).aggregate(
+        ends_at=Max("ends_at"),
+        post_roll_filler_ends_at=Max("post_roll_filler_ends_at"),
+    )
+    values = [value for value in bounds.values() if value is not None]
+    return max(values) if values else None
 
 
 @shared_task

@@ -47,10 +47,11 @@ class FlexibleTvPlayoutGenerationService:
     OVERFLOW_STRICT = "strict"
     OVERFLOW_SOFT = "soft"
 
-    def __init__(self, *, tv_channel: TvChannel, days: int, reset: bool = False):
+    def __init__(self, *, tv_channel: TvChannel, days: int, reset: bool = False, extend: bool = False):
         self.tv_channel = tv_channel
         self.days = days
         self.reset = reset
+        self.extend = extend
         self.editorial_line = self._get_editorial_line(tv_channel)
         self.grid_layout: GridLayout | None = None
         self.overflow_mode = str(settings.FLEXIBLE_PLAYOUT_OVERFLOW_MODE).strip().lower()
@@ -82,9 +83,13 @@ class FlexibleTvPlayoutGenerationService:
                 raise ValidationError("Flexible grid must have an editorial segment path.")
 
             tv_playout, created = self._get_or_create_playout(tv_channel, grid_layout=grid_layout, reset=self.reset)
-            start_at = self._resolve_window_start()
-            end_at = start_at + timedelta(days=self.days)
-            self._delete_future_items_and_rollback_cursors(tv_playout=tv_playout, start_at=start_at)
+            start_at = self._resolve_window_start(tv_playout)
+            end_at = self._resolve_window_end(start_at)
+            cleanup_start = self._delete_future_items_and_rollback_cursors(tv_playout=tv_playout, start_at=start_at)
+            if cleanup_start > start_at:
+                start_at = cleanup_start
+                if not self.extend:
+                    end_at = start_at + timedelta(days=self.days)
 
             history = self._build_history(tv_channel=tv_channel, start_at=start_at)
             generated_items = 0
@@ -157,7 +162,7 @@ class FlexibleTvPlayoutGenerationService:
                 generated_items += 1
                 cursor = scheduled.post_roll_filler_ends_at or scheduled.ends_at
 
-            if generated_items == 0:
+            if generated_items == 0 and start_at < end_at:
                 warnings.append("Flexible playout generated no item.")
 
             filled_items = 0
@@ -243,7 +248,7 @@ class FlexibleTvPlayoutGenerationService:
 
         return TvPlayout.objects.create(tv_channel=tv_channel, is_active=True, grid=grid_layout), True
 
-    def _resolve_window_start(self) -> datetime:
+    def _resolve_window_start(self, tv_playout: TvPlayout) -> datetime:
         now = timezone.now()
         cycle_anchor = now.replace(
             hour=self.day_start.hour,
@@ -253,7 +258,28 @@ class FlexibleTvPlayoutGenerationService:
         )
         if now.time() < self.day_start:
             cycle_anchor -= timedelta(days=1)
+        if self.extend and not self.reset:
+            last_end = self._get_playout_last_end(tv_playout)
+            if last_end is not None:
+                return max(last_end, now)
         return cycle_anchor
+
+    def _resolve_window_end(self, start_at: datetime) -> datetime:
+        if self.extend and not self.reset:
+            return timezone.now() + timedelta(days=self.days)
+        return start_at + timedelta(days=self.days)
+
+    @staticmethod
+    def _get_playout_last_end(tv_playout: TvPlayout) -> datetime | None:
+        bounds = ScheduleMediaItem.objects.filter(
+            Q(flexible_selection__tv_playout=tv_playout)
+            | Q(parent_schedule_item__flexible_selection__tv_playout=tv_playout),
+        ).aggregate(
+            ends_at=Max("ends_at"),
+            post_roll_filler_ends_at=Max("post_roll_filler_ends_at"),
+        )
+        values = [value for value in bounds.values() if value is not None]
+        return max(values) if values else None
 
     def _resolve_day_end_at(self, cursor: datetime) -> datetime:
         day_anchor = cursor.replace(
@@ -284,26 +310,29 @@ class FlexibleTvPlayoutGenerationService:
             candidate += timedelta(days=1)
         return candidate
 
-    def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> None:
+    def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> datetime:
+        cleanup_start = start_at
+        if not self.reset:
+            cleanup_start = max(cleanup_start, timezone.now())
         # Enfants post-roll dont le parent (avant start_at) est conserve mais dont la
         # fenetre depasse start_at: le CASCADE ne les couvre pas, suppression explicite.
         ScheduleMediaItem.objects.filter(
             parent_schedule_item__flexible_selection__tv_playout=tv_playout,
-            starts_at__gte=start_at,
+            starts_at__gte=cleanup_start,
         ).delete()
         future_qs = ScheduleMediaItem.objects.filter(
             flexible_selection__tv_playout=tv_playout,
-            starts_at__gte=start_at,
+            starts_at__gte=cleanup_start,
         )
         affected_selection_ids = set(future_qs.values_list("flexible_selection_id", flat=True).distinct())
         future_qs.delete()
         if not affected_selection_ids:
-            return
+            return cleanup_start
 
         selections = FlexiblePlayoutSelection.objects.filter(id__in=affected_selection_ids)
         for selection in selections:
             last_scheduled = (
-                ScheduleMediaItem.objects.filter(flexible_selection=selection, starts_at__lt=start_at)
+                ScheduleMediaItem.objects.filter(flexible_selection=selection, starts_at__lt=cleanup_start)
                 .order_by("-starts_at", "-id")
                 .select_related("item")
                 .first()
@@ -311,6 +340,7 @@ class FlexibleTvPlayoutGenerationService:
             selection.last_scheduled_item = last_scheduled.item if last_scheduled else None
             selection.status = ScheduledContainerStatus.COMPLETED if last_scheduled else ScheduledContainerStatus.PENDING
             selection.save(update_fields=["last_scheduled_item", "status"])
+        return cleanup_start
 
     def _build_history(self, *, tv_channel: TvChannel, start_at: datetime) -> dict:
         lookback_start = start_at - timedelta(hours=self.LOOKBACK_HOURS)
