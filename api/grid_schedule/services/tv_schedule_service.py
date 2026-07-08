@@ -116,8 +116,12 @@ class TvPlayoutGenerationService:
             )
 
             cleanup_start = self._delete_future_items_and_rollback_cursors(tv_playout=tv_playout, start_at=start_at)
-            if cleanup_start > start_at:
-                start_at = cleanup_start
+            adjusted_start = self._resolve_post_cleanup_window_start(
+                tv_playout=tv_playout,
+                cleanup_start=cleanup_start,
+            )
+            if adjusted_start > start_at:
+                start_at = adjusted_start
                 if not self.extend:
                     end_at = start_at + timedelta(days=self.days)
             logger.info(
@@ -319,6 +323,14 @@ class TvPlayoutGenerationService:
         )
         values = [value for value in bounds.values() if value is not None]
         return max(values) if values else None
+
+    def _resolve_post_cleanup_window_start(self, *, tv_playout: TvPlayout, cleanup_start: datetime) -> datetime:
+        if self.reset:
+            return cleanup_start
+        last_end = self._get_playout_last_end(tv_playout)
+        if last_end is None:
+            return cleanup_start
+        return max(cleanup_start, last_end)
 
     def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> datetime:
         cleanup_start = start_at

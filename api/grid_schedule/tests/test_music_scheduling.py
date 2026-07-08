@@ -174,3 +174,31 @@ class FixedPlayoutExtensionTests(PostRollFillerFixtureMixin, TestCase):
             )
             self.assertEqual(second.generated_items, 0)
             self.assertEqual(after_second_ids, after_extend_ids)
+
+    def test_manual_regeneration_resumes_after_current_item(self):
+        initial_now = timezone.make_aware(datetime(2026, 1, 1, 9, 0))
+        regenerate_now = timezone.make_aware(datetime(2026, 1, 1, 8, 30))
+
+        with patch("grid_schedule.services.tv_schedule_service.timezone.now", return_value=initial_now):
+            initial = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=1,
+                reset=True,
+            ).generate()
+
+        with patch("grid_schedule.services.tv_schedule_service.timezone.now", return_value=regenerate_now):
+            regenerated = TvPlayoutGenerationService(
+                tv_channel=self.tv_channel,
+                days=1,
+                reset=False,
+                extend=False,
+            ).generate()
+
+        self.assertEqual(regenerated.window_start, timezone.make_aware(datetime(2026, 1, 1, 9, 0)))
+        main_items = list(
+            ScheduleMediaItem.objects
+            .filter(block_container_selection__tv_playout=initial.tv_playout)
+            .order_by("starts_at", "id")
+        )
+        for previous, current in zip(main_items, main_items[1:]):
+            self.assertLessEqual(previous.ends_at, current.starts_at)
