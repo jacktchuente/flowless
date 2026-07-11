@@ -231,7 +231,9 @@ COMFYUI_URL=http://192.168.1.223:8188
 #OPENAI_IMAGE_API_KEY=
 #OPENAI_IMAGE_MODEL=gpt-image-1
 
-PUBLIC_ORIGINS=http://192.168.1.204:8004
+# Public entrypoint of the stack: a domain or an ip:port (no scheme).
+# CORS/CSRF origins (http and https) and allowed hosts are derived from it.
+DOMAIN_NAME=192.168.1.204:8004
 ```
 
 2. Start the stack:
