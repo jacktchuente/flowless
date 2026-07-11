@@ -110,3 +110,15 @@ class FormSuggestionApiTests(APITestCase):
         response = self.client.post(f"/api/tv-channel/{self.channel.id}/suggest-form/", {"form_kind": "editorial_line"}, format="json")
         self.assertEqual(response.status_code, 502)
         self.assertEqual(complete.call_count, 2)
+
+    @mock.patch("tv_channel.services.form_suggestion_service.LLMService.complete")
+    def test_network_failure_returns_502_after_retries(self, complete):
+        complete.side_effect = ConnectionError("LLM unavailable")
+        response = self.client.post(
+            f"/api/tv-channel/{self.channel.id}/suggest-form/",
+            {"form_kind": "editorial_line"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 502)
+        self.assertIn("LLM request failed", response.data["detail"])
+        self.assertEqual(complete.call_count, 2)

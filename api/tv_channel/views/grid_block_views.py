@@ -1,11 +1,17 @@
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from tv_channel.models import GridBlock
-from tv_channel.serializers.grid_block_serializers import GridBlockSerializer
+from tv_channel.serializers.grid_block_serializers import GridBlockSerializer, GridBlockWriteSerializer
 from tv_channel.services.grid_block_service import GridBlockService
+from tv_channel.services.grid_editing import (
+    GridNotEditableError,
+    ensure_block_is_editable,
+    get_editable_grid_layout,
+)
 
 
 class GridBlockViewSet(
@@ -25,20 +31,16 @@ class GridBlockViewSet(
 
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):
-            from tv_channel.serializers.grid_block_serializers import GridBlockWriteSerializer
             return GridBlockWriteSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
-        from tv_channel.services.grid_editing import GridNotEditableError, get_editable_grid_layout
         layout = serializer.validated_data["grid_layout"]
         try:
             active = get_editable_grid_layout(layout.tv_channel)
         except GridNotEditableError as exc:
-            from rest_framework.exceptions import ValidationError
             raise ValidationError({"grid_layout": str(exc)})
         if active.pk != layout.pk:
-            from rest_framework.exceptions import ValidationError
             raise ValidationError({"grid_layout": "Only the active grid can be edited."})
         serializer.save()
 
@@ -52,8 +54,6 @@ class GridBlockViewSet(
 
     @staticmethod
     def _ensure_editable(block):
-        from rest_framework.exceptions import ValidationError
-        from tv_channel.services.grid_editing import GridNotEditableError, ensure_block_is_editable
         try:
             ensure_block_is_editable(block)
         except GridNotEditableError as exc:

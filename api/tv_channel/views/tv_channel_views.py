@@ -10,7 +10,7 @@ from grid_schedule.serializers.playout_report_serializers import PlayoutGenerati
 from django.utils.timezone import now
 from media_source.constants import MediaContainerKind, MediaNature, MediaProgrammingRole
 from media_source.data import categories
-from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, TvChannel
+from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, GridLayoutMode, TvChannel
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer, EditorialLineWriteSerializer
 from tv_channel.serializers.form_suggestion_serializers import FormSuggestionRequestSerializer
 from tv_channel.serializers.grid_serializers import GridSerializer, GridWriteSerializer
@@ -127,7 +127,7 @@ class TvChannelViewSet(
     def grid_warnings(self, request, pk=None):
         channel = self.get_object()
         layout = channel.gridlayout_set.filter(is_active=True).first()
-        if layout is None or layout.mode != 1:
+        if layout is None or layout.mode != GridLayoutMode.FIXED:
             return Response({"warnings": []})
         return Response({"warnings": compute_grid_warnings(layout)})
 

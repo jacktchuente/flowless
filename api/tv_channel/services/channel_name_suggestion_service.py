@@ -43,13 +43,16 @@ class ChannelNameSuggestionService:
                 forbidden_channel_names=forbidden_channel_names,
                 retry_errors=retry_errors,
             )
-            response = LLMService().complete(prompt=prompt)
             try:
+                response = LLMService().complete(prompt=prompt)
                 name = self._parse_llm_response(response.content)
-            except ChannelNameSuggestionError as exc:
-                retry_errors = [str(exc)]
+            except Exception as exc:
+                error = exc if isinstance(exc, ChannelNameSuggestionError) else ChannelNameSuggestionError(
+                    f"LLM request failed: {exc}"
+                )
+                retry_errors = [str(error)]
                 if attempt == max_attempts:
-                    raise
+                    raise error from exc
                 continue
 
             if name in forbidden_channel_names:

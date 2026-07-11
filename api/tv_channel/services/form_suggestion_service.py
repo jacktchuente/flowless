@@ -41,14 +41,17 @@ class FormSuggestionService:
         attempts = max(1, int(getattr(settings, "LLM_RETRY_FORM_SUGGESTION", 3)))
         last_error = "Form suggestion failed."
         for _ in range(attempts):
-            response = LLMService().complete(prompt=self._build_prompt(retry_errors))
             try:
+                response = LLMService().complete(prompt=self._build_prompt(retry_errors))
                 payload = self._parse(response.content)
                 serializer = self.FORM_SERIALIZERS[self.form_kind](data=payload, partial=True)
                 serializer.is_valid(raise_exception=True)
                 return self._serialize_values(serializer.validated_data)
             except (FormSuggestionError, ValidationError) as exc:
                 last_error = str(exc.detail if isinstance(exc, ValidationError) else exc)
+                retry_errors = [last_error]
+            except Exception as exc:
+                last_error = f"LLM request failed: {exc}"
                 retry_errors = [last_error]
         raise FormSuggestionError(last_error)
 
