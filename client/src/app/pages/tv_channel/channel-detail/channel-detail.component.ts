@@ -6,23 +6,27 @@ import {MatDialog} from "@angular/material/dialog";
 import {MatIconModule} from "@angular/material/icon";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {MatSnackBar} from "@angular/material/snack-bar";
 import {filter} from "rxjs/operators";
 import {CalendarEvent, CalendarModule} from "angular-calendar";
 import {WebsocketService} from "@kwyxyz/ngx-request";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslateModule, TranslateService} from "@ngx-translate/core";
-import {EditorialLineData, GridBlock, ScheduledMediaItem, TvChannel} from "@project-interfaces/tv-channel";
+import {EditorialLineData, FormOptions, GridBlock, GridWarningsResponse, ScheduledMediaItem, TvChannel} from "@project-interfaces/tv-channel";
 import {TvChannelLogoPromptResponse, TvChannelService} from "@project-services/tv-channel.service";
 import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
 import {NotificationService} from "@project-shared/services/notification.service";
 import {BlueprintGenerationDialogComponent} from "../blueprint-generation-dialog/blueprint-generation-dialog.component";
-import {EditorialLineDetailDialogComponent} from "../editorial-line-detail-dialog/editorial-line-detail-dialog.component";
 import {GridBlockDetailDialogComponent} from "../grid-block-detail-dialog/grid-block-detail-dialog.component";
 import {GenerationReportDialogComponent} from "../generation-report-dialog/generation-report-dialog.component";
 import {PlayoutGenerationDialogComponent} from "../playout-generation-dialog/playout-generation-dialog.component";
 import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialog.component";
 import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-detail-dialog/schedule-media-item-detail-dialog.component";
 import {TvChannelDialogComponent} from "../tv-channel-dialog/tv-channel-dialog.component";
+import {EditorialLineEditDialogComponent} from "../editorial-line-edit-dialog/editorial-line-edit-dialog.component";
+import {GridBlockEditDialogComponent} from "../grid-block-edit-dialog/grid-block-edit-dialog.component";
+import {GridEditDialogComponent} from "../grid-edit-dialog/grid-edit-dialog.component";
+import {GridBlockService} from "@project-services/grid-block.service";
 
 type ChannelCalendarEventMeta =
   | {kind: 'schedule', item: ScheduledMediaItem}
@@ -60,6 +64,8 @@ export class ChannelDetailComponent {
   calendarDate = new Date()
   scheduleCalendarEvents: ChannelCalendarEvent[] = []
   gridCalendarEvents: ChannelCalendarEvent[] = []
+  formOptions: FormOptions | null = null
+  gridWarnings: string[] = []
 
   constructor(
     private route: ActivatedRoute,
@@ -69,6 +75,8 @@ export class ChannelDetailComponent {
     private notificationService: NotificationService,
     private dialog: MatDialog,
     private translateService: TranslateService,
+    private gridBlockService: GridBlockService,
+    private snackBar: MatSnackBar,
   ) {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -123,6 +131,7 @@ export class ChannelDetailComponent {
       this.logoLoadFailed = false
       this.calendarDate = this.getTodayDate()
       this.refreshCalendarData()
+      this.loadGridWarnings()
       this.isPageLoading = false
     })
   }
@@ -366,18 +375,27 @@ export class ChannelDetailComponent {
   }
 
   openEditorialLineDetailDialog() {
-    if (!this.channel || !this.editorialLine) {
+    if (!this.channel) {
       return
     }
-    this.dialog.open(EditorialLineDetailDialogComponent, {
+    this.withFormOptions((options) => this.dialog.open(EditorialLineEditDialogComponent, {
       width: '860px',
       maxWidth: '96vw',
       data: {
-        channelName: this.channel.name,
+        channelId: this.channel!.id,
         editorialLine: this.editorialLine,
+        formOptions: options,
       }
-    })
+    }).afterClosed().subscribe(result => this.afterGridWrite(result)))
   }
+
+  openGridEditDialog() { if (!this.channel?.grid_data || this.isFlexibleChannel) return; this.withFormOptions(options => this.dialog.open(GridEditDialogComponent,{width:'620px',maxWidth:'96vw',data:{channelId:this.channel!.id,postFillerPolicy:this.channel!.grid_data!.post_filler_policy,formOptions:options}}).afterClosed().subscribe(r=>this.afterGridWrite(r))) }
+  openBlockEditDialog(block: GridBlock | null) { if (!this.channel?.grid_data || this.isFlexibleChannel) return; this.withFormOptions(options => this.dialog.open(GridBlockEditDialogComponent,{width:'900px',maxWidth:'96vw',data:{channelId:this.channel!.id,gridLayoutId:this.channel!.grid_data!.id,block,formOptions:options}}).afterClosed().subscribe(r=>this.afterGridWrite(r))) }
+  deleteBlock(block: GridBlock) { if (!this.channel || this.isFlexibleChannel) return; this.dialog.open(ConfirmationDialogComponent,{width:'520px',data:{confirmationMessage:'Supprimer ce block de grille ?'}}).afterClosed().subscribe(ok=>{if(!ok)return;this.gridBlockService.delete(block.id).subscribe(r=>{if(!r.isOk){this.notificationService.notify('Suppression impossible.');return}this.afterGridWrite({saved:true})})}) }
+  createGridVersion() { if (!this.channel || this.isFlexibleChannel) return; this.dialog.open(ConfirmationDialogComponent,{width:'520px',data:{confirmationMessage:'Créer une nouvelle version de la grille active ?'}}).afterClosed().subscribe(ok=>{if(!ok||!this.channel)return;this.tvChannelService.createGridVersion(this.channel.id).subscribe(r=>{if(!r.isOk){this.notificationService.notify('Création de version impossible.');return}this.afterGridWrite({saved:true})})}) }
+  private withFormOptions(callback:(options:FormOptions)=>void){if(this.formOptions){callback(this.formOptions);return}this.tvChannelService.getFormOptions().subscribe(r=>{if(!r.isOk){this.notificationService.notify('Chargement des options impossible.');return}this.formOptions=r.body as FormOptions;callback(this.formOptions)})}
+  private loadGridWarnings(){if(!this.channel){this.gridWarnings=[];return}this.tvChannelService.getGridWarnings(this.channel.id).subscribe(r=>{this.gridWarnings=r.isOk?(r.body as GridWarningsResponse).warnings:[]})}
+  private afterGridWrite(result:any){if(!result?.saved||!this.channel)return;const id=this.channel.id.toString();this.loadChannel(id);this.snackBar.open('Modifications enregistrées. Régénérer le playout ?', 'Régénérer',{duration:10000}).onAction().subscribe(()=>this.dialog.open(PlayoutGenerationDialogComponent,{width:'720px',maxWidth:'96vw',data:{channelId:id,reset:true}}))}
 
   openBlockDetails(block: GridBlock) {
     if (!this.channel?.grid_data || !this.channel.editorial_line_data) {

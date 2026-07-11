@@ -322,3 +322,8 @@
   border-color: rgba(230, 160, 30, 0.6) !important;
   color: #c80 !important;
 }
+.warning-list { border-left: 3px solid #b26a00; padding: 8px 12px; margin: 12px 0; background: #fff8e8; }
+.warning-list p { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.block-list { display: grid; border-top: 1px solid #ddd; }
+.block-row { display: grid; grid-template-columns: minmax(140px, auto) 1fr auto; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid #ddd; }
+@media (max-width: 640px) { .block-row { grid-template-columns: 1fr auto; } .block-row > span { grid-column: 1 / -1; } }
