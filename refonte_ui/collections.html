@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Collections</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link active" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Collections</span>
+        <h1>Bibliothèque éditoriale</h1>
+        <p class="sub">Chaque collection reçoit un rôle éditorial. Activez-la pour qu'elle soit disponible aux grilles de chaînes, analysez-la pour rafraîchir ses métadonnées.</p>
+      </div>
+      <div class="topline-actions">
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>Rechercher</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <div class="table-wrap">
+          <table class="grid">
+            <thead>
+              <tr><th>Collection</th><th>Source</th><th>Rôle éditorial</th><th>Nature</th><th>Type</th><th>Active</th><th>Dernière analyse</th><th></th></tr>
+            </thead>
+            <tbody>
+
+              <tr style="cursor:pointer;" onclick="openModal('modal-collection')">
+                <td><div class="cell-title">Prestige Crime</div><div class="cell-sub">demo-collection-prestige-crime</div></td>
+                <td>Showcase Library</td>
+                <td><span class="pill info"><span class="dot"></span>Principal</span></td>
+                <td>Fiction</td>
+                <td>Série</td>
+                <td onclick="event.stopPropagation()"><label class="switch"><input type="checkbox" checked /><span class="track"></span></label></td>
+                <td class="mono">31/05 09:45</td>
+                <td style="text-align:right;" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="showToast('Analyse de « Prestige Crime » lancée.')">Analyser</button></td>
+              </tr>
+
+              <tr style="cursor:pointer;" onclick="openModal('modal-collection')">
+                <td><div class="cell-title">Action Features</div><div class="cell-sub">demo-collection-action-features</div></td>
+                <td>Showcase Library</td>
+                <td><span class="pill info"><span class="dot"></span>Principal</span></td>
+                <td>Fiction</td>
+                <td>Film</td>
+                <td onclick="event.stopPropagation()"><label class="switch"><input type="checkbox" checked /><span class="track"></span></label></td>
+                <td class="mono">31/05 09:45</td>
+                <td style="text-align:right;" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="showToast('Analyse de « Action Features » lancée.')">Analyser</button></td>
+              </tr>
+
+              <tr style="cursor:pointer;" onclick="openModal('modal-collection')">
+                <td><div class="cell-title">Current Affairs</div><div class="cell-sub">demo-collection-current-affairs</div></td>
+                <td>Showcase Library</td>
+                <td><span class="pill info"><span class="dot"></span>Principal</span></td>
+                <td>Documentaire</td>
+                <td>Série</td>
+                <td onclick="event.stopPropagation()"><label class="switch"><input type="checkbox" checked /><span class="track"></span></label></td>
+                <td class="mono">31/05 09:45</td>
+                <td style="text-align:right;" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="showToast('Analyse de « Current Affairs » lancée.')">Analyser</button></td>
+              </tr>
+
+              <tr style="cursor:pointer;" onclick="openModal('modal-collection')">
+                <td><div class="cell-title">Comedy Evenings</div><div class="cell-sub">demo-collection-comedy-evenings</div></td>
+                <td>Showcase Library</td>
+                <td><span class="pill info"><span class="dot"></span>Principal</span></td>
+                <td>Divertissement</td>
+                <td>Série</td>
+                <td onclick="event.stopPropagation()"><label class="switch"><input type="checkbox" checked /><span class="track"></span></label></td>
+                <td class="mono">31/05 09:45</td>
+                <td style="text-align:right;" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="showToast('Analyse de « Comedy Evenings » lancée.')">Analyser</button></td>
+              </tr>
+
+              <tr style="cursor:pointer;" onclick="openModal('modal-collection')">
+                <td><div class="cell-title">Live Sessions</div><div class="cell-sub">demo-collection-live-sessions</div></td>
+                <td>Showcase Library</td>
+                <td><span class="pill neutral"><span class="dot"></span>Filler</span></td>
+                <td>Musique</td>
+                <td>Clip live</td>
+                <td onclick="event.stopPropagation()"><label class="switch"><input type="checkbox" checked /><span class="track"></span></label></td>
+                <td class="mono">31/05 09:45</td>
+                <td style="text-align:right;" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="showToast('Analyse de « Live Sessions » lancée.')">Analyser</button></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-scrim" id="modal-collection">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Prestige Crime</h3>
+        <p class="desc">Métadonnées éditoriales utilisées par les règles de grille et de ligne éditoriale.</p>
+      </div>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row cols-2">
+        <div class="field">
+          <label>Rôle de programmation</label>
+          <div class="select-fake"><select><option>Principal</option><option>Filler</option><option>Interstitiel</option></select></div>
+          <span class="hint">Détermine si ce contenu peut porter un créneau à lui seul.</span>
+        </div>
+        <div class="field">
+          <label>Nature</label>
+          <div class="select-fake"><select><option>Fiction</option><option>Documentaire</option><option>Divertissement</option><option>Musique</option></select></div>
+        </div>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field">
+          <label>Type de contenant</label>
+          <div class="select-fake"><select><option>Série</option><option>Film</option><option>Clip live</option></select></div>
+        </div>
+        <div class="field">
+          <label>Animation</label>
+          <label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Considérer comme anime</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn danger-ghost" data-close-modal onclick="showToast('Analyse de « Prestige Crime » lancée.')">Analyser maintenant</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost" data-close-modal>Annuler</button>
+        <button class="btn primary" data-close-modal onclick="showToast('Métadonnées enregistrées pour « Prestige Crime ».')">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

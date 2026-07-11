@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Vue d'ensemble</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link active" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Vue d'ensemble</span>
+        <h1>Bonjour Jack — voici l'état de la régie</h1>
+        <p class="sub">Un point d'entrée unique : ce qui nécessite une action, ce qui vient de se passer, et ce qui est à l'antenne en ce moment.</p>
+      </div>
+      <div class="topline-actions">
+        <a class="btn" href="channel-detail.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nouvelle chaîne</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- stat row -->
+      <div class="card">
+        <div class="card-body" style="display:grid; grid-template-columns:repeat(4,1fr); gap:28px;">
+          <div class="stat">
+            <span class="n mono">4<span style="font-size:16px; color:var(--slate-400);">/4</span></span>
+            <span class="l">Chaînes à l'antenne</span>
+          </div>
+          <div class="stat">
+            <span class="n mono" style="color:var(--critical);">3</span>
+            <span class="l">Alertes ouvertes sur 2 chaînes</span>
+          </div>
+          <div class="stat">
+            <span class="n mono">1<span style="font-size:16px; color:var(--slate-400);">/2</span></span>
+            <span class="l">Sources à resynchroniser</span>
+          </div>
+          <div class="stat">
+            <span class="n mono">12<span style="font-size:16px; color:var(--slate-400);"> min</span></span>
+            <span class="l">Depuis la dernière génération</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:20px; align-items:start;">
+
+        <!-- priority list -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>À traiter en priorité</h2>
+              <p class="desc">Trié par sévérité — les erreurs bloquent la diffusion, les avertissements non.</p>
+            </div>
+          </div>
+          <div class="card-body" style="padding:8px 0; display:flex; flex-direction:column;">
+
+            <a href="channel-detail.html" style="display:flex; align-items:center; gap:14px; padding:14px 22px; text-decoration:none; color:inherit; border-bottom:1px solid var(--slate-100);">
+              <span class="pill critical"><span class="dot"></span>Erreur</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; color:var(--slate-900);">Harbor Street Nights</div>
+                <div style="font-size:12px; color:var(--slate-500);">Le dernier planning laisse 2h14 sans média correspondant — génération à refaire.</div>
+              </div>
+              <span class="mono" style="font-size:11px; color:var(--slate-400); flex:none;">il y a 12 min</span>
+            </a>
+
+            <a href="sources.html" style="display:flex; align-items:center; gap:14px; padding:14px 22px; text-decoration:none; color:inherit; border-bottom:1px solid var(--slate-100);">
+              <span class="pill warning"><span class="dot"></span>Avertissement</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; color:var(--slate-900);">Archive Vault</div>
+                <div style="font-size:12px; color:var(--slate-500);">Dernière synchronisation il y a 9 jours — de nouveaux titres Jellyfin ne sont peut-être pas encore visibles.</div>
+              </div>
+              <span class="mono" style="font-size:11px; color:var(--slate-400); flex:none;">il y a 9 j</span>
+            </a>
+
+            <a href="channel-detail.html" style="display:flex; align-items:center; gap:14px; padding:14px 22px; text-decoration:none; color:inherit;">
+              <span class="pill warning"><span class="dot"></span>Avertissement</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; color:var(--slate-900);">Velvet Rewind</div>
+                <div style="font-size:12px; color:var(--slate-500);">3 titres de la collection « Comedy Evenings » ne correspondent à aucune règle de la grille éditoriale.</div>
+              </div>
+              <span class="mono" style="font-size:11px; color:var(--slate-400); flex:none;">il y a 1 h</span>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- activity -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Activité récente</h2>
+              <p class="desc">Analyses et générations, dernières 24 h.</p>
+            </div>
+          </div>
+          <div class="card-body" style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; gap:12px;">
+              <span class="pill success" style="flex:none;"><span class="dot"></span>OK</span>
+              <div>
+                <div style="font-size:12.5px; color:var(--slate-900);">Planning généré pour <strong>Pulse Report Weekly</strong> — 7 jours</div>
+                <div class="mono" style="font-size:11px; color:var(--slate-400);">il y a 12 min</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <span class="pill success" style="flex:none;"><span class="dot"></span>OK</span>
+              <div>
+                <div style="font-size:12.5px; color:var(--slate-900);">Collection <strong>Live Sessions</strong> analysée — 5 titres</div>
+                <div class="mono" style="font-size:11px; color:var(--slate-400);">il y a 48 min</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <span class="pill critical" style="flex:none;"><span class="dot"></span>Échec</span>
+              <div>
+                <div style="font-size:12.5px; color:var(--slate-900);">Génération du planning <strong>Harbor Street Nights</strong> — trous non couverts</div>
+                <div class="mono" style="font-size:11px; color:var(--slate-400);">il y a 1 h</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <span class="pill neutral" style="flex:none;"><span class="dot"></span>Info</span>
+              <div>
+                <div style="font-size:12.5px; color:var(--slate-900);">Nouveau run de segmentation lancé — 3 candidats détectés</div>
+                <div class="mono" style="font-size:11px; color:var(--slate-400);">il y a 3 h</div>
+              </div>
+            </div>
+            <a href="channel-detail.html" style="font-size:12.5px; font-weight:600; color:var(--signal-strong); text-decoration:none;">Voir tous les rapports de génération →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- on air strip -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Chaînes à l'antenne</h2>
+            <p class="desc">Ce qui joue maintenant, et ce qui suit.</p>
+          </div>
+          <a class="btn sm" href="channels.html">Voir toutes les chaînes</a>
+        </div>
+        <div class="card-body" style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+
+          <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="font-size:13px;">Harbor Street Nights</strong>
+              <span class="pill live"><span class="dot"></span>Live</span>
+            </div>
+            <div style="font-size:12.5px; color:var(--slate-700); font-weight:600;">Harbor Homicide · Ép. 4</div>
+            <div class="mono" style="font-size:11px; color:var(--slate-400); margin:2px 0 8px;">21:00 – 21:52</div>
+            <div style="font-size:11px; color:var(--slate-500);">Suivant — Cold Ledger · Ép. 1 <span class="mono">à 21:52</span></div>
+          </div>
+
+          <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="font-size:13px;">Night Shift Radio</strong>
+              <span class="pill live"><span class="dot"></span>Live</span>
+            </div>
+            <div style="font-size:12.5px; color:var(--slate-700); font-weight:600;">Live Sessions · Set 03</div>
+            <div class="mono" style="font-size:11px; color:var(--slate-400); margin:2px 0 8px;">20:40 – 22:10</div>
+            <div style="font-size:11px; color:var(--slate-500);">Suivant — Set 04 <span class="mono">à 22:10</span></div>
+          </div>
+
+          <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="font-size:13px;">Pulse Report Weekly</strong>
+              <span class="pill live"><span class="dot"></span>Live</span>
+            </div>
+            <div style="font-size:12.5px; color:var(--slate-700); font-weight:600;">Atlas of Conflict · Ép. 2</div>
+            <div class="mono" style="font-size:11px; color:var(--slate-400); margin:2px 0 8px;">21:05 – 22:00</div>
+            <div style="font-size:11px; color:var(--slate-500);">Suivant — Deep Current <span class="mono">à 22:00</span></div>
+          </div>
+
+          <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="font-size:13px;">Velvet Rewind</strong>
+              <span class="pill live"><span class="dot"></span>Live</span>
+            </div>
+            <div style="font-size:12.5px; color:var(--slate-700); font-weight:600;">Comedy Evenings · Ép. 6</div>
+            <div class="mono" style="font-size:11px; color:var(--slate-400); margin:2px 0 8px;">20:30 – 21:15</div>
+            <div style="font-size:11px; color:var(--slate-500);">Suivant — Ép. 7 <span class="mono">à 21:15</span></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
