@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {BaseApiService, ObjectApiService} from "@kwyxyz/ngx-request";
 import {apiRoutes} from "../_utils/apiRoutes";
-import {PlayoutGenerationReport, TvChannel} from "../_interfaces/tv-channel";
+import {EditorialLineData, EditorialLinePayload, FormOptions, FormSuggestionRequest, FormSuggestionResponse, GridData, GridPayload, GridWarningsResponse, PlayoutGenerationReport, TvChannel} from "../_interfaces/tv-channel";
 import {Observable, Subject} from "rxjs";
 
 interface RequestResponseLike {
@@ -85,6 +85,16 @@ export class TvChannelApiService extends BaseApiService {
     generateLogo(id: string | number, backend: string | null): Observable<unknown> {
         return this.http.post(`${this.getFullUrl()}${id}/generate-logo/`, {backend});
     }
+
+    getFormOptions(): Observable<FormOptions> { return this.http.get<FormOptions>(`${this.getFullUrl()}form-options/`) }
+    getEditorialLine(id: string | number): Observable<EditorialLineData> { return this.http.get<EditorialLineData>(`${this.getFullUrl()}${id}/editorial-line/`) }
+    updateEditorialLine(id: string | number, payload: Partial<EditorialLinePayload>, partial = true): Observable<EditorialLineData> {
+        return partial ? this.http.patch<EditorialLineData>(`${this.getFullUrl()}${id}/editorial-line/`, payload) : this.http.put<EditorialLineData>(`${this.getFullUrl()}${id}/editorial-line/`, payload)
+    }
+    updateGrid(id: string | number, payload: GridPayload): Observable<GridData> { return this.http.patch<GridData>(`${this.getFullUrl()}${id}/grid/`, payload) }
+    createGridVersion(id: string | number): Observable<GridData> { return this.http.post<GridData>(`${this.getFullUrl()}${id}/grid/new-version/`, {}) }
+    getGridWarnings(id: string | number): Observable<GridWarningsResponse> { return this.http.get<GridWarningsResponse>(`${this.getFullUrl()}${id}/grid-warnings/`) }
+    suggestForm(id: string | number, payload: FormSuggestionRequest): Observable<FormSuggestionResponse> { return this.http.post<FormSuggestionResponse>(`${this.getFullUrl()}${id}/suggest-form/`, payload) }
 }
 
 @Injectable({
@@ -197,6 +207,19 @@ export class TvChannelService extends ObjectApiService {
         })
         return subject
     }
+
+    private wrap(request: Observable<unknown>): Subject<RequestResponseLike> {
+        const subject = new Subject<RequestResponseLike>()
+        request.subscribe({next: body => subject.next({isOk: true, body}), error: body => subject.next({isOk: false, body})})
+        return subject
+    }
+    getFormOptions() { return this.wrap(this.api.getFormOptions()) }
+    getEditorialLine(id: string | number) { return this.wrap(this.api.getEditorialLine(id)) }
+    updateEditorialLine(id: string | number, payload: Partial<EditorialLinePayload>, partial = true) { return this.wrap(this.api.updateEditorialLine(id, payload, partial)) }
+    updateGrid(id: string | number, payload: GridPayload) { return this.wrap(this.api.updateGrid(id, payload)) }
+    createGridVersion(id: string | number) { return this.wrap(this.api.createGridVersion(id)) }
+    getGridWarnings(id: string | number) { return this.wrap(this.api.getGridWarnings(id)) }
+    suggestForm(id: string | number, payload: FormSuggestionRequest) { return this.wrap(this.api.suggestForm(id, payload)) }
 
     private refreshFromSocket() {
         this.listObject(this.lastQueryParams, true)
