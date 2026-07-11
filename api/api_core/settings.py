@@ -14,22 +14,19 @@ USE_SQLITE = os.getenv('USE_SQLITE', '1') == '1'
 DEBUG = os.getenv('DEBUG', '1') == "1"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "INSECURE_SECRET_KEY")
 
-PUBLIC_ORIGINS = os.getenv("PUBLIC_ORIGINS", "").split()
-if not PUBLIC_ORIGINS:
-    PUBLIC_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split()
+# DOMAIN_NAME is the single public-facing entrypoint: a domain (flowless.example.com)
+# or an ip:port (192.168.1.204:8004). A leading scheme is tolerated and stripped.
+# Origins (CORS/CSRF) and ALLOWED_HOSTS are derived from it, accepting http and https.
+DOMAIN_NAME = os.getenv("DOMAIN_NAME", "").strip()
+if "://" in DOMAIN_NAME:
+    DOMAIN_NAME = urlparse(DOMAIN_NAME).netloc
 
-ALLOWED_HOSTS_ENV = os.getenv("ALLOWED_HOSTS", "").split()
-if ALLOWED_HOSTS_ENV:
-    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV
-else:
-    # Default to the hosts derived from the public origins exposed by the gateway.
-    parsed_public_hosts = [
-        urlparse(origin).netloc.split(":", 1)[0]
-        for origin in PUBLIC_ORIGINS
-        if origin
-    ]
-    default_local_hosts = ["localhost", "127.0.0.1"]
-    ALLOWED_HOSTS = list(dict.fromkeys([*parsed_public_hosts, *default_local_hosts]))
+PUBLIC_ORIGINS = [f"https://{DOMAIN_NAME}", f"http://{DOMAIN_NAME}"] if DOMAIN_NAME else []
+
+_domain_host = urlparse(f"//{DOMAIN_NAME}").hostname if DOMAIN_NAME else None
+ALLOWED_HOSTS = list(dict.fromkeys(
+    host for host in [_domain_host, "localhost", "127.0.0.1"] if host
+))
 
 if USE_SQLITE:
     DATABASES = {
