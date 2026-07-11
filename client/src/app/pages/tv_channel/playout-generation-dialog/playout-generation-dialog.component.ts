@@ -59,8 +59,9 @@ export class PlayoutGenerationDialogComponent {
     private dialogRef: MatDialogRef<PlayoutGenerationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
       channelId?: string | number,
+      reset?: boolean,
     }
-  ) {}
+  ) { this.model.reset = data.reset ?? false }
 
   get title(): string {
     return 'Generer le playout'

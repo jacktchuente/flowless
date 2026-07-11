@@ -1,0 +1,11 @@
+<section class="suggestion-panel">
+  <mat-form-field appearance="outline">
+    <mat-label>{{ 'MANUAL_EDIT.SUGGESTION_CONTEXT' | translate }}</mat-label>
+    <textarea matInput rows="3" [(ngModel)]="context" [disabled]="disabled || isLoading"></textarea>
+  </mat-form-field>
+  <button mat-stroked-button type="button" (click)="suggest.emit(context)" [disabled]="disabled || isLoading">
+    <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
+    <mat-icon *ngIf="!isLoading">lightbulb</mat-icon><span>{{ 'MANUAL_EDIT.SUGGEST_LLM' | translate }}</span>
+  </button>
+  <p class="suggestion-error" *ngIf="error">{{ error }}</p>
+</section>

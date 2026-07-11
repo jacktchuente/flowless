@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {BaseApiService} from "@kwyxyz/ngx-request";
 import {apiRoutes} from "../_utils/apiRoutes";
 import {Observable, Subject} from "rxjs";
+import {GridBlock, GridBlockPayload} from "../_interfaces/tv-channel";
 
 interface RequestResponseLike {
   isOk: boolean
@@ -26,6 +27,9 @@ export class GridBlockApiService extends BaseApiService {
   getAvailableMediaCount(id: string | number): Observable<GridBlockAvailableMediaCount> {
     return this.http.get<GridBlockAvailableMediaCount>(`${this.getFullUrl()}${id}/available-media-count/`)
   }
+  create(payload: GridBlockPayload): Observable<GridBlock> { return this.http.post<GridBlock>(this.getFullUrl(), payload) }
+  update(id: string | number, payload: Partial<GridBlockPayload>): Observable<GridBlock> { return this.http.patch<GridBlock>(`${this.getFullUrl()}${id}/`, payload) }
+  delete(id: string | number): Observable<void> { return this.http.delete<void>(`${this.getFullUrl()}${id}/`) }
 }
 
 @Injectable({
@@ -42,4 +46,13 @@ export class GridBlockService {
     })
     return subject
   }
+
+  private wrap(request: Observable<unknown>): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>()
+    request.subscribe({next: body => subject.next({isOk: true, body}), error: body => subject.next({isOk: false, body})})
+    return subject
+  }
+  create(payload: GridBlockPayload) { return this.wrap(this.api.create(payload)) }
+  update(id: string | number, payload: Partial<GridBlockPayload>) { return this.wrap(this.api.update(id, payload)) }
+  delete(id: string | number) { return this.wrap(this.api.delete(id)) }
 }

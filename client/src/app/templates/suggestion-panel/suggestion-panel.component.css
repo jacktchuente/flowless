@@ -1,0 +1,4 @@
+.suggestion-panel { display: grid; gap: 8px; padding: 12px 0; }
+mat-form-field { width: 100%; }
+button { justify-self: start; }
+.suggestion-error { color: var(--mat-sys-error); margin: 0; }

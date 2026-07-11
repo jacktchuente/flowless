@@ -7,7 +7,15 @@ from rest_framework.viewsets import GenericViewSet
 
 from grid_schedule.models import PlayoutGenerationReport
 from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSerializer
-from tv_channel.models import GridBlock, TvChannel
+from django.utils.timezone import now
+from media_source.constants import MediaContainerKind, MediaNature, MediaProgrammingRole
+from media_source.data import categories
+from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, GridLayoutMode, TvChannel
+from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer, EditorialLineWriteSerializer
+from tv_channel.serializers.form_suggestion_serializers import FormSuggestionRequestSerializer
+from tv_channel.serializers.grid_serializers import GridSerializer, GridWriteSerializer
+from tv_channel.services.grid_editing import GridNotEditableError, compute_grid_warnings, get_editable_grid_layout
+from tv_channel.services.form_suggestion_service import FormSuggestionError, FormSuggestionService
 from tv_channel.serializers.tv_channel_serializers import (
     TvChannelCreateSerializer,
     TvChannelDetailSerializer,
@@ -56,6 +64,96 @@ class TvChannelViewSet(
         if self.action == "retrieve":
             return TvChannelDetailSerializer
         return super().get_serializer_class()
+
+    @action(detail=False, methods=("get",), url_path="form-options")
+    def form_options(self, request):
+        return Response({
+            "categories": categories,
+            "natures": [{"value": choice.value, "label": choice.label} for choice in MediaNature],
+            "container_kinds": [{"value": choice.value, "label": choice.label} for choice in MediaContainerKind],
+            "programming_roles": [{"value": choice.value, "label": choice.label} for choice in MediaProgrammingRole],
+            "filler_policies": list(FillerPolicy.objects.order_by("name").values("id", "name", "duration_seconds")),
+        })
+
+    @action(detail=True, methods=("get", "put", "patch"), url_path="editorial-line")
+    def editorial_line(self, request, pk=None):
+        channel = self.get_object()
+        if request.method == "GET":
+            line = getattr(channel, "editorialline", None)
+            if line is None:
+                return Response({"detail": "Editorial line not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(EditorialLineSerializer(line).data)
+        line, _ = EditorialLine.objects.get_or_create(tv_channel=channel)
+        serializer = EditorialLineWriteSerializer(
+            line, data=request.data, partial=request.method == "PATCH"
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(EditorialLineSerializer(line).data)
+
+    @action(detail=True, methods=("patch",), url_path="grid")
+    def grid(self, request, pk=None):
+        try:
+            layout = get_editable_grid_layout(self.get_object())
+        except GridNotEditableError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = GridWriteSerializer(layout, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(GridSerializer(layout).data)
+
+    @action(detail=True, methods=("post",), url_path="grid/new-version")
+    def new_grid_version(self, request, pk=None):
+        channel = self.get_object()
+        try:
+            source = get_editable_grid_layout(channel)
+        except GridNotEditableError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            source.is_active = False
+            source.save(update_fields=["is_active"])
+            copy = GridLayout.objects.create(
+                tv_channel=channel, mode=source.mode, post_filler_policy=source.post_filler_policy,
+                is_active=True, created_at=now(),
+            )
+            fields = [field.name for field in GridBlock._meta.fields if field.name not in ("id", "grid_layout")]
+            GridBlock.objects.bulk_create([
+                GridBlock(grid_layout=copy, **{field: getattr(block, field) for field in fields})
+                for block in source.gridblock_set.all()
+            ])
+        return Response(GridSerializer(copy).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=("get",), url_path="grid-warnings")
+    def grid_warnings(self, request, pk=None):
+        channel = self.get_object()
+        layout = channel.gridlayout_set.filter(is_active=True).first()
+        if layout is None or layout.mode != GridLayoutMode.FIXED:
+            return Response({"warnings": []})
+        return Response({"warnings": compute_grid_warnings(layout)})
+
+    @action(detail=True, methods=("post",), url_path="suggest-form")
+    def suggest_form(self, request, pk=None):
+        channel = self.get_object()
+        serializer = FormSuggestionRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        if data["form_kind"] in ("grid", "grid_block"):
+            try:
+                get_editable_grid_layout(channel)
+            except GridNotEditableError as exc:
+                return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        block = None
+        if "grid_block_id" in data:
+            block = GridBlock.objects.filter(pk=data["grid_block_id"], grid_layout__tv_channel=channel).first()
+            if block is None:
+                return Response({"grid_block_id": "Block does not belong to this channel."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            values = FormSuggestionService(
+                channel, data["form_kind"], data["user_context"], data["current_values"], block
+            ).suggest()
+        except FormSuggestionError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        return Response({"values": values})
 
     @action(detail=True, methods=("post",), url_name="generate-blueprint", url_path="generate-blueprint")
     def generate_blueprint(self, request, pk=None):

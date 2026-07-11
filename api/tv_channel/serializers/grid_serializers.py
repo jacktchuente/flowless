@@ -48,3 +48,9 @@ class GridSerializer(serializers.ModelSerializer):
     def get_blocks(self, obj):
         queryset = obj.gridblock_set.all().order_by("starts_at", "id")
         return GridBlockSerializer(queryset, many=True).data
+
+
+class GridWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GridLayout
+        fields = ("post_filler_policy",)

@@ -112,3 +112,25 @@ export interface TvChannelPayload {
   specification?: string | null
   catalog: string | number
 }
+
+export interface FormOption { value: number; label: string }
+export interface FillerPolicyOption { id: number; name: string; duration_seconds: number }
+export interface FormOptions {
+  categories: string[]
+  natures: FormOption[]
+  container_kinds: FormOption[]
+  programming_roles: FormOption[]
+  filler_policies: FillerPolicyOption[]
+}
+
+export type EditorialLinePayload = EditorialLineData
+export type GridBlockPayload = Omit<GridBlock, 'id' | 'post_filler_policy_name'> & {grid_layout: string | number}
+export interface GridPayload { post_filler_policy: string | number | null }
+export interface FormSuggestionRequest {
+  form_kind: 'editorial_line' | 'grid_block' | 'grid'
+  user_context: string
+  current_values: Record<string, unknown>
+  grid_block_id?: string | number
+}
+export interface FormSuggestionResponse { values: Record<string, unknown> }
+export interface GridWarningsResponse { warnings: string[] }
