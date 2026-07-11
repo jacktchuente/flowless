@@ -6,10 +6,11 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
+import {TranslateModule} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-suggestion-panel', standalone: true,
-  imports: [FormsModule, NgIf, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatFormFieldModule, MatInputModule],
+  imports: [FormsModule, NgIf, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, TranslateModule],
   templateUrl: './suggestion-panel.component.html', styleUrl: './suggestion-panel.component.css'
 })
 export class SuggestionPanelComponent {

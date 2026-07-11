@@ -140,6 +140,16 @@
     "NOTIFY_LOGO_GENERATION_STARTED": "Génération du logo lancée.",
     "NOTIFY_LOGO_GENERATION_FAILED": "Échec du lancement de la génération du logo."
   },
+  "MANUAL_EDIT": {
+    "EDIT_EDITORIAL_LINE": "Modifier la ligne éditoriale", "NO_EDITORIAL_LINE": "Aucune ligne éditoriale.",
+    "FIXED_GRID": "Grille fixe", "EDITORIAL_BLOCKS": "Blocks éditoriaux", "EDIT_GRID": "Modifier la grille", "NEW_VERSION": "Nouvelle version", "ADD_BLOCK": "Ajouter un block", "EDIT_BLOCK": "Modifier le block",
+    "BLOCK_SUMMARY": "Priorité {{priority}} · {{min}}–{{max}} éléments", "CONFIRM_DELETE_BLOCK": "Supprimer ce block de grille ?", "CONFIRM_NEW_VERSION": "Créer une nouvelle version de la grille active ?",
+    "DELETE_FAILED": "Suppression impossible.", "VERSION_FAILED": "Création de version impossible.", "OPTIONS_FAILED": "Chargement des options impossible.", "SAVE_FAILED": "Enregistrement impossible.",
+    "SAVED_REGENERATE": "Modifications enregistrées. Régénérer le playout ?", "REGENERATE": "Régénérer", "CANCEL": "Annuler", "SAVE": "Enregistrer", "NONE": "Aucune",
+    "SUGGESTION_CONTEXT": "Contexte pour la suggestion", "SUGGEST_LLM": "Suggérer (LLM)", "FILLER_POLICY": "Politique de remplissage", "POST_FILLER_POLICY": "Politique post-remplissage",
+    "START": "Début", "END": "Fin", "PRIORITY": "Priorité", "MIN_ITEMS": "Minimum éléments", "MAX_ITEMS": "Maximum éléments", "MIN_DURATION": "Durée minimum (s)", "MAX_DURATION": "Durée maximum (s)", "ALLOW_FILLER": "Autoriser le remplissage",
+    "ALLOWED_CATEGORIES": "Catégories autorisées", "FORBIDDEN_CATEGORIES": "Catégories interdites", "PREFERRED_CATEGORIES": "Catégories préférées", "ALLOWED_NATURES": "Natures autorisées", "FORBIDDEN_NATURES": "Natures interdites", "PREFERRED_NATURES": "Natures préférées", "ALLOWED_KINDS": "Types autorisés", "FORBIDDEN_KINDS": "Types interdits", "PREFERRED_KINDS": "Types préférés"
+  },
   "CHANNELS": {
     "EYEBROW": "Chaînes",
     "TITLE": "Catalogues et chaînes",

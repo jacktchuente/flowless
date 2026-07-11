@@ -389,13 +389,126 @@ export class ChannelDetailComponent {
     }).afterClosed().subscribe(result => this.afterGridWrite(result)))
   }
 
-  openGridEditDialog() { if (!this.channel?.grid_data || this.isFlexibleChannel) return; this.withFormOptions(options => this.dialog.open(GridEditDialogComponent,{width:'620px',maxWidth:'96vw',data:{channelId:this.channel!.id,postFillerPolicy:this.channel!.grid_data!.post_filler_policy,formOptions:options}}).afterClosed().subscribe(r=>this.afterGridWrite(r))) }
-  openBlockEditDialog(block: GridBlock | null) { if (!this.channel?.grid_data || this.isFlexibleChannel) return; this.withFormOptions(options => this.dialog.open(GridBlockEditDialogComponent,{width:'900px',maxWidth:'96vw',data:{channelId:this.channel!.id,gridLayoutId:this.channel!.grid_data!.id,block,formOptions:options}}).afterClosed().subscribe(r=>this.afterGridWrite(r))) }
-  deleteBlock(block: GridBlock) { if (!this.channel || this.isFlexibleChannel) return; this.dialog.open(ConfirmationDialogComponent,{width:'520px',data:{confirmationMessage:'Supprimer ce block de grille ?'}}).afterClosed().subscribe(ok=>{if(!ok)return;this.gridBlockService.delete(block.id).subscribe(r=>{if(!r.isOk){this.notificationService.notify('Suppression impossible.');return}this.afterGridWrite({saved:true})})}) }
-  createGridVersion() { if (!this.channel || this.isFlexibleChannel) return; this.dialog.open(ConfirmationDialogComponent,{width:'520px',data:{confirmationMessage:'Créer une nouvelle version de la grille active ?'}}).afterClosed().subscribe(ok=>{if(!ok||!this.channel)return;this.tvChannelService.createGridVersion(this.channel.id).subscribe(r=>{if(!r.isOk){this.notificationService.notify('Création de version impossible.');return}this.afterGridWrite({saved:true})})}) }
-  private withFormOptions(callback:(options:FormOptions)=>void){if(this.formOptions){callback(this.formOptions);return}this.tvChannelService.getFormOptions().subscribe(r=>{if(!r.isOk){this.notificationService.notify('Chargement des options impossible.');return}this.formOptions=r.body as FormOptions;callback(this.formOptions)})}
-  private loadGridWarnings(){if(!this.channel){this.gridWarnings=[];return}this.tvChannelService.getGridWarnings(this.channel.id).subscribe(r=>{this.gridWarnings=r.isOk?(r.body as GridWarningsResponse).warnings:[]})}
-  private afterGridWrite(result:any){if(!result?.saved||!this.channel)return;const id=this.channel.id.toString();this.loadChannel(id);this.snackBar.open('Modifications enregistrées. Régénérer le playout ?', 'Régénérer',{duration:10000}).onAction().subscribe(()=>this.dialog.open(PlayoutGenerationDialogComponent,{width:'720px',maxWidth:'96vw',data:{channelId:id,reset:true}}))}
+  openGridEditDialog() {
+    if (!this.channel?.grid_data || this.isFlexibleChannel) {
+      return
+    }
+    this.withFormOptions((options) => {
+      this.dialog.open(GridEditDialogComponent, {
+        width: '620px',
+        maxWidth: '96vw',
+        data: {
+          channelId: this.channel!.id,
+          postFillerPolicy: this.channel!.grid_data!.post_filler_policy,
+          formOptions: options,
+        },
+      }).afterClosed().subscribe((result) => this.afterGridWrite(result))
+    })
+  }
+
+  openBlockEditDialog(block: GridBlock | null) {
+    if (!this.channel?.grid_data || this.isFlexibleChannel) {
+      return
+    }
+    this.withFormOptions((options) => {
+      this.dialog.open(GridBlockEditDialogComponent, {
+        width: '900px',
+        maxWidth: '96vw',
+        data: {
+          channelId: this.channel!.id,
+          gridLayoutId: this.channel!.grid_data!.id,
+          block,
+          formOptions: options,
+        },
+      }).afterClosed().subscribe((result) => this.afterGridWrite(result))
+    })
+  }
+
+  deleteBlock(block: GridBlock) {
+    if (!this.channel || this.isFlexibleChannel) {
+      return
+    }
+    this.dialog.open(ConfirmationDialogComponent, {
+      width: '520px',
+      data: {confirmationMessage: this.translateService.instant('MANUAL_EDIT.CONFIRM_DELETE_BLOCK')},
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return
+      }
+      this.gridBlockService.delete(block.id).subscribe((response) => {
+        if (!response.isOk) {
+          this.notificationService.notify('MANUAL_EDIT.DELETE_FAILED')
+          return
+        }
+        this.afterGridWrite({saved: true})
+      })
+    })
+  }
+
+  createGridVersion() {
+    if (!this.channel || this.isFlexibleChannel) {
+      return
+    }
+    this.dialog.open(ConfirmationDialogComponent, {
+      width: '520px',
+      data: {confirmationMessage: this.translateService.instant('MANUAL_EDIT.CONFIRM_NEW_VERSION')},
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed || !this.channel) {
+        return
+      }
+      this.tvChannelService.createGridVersion(this.channel.id).subscribe((response) => {
+        if (!response.isOk) {
+          this.notificationService.notify('MANUAL_EDIT.VERSION_FAILED')
+          return
+        }
+        this.afterGridWrite({saved: true})
+      })
+    })
+  }
+
+  private withFormOptions(callback: (options: FormOptions) => void) {
+    if (this.formOptions) {
+      callback(this.formOptions)
+      return
+    }
+    this.tvChannelService.getFormOptions().subscribe((response) => {
+      if (!response.isOk) {
+        this.notificationService.notify('MANUAL_EDIT.OPTIONS_FAILED')
+        return
+      }
+      this.formOptions = response.body as FormOptions
+      callback(this.formOptions)
+    })
+  }
+
+  private loadGridWarnings() {
+    if (!this.channel) {
+      this.gridWarnings = []
+      return
+    }
+    this.tvChannelService.getGridWarnings(this.channel.id).subscribe((response) => {
+      this.gridWarnings = response.isOk ? (response.body as GridWarningsResponse).warnings : []
+    })
+  }
+
+  private afterGridWrite(result: any) {
+    if (!result?.saved || !this.channel) {
+      return
+    }
+    const channelId = this.channel.id.toString()
+    this.loadChannel(channelId)
+    this.snackBar.open(
+      this.translateService.instant('MANUAL_EDIT.SAVED_REGENERATE'),
+      this.translateService.instant('MANUAL_EDIT.REGENERATE'),
+      {duration: 10000},
+    ).onAction().subscribe(() => {
+      this.dialog.open(PlayoutGenerationDialogComponent, {
+        width: '720px',
+        maxWidth: '96vw',
+        data: {channelId, reset: true},
+      })
+    })
+  }
 
   openBlockDetails(block: GridBlock) {
     if (!this.channel?.grid_data || !this.channel.editorial_line_data) {

@@ -132,7 +132,7 @@
         </div>
         <button mat-stroked-button type="button" (click)="openEditorialLineDetailDialog()">
           <mat-icon>edit</mat-icon>
-          Modifier
+          {{ 'CHANNELS.EDIT' | translate }}
         </button>
         <button mat-stroked-button type="button" *ngIf="!isFlexibleChannel" (click)="openResetRulesDialog()">
           <mat-icon>restart_alt</mat-icon>
@@ -153,27 +153,29 @@
           <dd>{{ editorialLine.allow_filler ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
         </div>
       </dl>
-      <ng-template #noEditorialLine><p>Aucune ligne éditoriale.</p></ng-template>
+      <ng-template #noEditorialLine><p>{{ 'MANUAL_EDIT.NO_EDITORIAL_LINE' | translate }}</p></ng-template>
     </article>
   </section>
 
-  <section class="timeline-card" *ngIf="channel.grid_data as editableGrid">
-    <div class="timeline-card-head" *ngIf="!isFlexibleChannel">
-      <div><span class="panel-label">Grille fixe</span><h3>Blocks éditoriaux</h3></div>
+  <section class="timeline-card" *ngIf="channel.grid_data && !isFlexibleChannel">
+    <ng-container *ngIf="channel.grid_data as editableGrid">
+    <div class="timeline-card-head">
+      <div><span class="panel-label">{{ 'MANUAL_EDIT.FIXED_GRID' | translate }}</span><h3>{{ 'MANUAL_EDIT.EDITORIAL_BLOCKS' | translate }}</h3></div>
       <div class="calendar-nav">
-        <button mat-stroked-button (click)="openGridEditDialog()"><mat-icon>settings</mat-icon>Modifier la grille</button>
-        <button mat-stroked-button (click)="createGridVersion()"><mat-icon>content_copy</mat-icon>Nouvelle version</button>
-        <button mat-flat-button color="primary" (click)="openBlockEditDialog(null)"><mat-icon>add</mat-icon>Ajouter un block</button>
+        <button mat-stroked-button (click)="openGridEditDialog()"><mat-icon>settings</mat-icon>{{ 'MANUAL_EDIT.EDIT_GRID' | translate }}</button>
+        <button mat-stroked-button (click)="createGridVersion()"><mat-icon>content_copy</mat-icon>{{ 'MANUAL_EDIT.NEW_VERSION' | translate }}</button>
+        <button mat-flat-button color="primary" (click)="openBlockEditDialog(null)"><mat-icon>add</mat-icon>{{ 'MANUAL_EDIT.ADD_BLOCK' | translate }}</button>
       </div>
     </div>
     <div class="warning-list" *ngIf="!isFlexibleChannel && gridWarnings.length"><p *ngFor="let warning of gridWarnings"><mat-icon>warning</mat-icon>{{ warning }}</p></div>
     <div class="block-list" *ngIf="!isFlexibleChannel">
       <div class="block-row" *ngFor="let block of editableGrid.blocks">
         <button mat-button (click)="openBlockDetails(block)">{{ getBlockTimeLabel(block) }}</button>
-        <span>Priorité {{ block.priority }} · {{ block.min_items }}–{{ block.max_items }} éléments</span>
-        <div><button mat-icon-button title="Modifier" (click)="openBlockEditDialog(block)"><mat-icon>edit</mat-icon></button><button mat-icon-button title="Supprimer" (click)="deleteBlock(block)"><mat-icon>delete</mat-icon></button></div>
+        <span>{{ 'MANUAL_EDIT.BLOCK_SUMMARY' | translate:{priority: block.priority, min: block.min_items, max: block.max_items} }}</span>
+        <div><button mat-icon-button [title]="'CHANNELS.EDIT' | translate" (click)="openBlockEditDialog(block)"><mat-icon>edit</mat-icon></button><button mat-icon-button [title]="'CHANNELS.DELETE' | translate" (click)="deleteBlock(block)"><mat-icon>delete</mat-icon></button></div>
       </div>
     </div>
+    </ng-container>
   </section>
 
   <section class="timeline-card" *ngIf="channel.grid_data as gridData">
