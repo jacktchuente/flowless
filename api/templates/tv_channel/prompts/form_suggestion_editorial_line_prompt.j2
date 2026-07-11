@@ -1,0 +1,17 @@
+You fill an editorial-line form. User context is the priority instruction.
+Channel: {{ channel | tojson }}
+Catalog: {{ catalog | tojson }}
+Grid mode: {{ grid_mode }}
+Current editorial line: {{ editorial_line | tojson }}
+Current form values: {{ current_values | tojson }}
+Available categories: {{ categories | tojson }}
+Available nature labels: {{ natures | tojson }}
+Available container-kind labels: {{ container_kinds | tojson }}
+User context: {{ user_context }}
+Previous validation errors: {{ retry_errors | tojson }}
+
+Return every field: allowed_categories, forbidden_categories, preferred_categories,
+allowed_natures, forbidden_natures, preferred_natures, allowed_container_kinds,
+forbidden_container_kinds, preferred_container_kinds, start_at, end_at, allow_filler.
+Use labels for natures and container kinds, and HH:MM times. Return only:
+<suggestion_output>{"allowed_categories": [], "forbidden_categories": [], "preferred_categories": [], "allowed_natures": [], "forbidden_natures": [], "preferred_natures": [], "allowed_container_kinds": [], "forbidden_container_kinds": [], "preferred_container_kinds": [], "start_at": "06:00", "end_at": "22:00", "allow_filler": true}</suggestion_output>

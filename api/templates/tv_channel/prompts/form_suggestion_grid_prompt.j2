@@ -1,0 +1,10 @@
+You fill the fixed-grid settings form. User context is the priority instruction.
+Channel: {{ channel | tojson }}
+Catalog: {{ catalog | tojson }}
+Current form values: {{ current_values | tojson }}
+Available filler policies: {{ filler_policies | tojson }}
+User context: {{ user_context }}
+Previous validation errors: {{ retry_errors | tojson }}
+
+Return exactly one field, post_filler_policy, as an available id or null. Return only:
+<suggestion_output>{"post_filler_policy": null}</suggestion_output>
