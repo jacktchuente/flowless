@@ -79,6 +79,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,6 +131,13 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "statics")
 MEDIA_ROOT = os.path.join(BASE_DIR, 'medias')
+
+# Statics servis par whitenoise (uvicorn est seul en front, plus de nginx).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+WHITENOISE_MAX_AGE = 7 * 24 * 3600  # meme expiration que l'ancien nginx
 
 if MODE == 'prod':
     MEDIA_URL = os.getenv('MEDIA_URL', '/medias/')

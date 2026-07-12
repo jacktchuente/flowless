@@ -9,10 +9,10 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VERSION=1.8.5
 
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+ENV PATH="$POETRY_HOME/bin:$PATH"
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y curl libpq-dev build-essential nginx \
+    && apt-get install --no-install-recommends -y curl libpq-dev build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,4 +29,4 @@ RUN rm -rf /root/.cache/pypoetry
 RUN python -m compileall -qq /usr/local/lib/python3.12/site-packages
 COPY . .
 RUN python manage.py collectstatic --noinput
-CMD sh ./docker/runme.sh
+CMD ["bash", "./docker/runme.sh"]
