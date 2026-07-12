@@ -2,6 +2,7 @@ import { Component, Inject, Input, Optional } from "@angular/core";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { FlwIconComponent } from "../icon/flw-icon.component";
 import { NgIf } from "@angular/common";
+import { TranslateModule } from "@ngx-translate/core";
 
 export interface FlwModalData {
   title?: string;
@@ -12,7 +13,7 @@ export interface FlwModalData {
 @Component({
   selector: "flw-modal",
   standalone: true,
-  imports: [FlwIconComponent, NgIf],
+  imports: [FlwIconComponent, NgIf, TranslateModule],
   template: ` <section
     class="modal"
     [class.wide]="wide || data?.wide"
@@ -30,7 +31,7 @@ export interface FlwModalData {
       <button
         type="button"
         class="modal-close"
-        aria-label="Fermer"
+        [attr.aria-label]="'COMMON.CLOSE' | translate"
         (click)="close()"
       >
         <flw-icon name="close" />

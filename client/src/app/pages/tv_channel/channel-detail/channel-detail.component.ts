@@ -184,9 +184,9 @@ export class ChannelDetailComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Nouvelle version",
-          message: "Créer une nouvelle version de la grille active ?",
-          confirmLabel: "Créer",
+          title: this.translate.instant("MANUAL_EDIT.NEW_VERSION"),
+          message: this.translate.instant("MANUAL_EDIT.CONFIRM_NEW_VERSION"),
+          confirmLabel: this.translate.instant("MANUAL_EDIT.CREATE"),
         },
       })
       .closed.subscribe((ok) => {
@@ -319,8 +319,14 @@ export class ChannelDetailComponent {
     return (this.channel?.grid_data?.blocks ?? []).map((b) => ({
       start: b.starts_at.slice(0, 5),
       end: b.ends_at.slice(0, 5),
-      title: `Bloc — ${b.allowed_categories[0] ?? "Programmation"}`,
-      sub: `Priorité ${b.priority}`,
+      title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
+        category:
+          b.allowed_categories[0] ??
+          this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
+      }),
+      sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
+        priority: b.priority,
+      }),
       category: natureToCategory(b.allowed_natures[0]),
     }));
   }

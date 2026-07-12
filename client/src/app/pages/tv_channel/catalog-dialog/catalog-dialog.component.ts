@@ -9,25 +9,33 @@ import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { Catalog } from "@project-interfaces/catalog";
 import { CatalogService } from "@project-services/catalog.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
+import { TranslateModule } from "@ngx-translate/core";
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, FlwModalComponent],
+  imports: [ReactiveFormsModule, FlwModalComponent, TranslateModule],
   template: `<flw-modal
-    [title]="data.catalog ? 'Modifier le catalogue' : 'Nouveau catalogue'"
+    [title]="
+      (data.catalog ? 'CHANNELS.EDIT_CATALOG' : 'CHANNELS.NEW_CATALOG')
+        | translate
+    "
     ><form [formGroup]="form">
       <div class="field">
-        <label>Nom</label><input formControlName="name" type="text" />
+        <label>{{ "COMMON.NAME" | translate }}</label
+        ><input formControlName="name" type="text" />
       </div>
       <div class="field">
-        <label>Description</label
+        <label>{{ "COMMON.DESCRIPTION" | translate }}</label
         ><textarea formControlName="description" rows="4"></textarea>
       </div>
     </form>
     <div modal-footer>
       <span></span>
       <div>
-        <button class="btn ghost" (click)="ref.close()">Annuler</button
-        ><button class="btn primary" (click)="save()">Enregistrer</button>
+        <button class="btn ghost" (click)="ref.close()">
+          {{ "COMMON.CANCEL" | translate }}</button
+        ><button class="btn primary" (click)="save()">
+          {{ "CHANNEL_DIALOGS.COMMON.SAVE" | translate }}
+        </button>
       </div>
     </div></flw-modal
   >`,

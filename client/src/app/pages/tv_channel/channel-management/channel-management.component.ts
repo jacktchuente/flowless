@@ -161,8 +161,14 @@ export class ChannelManagementComponent {
       return (c.grid_data?.blocks ?? []).map((b) => ({
         start: b.starts_at.slice(0, 5),
         end: b.ends_at.slice(0, 5),
-        title: `Bloc — ${b.allowed_categories[0] ?? "Programmation"}`,
-        sub: `Priorité ${b.priority}`,
+        title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
+          category:
+            b.allowed_categories[0] ??
+            this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
+        }),
+        sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
+          priority: b.priority,
+        }),
         category: natureToCategory(b.allowed_natures[0]),
       }));
     return (c.active_schedule_items ?? [])
@@ -181,11 +187,11 @@ export class ChannelManagementComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Générer les chaînes",
+          title: this.translate.instant("CHANNELS.GENERATE_CHANNELS_TITLE"),
           message: this.translate.instant("CHANNELS.CONFIRM_GENERATE_CATALOG", {
             name: c.name,
           }),
-          confirmLabel: "Générer",
+          confirmLabel: this.translate.instant("CHANNELS.GENERATE"),
         },
       })
       .closed.subscribe((ok) => {
@@ -226,9 +232,11 @@ export class ChannelManagementComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Supprimer la chaîne",
-          message: `Supprimer « ${c.name} » ?`,
-          confirmLabel: "Supprimer",
+          title: this.translate.instant("CHANNELS.DELETE_CHANNEL_TITLE"),
+          message: this.translate.instant("CHANNELS.CONFIRM_DELETE", {
+            name: c.name,
+          }),
+          confirmLabel: this.translate.instant("COMMON.DELETE"),
         },
       })
       .closed.subscribe((ok) => {

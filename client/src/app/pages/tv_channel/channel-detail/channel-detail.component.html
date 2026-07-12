@@ -33,7 +33,7 @@
       <button class="btn" (click)="edit()">
         {{ "COMMON.EDIT" | translate }}</button
       ><button class="btn" (click)="openReports()">
-        Rapports
+        {{ "CHANNEL_DETAIL.GENERATION_REPORTS" | translate }}
         <span class="pill critical" *ngIf="reportIssueCount">{{
           reportIssueCount
         }}</span></button
@@ -89,15 +89,15 @@
         <h2>{{ "CHANNEL_DETAIL.EDITORIAL_LINE" | translate }}</h2>
         <div>
           <button class="btn ghost sm" (click)="openResetRules()">
-            Réinitialiser</button
+            {{ "COMMON.RESET" | translate }}</button
           ><button class="btn sm" (click)="openEditorialLine()">
-            Modifier
+            {{ "COMMON.EDIT" | translate }}
           </button>
         </div>
       </div>
       <div class="card-body kv" *ngIf="c.editorial_line_data as line">
         <div class="row">
-          <span class="k">Fenêtre horaire</span
+          <span class="k">{{ "CHANNEL_DETAIL.TIME_WINDOW" | translate }}</span
           ><strong class="v mono"
             >{{ line.start_at.slice(0, 5) }} →
             {{ line.end_at.slice(0, 5) }}</strong
@@ -133,15 +133,17 @@
     <div class="card-head">
       <div>
         <h2>{{ "MANUAL_EDIT.EDITORIAL_BLOCKS" | translate }}</h2>
-        <p class="desc">Blocs de programmation de la version active.</p>
+        <p class="desc">
+          {{ "CHANNEL_DETAIL.ACTIVE_BLOCKS_DESC" | translate }}
+        </p>
       </div>
       <div>
         <button class="btn ghost" (click)="openGridSettings()">
-          Paramètres de la grille</button
+          {{ "CHANNEL_DIALOGS.GRID.SETTINGS" | translate }}</button
         ><button class="btn" (click)="newVersion()">
           {{ "MANUAL_EDIT.NEW_VERSION" | translate }}</button
         ><button class="btn primary" (click)="openBlock(null)">
-          Ajouter un bloc
+          {{ "CHANNEL_DIALOGS.GRID.ADD_BLOCK" | translate }}
         </button>
       </div>
     </div>
@@ -161,12 +163,15 @@
             tag
           }}</span>
         </div>
-        <span
-          >Priorité {{ block.priority }} · {{ block.min_items }}–{{
-            block.max_items
-          }}
-          titres</span
-        >
+        <span>{{
+          "CHANNEL_DETAIL.BLOCK_SUMMARY"
+            | translate
+              : {
+                  priority: block.priority,
+                  min: block.min_items,
+                  max: block.max_items,
+                }
+        }}</span>
       </button>
       <div class="gap" *ngFor="let warning of gridWarnings">
         <flw-icon name="warning" />{{ warning }}
@@ -183,7 +188,7 @@
         <button class="btn ghost" (click)="shift(-1)">
           {{ "CHANNELS.PREVIOUS_DAY" | translate }}</button
         ><button class="btn ghost" (click)="resetCalendarDay()">
-          Aujourd'hui</button
+          {{ "CHANNELS.TODAY" | translate }}</button
         ><button class="btn ghost" (click)="shift(1)">
           {{ "CHANNELS.NEXT_DAY" | translate }}
         </button>

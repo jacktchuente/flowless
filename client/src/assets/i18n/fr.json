@@ -245,6 +245,12 @@
     "NOTIFY_RULES_RESET": "Règles réinitialisées.",
     "CALENDAR_HELP_FLEXIBLE": "Affichage journalier du programme généré par la planification flexible.",
     "GENERATION_REPORTS": "Rapports de génération",
+    "TIME_WINDOW": "Fenêtre horaire",
+    "ACTIVE_BLOCKS_DESC": "Blocs de programmation de la version active.",
+    "BLOCK_TITLE": "Bloc — {{category}}",
+    "BLOCK_PRIORITY": "Priorité {{priority}}",
+    "BLOCK_SUMMARY": "Priorité {{priority}} · {{min}}–{{max}} titres",
+    "PROGRAMMING": "Programmation",
     "GENERATE_LOGO": "Générer le logo",
     "GENERATE_LOGO_LOCAL": "GPU local (ComfyUI)",
     "GENERATE_LOGO_CLOUD": "Cloud (OpenAI)",
@@ -258,6 +264,7 @@
     "EDITORIAL_BLOCKS": "Blocks éditoriaux",
     "EDIT_GRID": "Modifier la grille",
     "NEW_VERSION": "Nouvelle version",
+    "CREATE": "Créer",
     "ADD_BLOCK": "Ajouter un block",
     "EDIT_BLOCK": "Modifier le block",
     "BLOCK_SUMMARY": "Priorité {{priority}} · {{min}}–{{max}} éléments",
@@ -303,6 +310,8 @@
     "CATALOG_LABEL": "Catalogue",
     "EDIT_CATALOG": "Modifier le catalogue",
     "GENERATE_CHANNELS": "1 - Générer les chaînes",
+    "GENERATE_CHANNELS_TITLE": "Générer les chaînes",
+    "GENERATE": "Générer",
     "PREVIOUS_DAY": "Jour précédent",
     "TODAY": "Aujourd’hui",
     "NEXT_DAY": "Jour suivant",
@@ -312,11 +321,15 @@
     "NO_CHANNEL": "Aucune chaîne",
     "NO_CHANNEL_HELP": "Ajoutez une chaîne pour ce catalogue.",
     "EDIT": "Modifier",
+    "EDIT_CHANNEL": "Modifier la chaîne",
+    "CHANNEL_ACTIVE": "Chaîne active",
     "GENERATE_BLUEPRINT": "Générer blueprint",
     "GENERATE_PLAYOUT": "Générer playout",
     "RESET_RULES": "Réinitialiser les règles",
     "PUSH_ETV": "Push ErsatzTV",
     "DELETE": "Supprimer",
+    "DELETE_CHANNEL_TITLE": "Supprimer la chaîne",
+    "CONFIRM_DELETE": "Supprimer « {{name}} » ?",
     "NO_CATALOG": "Aucun catalogue disponible",
     "NO_CATALOG_HELP": "Créez d’abord un catalogue pour commencer à organiser les chaînes.",
     "CONFIRM_GENERATE_CATALOG": "Générer automatiquement les chaînes du catalogue {{name}} ?",
@@ -358,6 +371,12 @@
     "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
   },
   "UI": {
+    "TIME_AGO": {
+      "NOW": "à l’instant",
+      "MINUTES": "il y a {{count}} min",
+      "HOURS": "il y a {{count}} h",
+      "DAYS": "il y a {{count}} j"
+    },
     "GEN_STEPS": {
       "DONE": "Terminé",
       "ERROR": "Échec"

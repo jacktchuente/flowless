@@ -12,6 +12,7 @@ import { TvChannelService } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
+import { TranslateModule } from "@ngx-translate/core";
 @Component({
   standalone: true,
   imports: [
@@ -19,28 +20,39 @@ import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
     FlwModalComponent,
     FlwSelectComponent,
     FlwSwitchComponent,
+    TranslateModule,
   ],
   template: `<flw-modal
-    [title]="data.channel ? 'Modifier la chaîne' : 'Nouvelle chaîne'"
+    [title]="
+      (data.channel ? 'CHANNELS.EDIT_CHANNEL' : 'CHANNELS.NEW_CHANNEL')
+        | translate
+    "
     ><form [formGroup]="form">
       <div class="field">
-        <label>Nom</label><input formControlName="name" type="text" />
+        <label>{{ "COMMON.NAME" | translate }}</label
+        ><input formControlName="name" type="text" />
       </div>
       <div class="field">
-        <label>Description</label
+        <label>{{ "COMMON.DESCRIPTION" | translate }}</label
         ><textarea formControlName="description" rows="4"></textarea>
       </div>
       <div class="field">
-        <label>Catalogue</label
+        <label>{{ "CHANNELS.CATALOG_LABEL" | translate }}</label
         ><flw-select formControlName="catalog" [options]="catalogOptions" />
       </div>
-      <flw-switch formControlName="is_enabled" label="Chaîne active" />
+      <flw-switch
+        formControlName="is_enabled"
+        [label]="'CHANNELS.CHANNEL_ACTIVE' | translate"
+      />
     </form>
     <div modal-footer>
       <span></span>
       <div>
-        <button class="btn ghost" (click)="ref.close()">Annuler</button
-        ><button class="btn primary" (click)="save()">Enregistrer</button>
+        <button class="btn ghost" (click)="ref.close()">
+          {{ "COMMON.CANCEL" | translate }}</button
+        ><button class="btn primary" (click)="save()">
+          {{ "CHANNEL_DIALOGS.COMMON.SAVE" | translate }}
+        </button>
       </div>
     </div></flw-modal
   >`,

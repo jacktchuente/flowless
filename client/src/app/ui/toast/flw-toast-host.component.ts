@@ -1,10 +1,11 @@
 import { AsyncPipe, NgFor, NgIf } from "@angular/common";
 import { Component } from "@angular/core";
 import { ToastService } from "./toast.service";
+import { TranslateModule } from "@ngx-translate/core";
 @Component({
   selector: "flw-toast-host",
   standalone: true,
-  imports: [AsyncPipe, NgFor, NgIf],
+  imports: [AsyncPipe, NgFor, NgIf, TranslateModule],
   template: `<div class="toast-host" aria-live="polite">
     <div class="toast" *ngFor="let toast of service.toasts$ | async">
       <span
@@ -23,7 +24,7 @@ import { ToastService } from "./toast.service";
       ><button
         *ngIf="!toast.action"
         type="button"
-        aria-label="Fermer"
+        [attr.aria-label]="'COMMON.CLOSE' | translate"
         (click)="service.dismiss(toast.id)"
       >
         ✕
