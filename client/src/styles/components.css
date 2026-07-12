@@ -404,21 +404,13 @@ table.grid .cell-sub {
   color: var(--signal-strong);
   border-color: var(--signal);
 }
-.cdk-overlay-container {
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  pointer-events: none;
-}
-.cdk-overlay-pane {
-  pointer-events: auto;
-}
+/* Base CDK importée via overlay-prebuilt.css ; seul le backdrop est personnalisé. */
 .cdk-overlay-backdrop {
-  position: absolute;
-  inset: 0;
   background: #0b16148c;
   backdrop-filter: blur(2px);
-  pointer-events: auto;
+}
+.cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  opacity: 1;
 }
 .modal {
   background: #fff;
