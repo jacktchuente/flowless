@@ -6,43 +6,52 @@ import {
   TvChannelResetRulesPayload,
 } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
-  imports: [FormsModule, FlwModalComponent],
+  imports: [FormsModule, FlwModalComponent, TranslateModule],
   template: `
     <flw-modal
-      title="Réinitialiser des règles"
+      [title]="'CHANNEL_DIALOGS.RESET.TITLE' | translate"
       [description]="data.channelName"
     >
-      <p class="tooltip-note amber">Cette opération est irréversible.</p>
+      <p class="tooltip-note amber">
+        {{ "CHANNEL_DIALOGS.RESET.WARNING" | translate }}
+      </p>
       <fieldset>
-        <legend>Quoi</legend>
-        <label><input type="checkbox" [(ngModel)]="nature" /> Natures</label
+        <legend>{{ "CHANNEL_DIALOGS.RESET.WHAT" | translate }}</legend>
+        <label
+          ><input type="checkbox" [(ngModel)]="nature" />
+          {{ "CHANNEL_DIALOGS.RESET.NATURES" | translate }}</label
         ><label
-          ><input type="checkbox" [(ngModel)]="kind" /> Types de
-          contenant</label
+          ><input type="checkbox" [(ngModel)]="kind" />
+          {{ "CHANNEL_DIALOGS.RESET.KINDS" | translate }}</label
         ><label
-          ><input type="checkbox" [(ngModel)]="category" /> Catégories</label
+          ><input type="checkbox" [(ngModel)]="category" />
+          {{ "CHANNEL_DIALOGS.RESET.CATEGORIES" | translate }}</label
         >
       </fieldset>
       <fieldset>
-        <legend>Quel niveau</legend>
-        <label><input type="checkbox" [(ngModel)]="allowed" /> Autorisé</label
+        <legend>{{ "CHANNEL_DIALOGS.RESET.LEVEL" | translate }}</legend>
+        <label
+          ><input type="checkbox" [(ngModel)]="allowed" />
+          {{ "CHANNEL_DIALOGS.COMMON.ALLOWED" | translate }}</label
         ><label
-          ><input type="checkbox" [(ngModel)]="forbidden" /> Interdit</label
+          ><input type="checkbox" [(ngModel)]="forbidden" />
+          {{ "CHANNEL_DIALOGS.COMMON.FORBIDDEN" | translate }}</label
         >
       </fieldset>
       <div modal-footer>
         <button class="btn ghost" type="button" (click)="ref.close(false)">
-          Annuler</button
+          {{ "CHANNEL_DIALOGS.COMMON.CANCEL" | translate }}</button
         ><button
           class="btn danger-ghost"
           type="button"
           [disabled]="!valid"
           (click)="reset()"
         >
-          Réinitialiser la sélection
+          {{ "CHANNEL_DIALOGS.RESET.ACTION" | translate }}
         </button>
       </div>
     </flw-modal>

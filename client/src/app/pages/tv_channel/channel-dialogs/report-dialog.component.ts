@@ -4,26 +4,34 @@ import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { PlayoutGenerationReport } from "@project-interfaces/tv-channel";
 import { TvChannelService } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
-  imports: [DatePipe, NgFor, NgIf, FlwModalComponent],
+  imports: [DatePipe, NgFor, NgIf, FlwModalComponent, TranslateModule],
   template: `
     <flw-modal
-      title="Rapports de génération"
+      [title]="'CHANNEL_DIALOGS.REPORT.TITLE' | translate"
       [description]="data.channelName"
       [wide]="true"
     >
-      <div class="empty" *ngIf="loading">Chargement…</div>
+      <div class="empty" *ngIf="loading">
+        {{ "CHANNEL_DIALOGS.REPORT.LOADING" | translate }}
+      </div>
       <ng-container *ngIf="latest as report">
         <div class="counters">
-          <span class="pill critical"
-            >{{ report.issue_counts.error }} erreurs</span
-          ><span class="pill warning"
-            >{{ report.issue_counts.warning }} alertes</span
-          ><span class="pill info"
-            >{{ report.issue_counts.info }} informations</span
-          >
+          <span class="pill critical">{{
+            "CHANNEL_DIALOGS.REPORT.ERRORS"
+              | translate: { count: report.issue_counts.error }
+          }}</span
+          ><span class="pill warning">{{
+            "CHANNEL_DIALOGS.REPORT.WARNINGS"
+              | translate: { count: report.issue_counts.warning }
+          }}</span
+          ><span class="pill info">{{
+            "CHANNEL_DIALOGS.REPORT.INFO"
+              | translate: { count: report.issue_counts.info }
+          }}</span>
         </div>
         <article
           class="issue"
@@ -38,7 +46,9 @@ import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
         </article>
       </ng-container>
       <hr class="divider" />
-      <span class="section-label">Runs précédents</span>
+      <span class="section-label">{{
+        "CHANNEL_DIALOGS.REPORT.PREVIOUS" | translate
+      }}</span>
       <div class="kv">
         <div class="row" *ngFor="let report of reports">
           <span class="k mono">{{
@@ -48,13 +58,20 @@ import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
             class="v pill"
             [class.critical]="report.issue_counts.error"
             [class.success]="!report.issue_counts.error"
-            >{{ report.issue_counts.error ? "Avec erreurs" : "Terminé" }}</span
+            >{{
+              (report.issue_counts.error
+                ? "CHANNEL_DIALOGS.REPORT.WITH_ERRORS"
+                : "CHANNEL_DIALOGS.REPORT.DONE"
+              ) | translate
+            }}</span
           >
         </div>
       </div>
       <div modal-footer>
         <span></span
-        ><button class="btn" type="button" (click)="ref.close()">Fermer</button>
+        ><button class="btn" type="button" (click)="ref.close()">
+          {{ "CHANNEL_DIALOGS.COMMON.CLOSE" | translate }}
+        </button>
       </div>
     </flw-modal>
   `,

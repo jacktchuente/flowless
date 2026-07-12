@@ -5,17 +5,26 @@ import { FormOptions } from "@project-interfaces/tv-channel";
 import { TvChannelService } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
   standalone: true,
-  imports: [FormsModule, FlwModalComponent, FlwSelectComponent],
-  template: `<flw-modal title="Paramètres de la grille"
+  imports: [
+    FormsModule,
+    FlwModalComponent,
+    FlwSelectComponent,
+    TranslateModule,
+  ],
+  template: `<flw-modal [title]="'CHANNEL_DIALOGS.GRID.SETTINGS' | translate"
     ><div class="field">
-      <label>Politique de remplissage</label
+      <label>{{ "CHANNEL_DIALOGS.GRID.FILLER_POLICY" | translate }}</label
       ><flw-select [(ngModel)]="policy" [options]="options" />
     </div>
     <div modal-footer>
-      <button class="btn ghost" (click)="ref.close(false)">Annuler</button
-      ><button class="btn primary" (click)="save()">Enregistrer</button>
+      <button class="btn ghost" (click)="ref.close(false)">
+        {{ "CHANNEL_DIALOGS.COMMON.CANCEL" | translate }}</button
+      ><button class="btn primary" (click)="save()">
+        {{ "CHANNEL_DIALOGS.COMMON.SAVE" | translate }}
+      </button>
     </div></flw-modal
   >`,
 })
@@ -24,6 +33,7 @@ export class GridSettingsDialogComponent {
   options: { label: string; value: string | number | null }[];
   constructor(
     private service: TvChannelService,
+    private translate: TranslateService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)
     public data: {
@@ -34,7 +44,10 @@ export class GridSettingsDialogComponent {
   ) {
     this.policy = data.policy;
     this.options = [
-      { label: "Non", value: null },
+      {
+        label: this.translate.instant("CHANNEL_DIALOGS.GRID.NONE"),
+        value: null,
+      },
       ...data.formOptions.filler_policies.map((p) => ({
         label: `${p.name} (${p.duration_seconds}s)`,
         value: p.id,
