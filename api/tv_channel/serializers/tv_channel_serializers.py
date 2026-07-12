@@ -5,7 +5,8 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from grid_schedule.models import ScheduleMediaItem, TvPlayout
+from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
+from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSummarySerializer
 from grid_schedule.serializers.schedule_media_item_serializers import ScheduleMediaItemSerializer
 from tv_channel.models import TvChannel
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer
@@ -38,6 +39,7 @@ class TvChannelSerializer(serializers.ModelSerializer):
     active_schedule_items = serializers.SerializerMethodField()
     active_playout_id = serializers.SerializerMethodField()
     logo = serializers.FileField(read_only=True)
+    latest_generation_report = serializers.SerializerMethodField()
 
     class Meta:
         model = TvChannel
@@ -58,6 +60,7 @@ class TvChannelSerializer(serializers.ModelSerializer):
             "editorial_line_data",
             "active_schedule_items",
             "active_playout_id",
+            "latest_generation_report",
         )
 
     def get_grid_data(self, obj):
@@ -122,6 +125,10 @@ class TvChannelSerializer(serializers.ModelSerializer):
             .first()
         )
         return active_playout.id if active_playout is not None else None
+
+    def get_latest_generation_report(self, obj):
+        report = PlayoutGenerationReport.objects.filter(tv_playout__tv_channel=obj, tv_playout__is_active=True).order_by("-created_at", "-id").first()
+        return PlayoutGenerationReportSummarySerializer(report).data if report else None
 
 
 class TvChannelResetRulesSerializer(serializers.Serializer):

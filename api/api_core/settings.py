@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "rule_engine",
     "grid_layout_preset",
     "editorial_planning",
+    "dashboard",
 ]
 
 if MODE == 'dev':
