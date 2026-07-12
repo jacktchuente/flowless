@@ -25,11 +25,11 @@ describe("unified rule values", () => {
   };
 
   it("combines and redistributes typed tags", () => {
-    expect(ruleOptions(options).map((option) => option.value)).toEqual([
-      "category:crime",
-      "nature:1",
-      "kind:2",
-    ]);
+    expect(
+      ruleOptions(options, (key, params) =>
+        params?.["value"] ? `${key}:${params["value"]}` : key,
+      ).map((option) => option.value),
+    ).toEqual(["category:crime", "nature:1", "kind:2"]);
     const values = readRuleValues(line, "allowed");
     const payload: Record<string, unknown> = {};
     writeRuleValues(payload, "allowed", values);

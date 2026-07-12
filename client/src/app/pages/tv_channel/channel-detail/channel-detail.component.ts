@@ -345,8 +345,12 @@ export class ChannelDetailComponent {
   blockTags(b: GridBlock) {
     return [
       ...b.allowed_categories,
-      ...b.allowed_natures.map(natureLabel),
-      ...b.allowed_container_kinds.map(containerKindLabel),
+      ...b.allowed_natures.map((value) =>
+        this.translate.instant(natureLabel(value)),
+      ),
+      ...b.allowed_container_kinds.map((value) =>
+        this.translate.instant(containerKindLabel(value)),
+      ),
     ].slice(0, 4);
   }
   shift(d: number) {

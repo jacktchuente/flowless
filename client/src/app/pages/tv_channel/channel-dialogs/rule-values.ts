@@ -6,18 +6,25 @@ import {
 import { FlwTagOption } from "../../../ui/tag-input/flw-tag-input.component";
 
 export type RuleLevel = "allowed" | "preferred" | "forbidden";
-export function ruleOptions(options: FormOptions): FlwTagOption[] {
+export function ruleOptions(
+  options: FormOptions,
+  translate: (key: string, params?: Record<string, unknown>) => string,
+): FlwTagOption[] {
   return [
     ...options.categories.map((value) => ({
-      label: `Catégorie · ${value}`,
+      label: translate("CHANNEL_DIALOGS.COMMON.CATEGORY_VALUE", { value }),
       value: `category:${value}`,
     })),
     ...options.natures.map((option) => ({
-      label: `Nature · ${option.label}`,
+      label: translate("CHANNEL_DIALOGS.COMMON.NATURE_VALUE", {
+        value: translate(`UI.NATURES.${option.value}`),
+      }),
       value: `nature:${option.value}`,
     })),
     ...options.container_kinds.map((option) => ({
-      label: `Type · ${option.label}`,
+      label: translate("CHANNEL_DIALOGS.COMMON.KIND_VALUE", {
+        value: translate(`UI.CONTAINER_KINDS.${option.value}`),
+      }),
       value: `kind:${option.value}`,
     })),
   ];

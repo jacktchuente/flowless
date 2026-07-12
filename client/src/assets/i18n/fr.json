@@ -371,6 +371,31 @@
     "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
   },
   "UI": {
+    "CATEGORIES": {
+      "FICTION": "Fiction",
+      "DOCUMENTARY": "Documentaire",
+      "NEWS": "Information",
+      "ENTERTAINMENT": "Divertissement",
+      "MUSIC": "Musique",
+      "SPORT": "Sport",
+      "FILLER": "Filler"
+    },
+    "NATURES": {
+      "1": "Fiction",
+      "2": "Documentaire",
+      "3": "Musique",
+      "4": "Sport",
+      "5": "Information",
+      "6": "Divertissement",
+      "99": "Autre"
+    },
+    "CONTAINER_KINDS": {
+      "1": "Vidéo unitaire",
+      "2": "Série",
+      "3": "Album",
+      "4": "Clip musical",
+      "99": "Autre"
+    },
     "TIME_AGO": {
       "NOW": "à l’instant",
       "MINUTES": "il y a {{count}} min",
@@ -401,7 +426,10 @@
       "DELETE": "Supprimer",
       "ALLOWED": "Autorisé",
       "PREFERRED": "Préféré",
-      "FORBIDDEN": "Interdit"
+      "FORBIDDEN": "Interdit",
+      "CATEGORY_VALUE": "Catégorie · {{value}}",
+      "NATURE_VALUE": "Nature · {{value}}",
+      "KIND_VALUE": "Type · {{value}}"
     },
     "GENERATION": {
       "BLUEPRINT_TITLE": "Générer le plan",

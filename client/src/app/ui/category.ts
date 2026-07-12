@@ -14,43 +14,43 @@ export const CATEGORY_COLOR: Record<
     fg: "#3947a0",
     bg: "#e4e6f8",
     sw: "var(--cat-fiction)",
-    label: "Fiction",
+    label: "UI.CATEGORIES.FICTION",
   },
   documentary: {
     fg: "#1e7167",
     bg: "#dff3ef",
     sw: "var(--cat-documentary)",
-    label: "Documentaire",
+    label: "UI.CATEGORIES.DOCUMENTARY",
   },
   news: {
     fg: "#8c3f29",
     bg: "#f8e4dc",
     sw: "var(--cat-news)",
-    label: "Information",
+    label: "UI.CATEGORIES.NEWS",
   },
   comedy: {
     fg: "#8c6a1f",
     bg: "#f8efd9",
     sw: "var(--cat-comedy)",
-    label: "Divertissement",
+    label: "UI.CATEGORIES.ENTERTAINMENT",
   },
   music: {
     fg: "#733f8a",
     bg: "#f1e3f7",
     sw: "var(--cat-music)",
-    label: "Musique",
+    label: "UI.CATEGORIES.MUSIC",
   },
   sport: {
     fg: "#873e37",
     bg: "#f5e4e2",
     sw: "var(--cat-sport)",
-    label: "Sport",
+    label: "UI.CATEGORIES.SPORT",
   },
   filler: {
     fg: "#5c6663",
     bg: "#e7eae9",
     sw: "var(--cat-filler)",
-    label: "Filler",
+    label: "UI.CATEGORIES.FILLER",
   },
 };
 export function natureToCategory(nature: unknown): CategoryKey {
@@ -76,21 +76,21 @@ export function natureToCategory(nature: unknown): CategoryKey {
 }
 
 const NATURE_LABELS: Record<string, string> = {
-  "1": "Fiction",
-  "2": "Documentaire",
-  "3": "Musique",
-  "4": "Sport",
-  "5": "Information",
-  "6": "Divertissement",
-  "99": "Autre",
+  "1": "UI.NATURES.1",
+  "2": "UI.NATURES.2",
+  "3": "UI.NATURES.3",
+  "4": "UI.NATURES.4",
+  "5": "UI.NATURES.5",
+  "6": "UI.NATURES.6",
+  "99": "UI.NATURES.99",
 };
 
 const CONTAINER_KIND_LABELS: Record<string, string> = {
-  "1": "Vidéo unitaire",
-  "2": "Série",
-  "3": "Album",
-  "4": "Clip musical",
-  "99": "Autre",
+  "1": "UI.CONTAINER_KINDS.1",
+  "2": "UI.CONTAINER_KINDS.2",
+  "3": "UI.CONTAINER_KINDS.3",
+  "4": "UI.CONTAINER_KINDS.4",
+  "99": "UI.CONTAINER_KINDS.99",
 };
 
 export function natureLabel(value: string | number): string {

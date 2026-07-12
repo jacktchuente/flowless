@@ -371,6 +371,31 @@
     "NOTIFY_SUGGEST_NAME_FAILED": "Name suggestion failed."
   },
   "UI": {
+    "CATEGORIES": {
+      "FICTION": "Fiction",
+      "DOCUMENTARY": "Documentary",
+      "NEWS": "News",
+      "ENTERTAINMENT": "Entertainment",
+      "MUSIC": "Music",
+      "SPORT": "Sport",
+      "FILLER": "Filler"
+    },
+    "NATURES": {
+      "1": "Fiction",
+      "2": "Documentary",
+      "3": "Music",
+      "4": "Sport",
+      "5": "News",
+      "6": "Entertainment",
+      "99": "Other"
+    },
+    "CONTAINER_KINDS": {
+      "1": "Standalone video",
+      "2": "Series",
+      "3": "Album",
+      "4": "Music video",
+      "99": "Other"
+    },
     "TIME_AGO": {
       "NOW": "just now",
       "MINUTES": "{{count}} min ago",
@@ -401,7 +426,10 @@
       "DELETE": "Delete",
       "ALLOWED": "Allowed",
       "PREFERRED": "Preferred",
-      "FORBIDDEN": "Forbidden"
+      "FORBIDDEN": "Forbidden",
+      "CATEGORY_VALUE": "Category · {{value}}",
+      "NATURE_VALUE": "Nature · {{value}}",
+      "KIND_VALUE": "Type · {{value}}"
     },
     "GENERATION": {
       "BLUEPRINT_TITLE": "Generate plan",

@@ -56,7 +56,8 @@
       /><strong class="mono">{{ calendarDate | date: "dd/MM/yyyy" }}</strong>
       <div class="legend">
         <span class="item" *ngFor="let cat of legend"
-          ><i class="sw" [style.background]="cat.sw"></i>{{ cat.label }}</span
+          ><i class="sw" [style.background]="cat.sw"></i
+          >{{ cat.label | translate }}</span
         >
       </div>
       <flw-segmented

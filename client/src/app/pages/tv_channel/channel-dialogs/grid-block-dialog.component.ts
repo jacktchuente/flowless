@@ -190,7 +190,9 @@ export class GridBlockDialogComponent {
     post_filler_policy_name: null,
   };
   source = this.data.block ?? this.empty;
-  options = ruleOptions(this.data.formOptions);
+  options = ruleOptions(this.data.formOptions, (key, params) =>
+    this.translate.instant(key, params),
+  );
   priorities = [80, 50, 20].map((value) => ({
     label: this.translate.instant(
       value === 80

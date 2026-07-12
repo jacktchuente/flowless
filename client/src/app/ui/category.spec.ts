@@ -9,7 +9,7 @@ describe("category helpers", () => {
   });
 
   it("resolves nature and container labels", () => {
-    expect(natureLabel(2)).toBe("Documentaire");
-    expect(containerKindLabel(2)).toBe("Série");
+    expect(natureLabel(2)).toBe("UI.NATURES.2");
+    expect(containerKindLabel(2)).toBe("UI.CONTAINER_KINDS.2");
   });
 });

@@ -8,7 +8,7 @@ import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { FlwRuleGroupComponent } from "../../../ui/rule-group/flw-rule-group.component";
 import { FlwTagInputComponent } from "../../../ui/tag-input/flw-tag-input.component";
 import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
-import { TranslateModule } from "@ngx-translate/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
@@ -78,7 +78,9 @@ import { TranslateModule } from "@ngx-translate/core";
   ],
 })
 export class EditorialLineDialogComponent {
-  options = ruleOptions(this.data.formOptions);
+  options = ruleOptions(this.data.formOptions, (key, params) =>
+    this.translate.instant(key, params),
+  );
   form = new FormGroup({
     start_at: new FormControl(this.data.line.start_at.slice(0, 5), {
       nonNullable: true,
@@ -101,6 +103,7 @@ export class EditorialLineDialogComponent {
   });
   constructor(
     private service: TvChannelService,
+    private translate: TranslateService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)
     public data: {
