@@ -5,7 +5,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from tv_channel.models import GridBlock
-from tv_channel.serializers.grid_block_serializers import GridBlockSerializer, GridBlockWriteSerializer
+from tv_channel.serializers.grid_block_serializers import (
+    GridBlockSerializer,
+    GridBlockWriteSerializer,
+)
 from tv_channel.services.grid_block_service import GridBlockService
 from tv_channel.services.grid_editing import (
     GridNotEditableError,
@@ -20,7 +23,7 @@ class GridBlockViewSet(
     mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     serializer_class = GridBlockSerializer
     permission_classes = []
@@ -41,7 +44,9 @@ class GridBlockViewSet(
         except GridNotEditableError as exc:
             raise ValidationError({"grid_layout": str(exc)})
         if active.pk != layout.pk:
-            raise ValidationError({"grid_layout": "Only the active grid can be edited."})
+            raise ValidationError(
+                {"grid_layout": "Only the active grid can be edited."}
+            )
         serializer.save()
 
     def perform_update(self, serializer):
@@ -59,9 +64,24 @@ class GridBlockViewSet(
         except GridNotEditableError as exc:
             raise ValidationError({"detail": str(exc)})
 
-    @action(detail=True, url_path="available-media-count", methods=('get',))
+    @action(detail=True, url_path="available-media-count", methods=("get", "post"))
     def available_media_count(self, request, pk):
         instance = self.get_object()
-        service = GridBlockService(grid_block=instance)
+        preview = instance
+        if request.method == "POST":
+            serializer = GridBlockWriteSerializer(
+                instance=instance,
+                data=request.data,
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            preview = copy(instance)
+            for field, value in serializer.validated_data.items():
+                setattr(preview, field, value)
+
+        service = GridBlockService(grid_block=preview)
         result = service.get_available_media_count()
         return Response(data={"count": result}, status=status.HTTP_200_OK)
+
+
+from copy import copy

@@ -1,183 +1,137 @@
-<section class="page-head">
+<header class="topline">
   <div>
-    <span class="eyebrow">{{ 'CHANNELS.EYEBROW' | translate }}</span>
-    <h2>{{ 'CHANNELS.TITLE' | translate }}</h2>
-    <p>{{ 'CHANNELS.SUBTITLE' | translate }}</p>
+    <span class="eyebrow">{{ "CHANNELS.EYEBROW" | translate }}</span>
+    <h1>{{ "CHANNELS.TITLE" | translate }}</h1>
+    <p class="sub">{{ "CHANNELS.SUBTITLE" | translate }}</p>
   </div>
-
-  <div class="head-actions">
-    <button mat-stroked-button (click)="openCreateCatalogDialog()">
-      <mat-icon>add</mat-icon>
-      {{ 'CHANNELS.NEW_CATALOG' | translate }}
-    </button>
-    <button mat-flat-button color="primary" (click)="openCreateChannelDialog()" [disabled]="!selectedCatalogId">
-      <mat-icon>add</mat-icon>
-      {{ 'CHANNELS.NEW_CHANNEL' | translate }}
+  <div class="topline-actions">
+    <button class="btn" (click)="openCatalog()">
+      <flw-icon name="plus" />{{ "CHANNELS.NEW_CATALOG" | translate }}</button
+    ><button
+      class="btn primary"
+      [disabled]="!selectedCatalogId"
+      (click)="openChannel()"
+    >
+      <flw-icon name="plus" />{{ "CHANNELS.NEW_CHANNEL" | translate }}
     </button>
   </div>
-</section>
-
-<section class="catalog-toolbar">
-  <div class="catalog-picker">
-    <label for="catalog-select">{{ 'CHANNELS.CATALOG_LABEL' | translate }}</label>
-    <select id="catalog-select" [(ngModel)]="selectedCatalogId" (ngModelChange)="onCatalogChange()">
-      <option *ngFor="let catalog of catalogs" [value]="catalog.id.toString()">
-        {{ catalog.name }}
-      </option>
-    </select>
-  </div>
-
-  <div class="catalog-toolbar-actions">
-    <button mat-button (click)="openEditCatalogDialog()" [disabled]="!selectedCatalogId">
-      {{ 'CHANNELS.EDIT_CATALOG' | translate }}
-    </button>
-    <button *ngIf="!flexMode" mat-stroked-button (click)="generateCatalogChannels()" [disabled]="!selectedCatalogId">
-      <mat-icon>auto_awesome</mat-icon>
-      {{ 'CHANNELS.GENERATE_CHANNELS' | translate }}
-    </button>
-    <button *ngIf="flexMode" mat-stroked-button (click)="generateFlexibleProgramming()" [disabled]="!selectedCatalogId">
-      <mat-icon>account_tree</mat-icon>
-      Flexible
-    </button>
-    <button *ngIf="flexMode" mat-stroked-button (click)="openFlexibleCandidates()" [disabled]="!selectedCatalogId">
-      <mat-icon>playlist_add</mat-icon>
-      Candidates
-    </button>
-    <button *ngIf="flexMode" mat-stroked-button (click)="openMembershipReview()" [disabled]="!selectedCatalogId">
-      <mat-icon>fact_check</mat-icon>
-      Segments
-    </button>
-    <button *ngIf="flexMode" mat-stroked-button (click)="openRunDialog()" [disabled]="!selectedCatalogId">
-      <mat-icon>history</mat-icon>
-      Runs
-    </button>
-    <button *ngIf="flexMode" mat-stroked-button (click)="matchFlexibleNewMedia()" [disabled]="!selectedCatalogId">
-      <mat-icon>sync</mat-icon>
-      Nouveaux medias
-    </button>
-    <mat-slide-toggle class="flex-mode-toggle" [(ngModel)]="flexMode">Flex</mat-slide-toggle>
-  </div>
-</section>
-
-<section class="channel-grid" *ngIf="selectedCatalogId; else emptyState">
-  <div class="calendar-toolbar">
-    <div class="calendar-toolbar-row">
-      <div class="calendar-nav">
-        <button mat-stroked-button (click)="shiftCalendarDay(-1)">
-          <mat-icon>chevron_left</mat-icon>
-          {{ 'CHANNELS.PREVIOUS_DAY' | translate }}
-        </button>
-        <button mat-button (click)="resetCalendarDay()">{{ 'CHANNELS.TODAY' | translate }}</button>
-        <span class="calendar-date">{{ calendarDate | date:'fullDate' }}</span>
-        <button mat-stroked-button (click)="shiftCalendarDay(1)">
-          {{ 'CHANNELS.NEXT_DAY' | translate }}
-          <mat-icon>chevron_right</mat-icon>
+</header>
+<div class="content">
+  <section class="card setup">
+    <div class="setup-row">
+      <div class="field">
+        <label>{{ "CHANNELS.CATALOG_LABEL" | translate }}</label
+        ><flw-select
+          [value]="selectedCatalogId"
+          [options]="catalogOptions"
+          (valueChange)="onCatalog($event)"
+        />
+      </div>
+      <div class="setup-actions">
+        <button class="btn sm ghost" (click)="openCatalog(selectedCatalog)">
+          {{ "CHANNELS.EDIT_CATALOG" | translate }}</button
+        ><button class="btn sm" (click)="generateCatalog()">
+          <flw-icon name="generate" />{{
+            "CHANNELS.GENERATE_CHANNELS" | translate
+          }}
         </button>
       </div>
-      <div class="calendar-mode-switch">
-      <mat-button-toggle-group [value]="calendarViewMode" (change)="setCalendarViewMode($event.value)">
-        <mat-button-toggle value="grid">{{ 'CHANNELS.GRID' | translate }}</mat-button-toggle>
-        <mat-button-toggle value="schedule">{{ 'CHANNELS.SCHEDULE' | translate }}</mat-button-toggle>
-      </mat-button-toggle-group>
-      </div>
     </div>
-  </div>
-
-  <div class="channel-grid-scroll">
-    <div class="channel-row" *ngFor="let channel of channels; trackBy: trackByChannelId">
-      <div class="channel-name-col">
-        <div class="channel-name-card">
-          <button class="channel-name-button" [title]="channel.name" (click)="openChannelDetail(channel)">
-            <img
-              *ngIf="channel.logo"
-              class="channel-card-logo"
-              [src]="channel.logo"
-              [alt]="channel.name"
-              loading="lazy"
-            >
-            <span class="channel-name-text">{{ channel.name }}</span>
-            <span class="channel-status-badge">
-              {{ getChannelStatusLabel(channel) }}
-            </span>
-          </button>
-          <button
-            mat-icon-button
-            class="channel-menu-button"
-            [matMenuTriggerFor]="channelMenu"
-            [matMenuTriggerData]="{ channel: channel }"
-            [title]="'CHANNELS.ACTIONS' | translate"
-          >
-            <mat-icon>more_vert</mat-icon>
-          </button>
-        </div>
-      </div>
-      <div class="channel-calendar-col">
-        <div class="calendar-scroll-panel">
-          <article class="calendar-panel" *ngIf="showCalendarContent; else calendarPlaceholder">
-            <mwl-calendar-day-view
-              [viewDate]="calendarDate"
-              [events]="calendarEventsByChannelId[channel.id.toString()] || emptyCalendarEvents"
-              [hourSegments]="2"
-              [dayStartHour]="0"
-              [dayEndHour]="24"
-              (eventClicked)="onCalendarEventClicked($event.event)"
-            />
-          </article>
-          <ng-template #calendarPlaceholder>
-            <article class="calendar-panel calendar-panel-placeholder">
-              <div class="calendar-placeholder-header"></div>
-              <div class="calendar-placeholder-grid">
-                <div class="calendar-placeholder-line" *ngFor="let _ of [1,2,3,4,5,6,7,8]"></div>
-              </div>
-            </article>
-          </ng-template>
-        </div>
-      </div>
-    </div>
-
-    <div class="channel-row empty-row" *ngIf="!channels.length">
-      <div class="channel-name-col muted">{{ 'CHANNELS.NO_CHANNEL' | translate }}</div>
-      <div class="channel-calendar-col muted">{{ 'CHANNELS.NO_CHANNEL_HELP' | translate }}</div>
-    </div>
-  </div>
-</section>
-
-<mat-menu #channelMenu="matMenu">
-  <ng-template matMenuContent let-channel="channel">
-    <button mat-menu-item (click)="openEditChannelDialog(channel)">
-      <mat-icon>edit</mat-icon>
-      <span>{{ 'CHANNELS.EDIT' | translate }}</span>
-    </button>
-    <button mat-menu-item *ngIf="!isFlexibleChannel(channel)" (click)="generateBlueprint(channel)">
-      <mat-icon>auto_awesome</mat-icon>
-      <span>{{ 'CHANNELS.GENERATE_BLUEPRINT' | translate }}</span>
-    </button>
-    <button mat-menu-item (click)="openGeneratePlayoutDialog(channel)">
-      <mat-icon>schedule</mat-icon>
-      <span>{{ 'CHANNELS.GENERATE_PLAYOUT' | translate }}</span>
-    </button>
-    <button mat-menu-item *ngIf="!isFlexibleChannel(channel)" (click)="openResetRulesDialog(channel)">
-      <mat-icon>restart_alt</mat-icon>
-      <span>{{ 'CHANNELS.RESET_RULES' | translate }}</span>
-    </button>
-    <button mat-menu-item (click)="pushChannel(channel)">
-      <mat-icon>publish</mat-icon>
-      <span>{{ 'CHANNELS.PUSH_ETV' | translate }}</span>
-    </button>
-    <button mat-menu-item (click)="deleteChannel(channel)">
-      <mat-icon>delete</mat-icon>
-      <span>{{ 'CHANNELS.DELETE' | translate }}</span>
-    </button>
-  </ng-template>
-</mat-menu>
-
-<ng-template #emptyState>
-  <section class="empty-state">
-    <h3>{{ 'CHANNELS.NO_CATALOG' | translate }}</h3>
-    <p>{{ 'CHANNELS.NO_CATALOG_HELP' | translate }}</p>
+    <hr class="divider" />
+    <flw-segmented
+      [value]="mode"
+      [options]="modeOptions"
+      (valueChange)="mode = $any($event)"
+    />
+    <p>
+      {{
+        mode === "classic"
+          ? ("CHANNELS.CLASSIC_HELP" | translate)
+          : ("CHANNELS.FLEXIBLE_HELP" | translate)
+      }}
+    </p>
   </section>
-</ng-template>
-
-<div class="page-loading-overlay" *ngIf="isPageLoading">
-  <mat-spinner diameter="64"></mat-spinner>
+  <ng-container *ngIf="mode === 'classic'"
+    ><section class="card toolbar">
+      <div class="group">
+        <flw-segmented
+          [options]="dayOptions"
+          [value]="0"
+          (valueChange)="setDay($event)"
+        /><strong class="day">{{
+          calendarDate | date: "EEEE d MMMM y"
+        }}</strong>
+      </div>
+      <div class="group">
+        <div class="legend">
+          <span class="item" *ngFor="let cat of legend"
+            ><i class="sw" [style.background]="cat.sw"></i
+            >{{ cat.label | translate }}</span
+          >
+        </div>
+        <flw-segmented
+          [options]="viewOptions"
+          [value]="calendarViewMode"
+          (valueChange)="calendarViewMode = $any($event)"
+        />
+      </div>
+    </section>
+    <div class="channel-cards">
+      <article class="card channel" *ngFor="let channel of channels">
+        <header>
+          <div>
+            <h2>{{ channel.name }}</h2>
+            <span class="pill" [class]="status(channel).kind"
+              ><span class="dot"></span>{{ status(channel).label }}</span
+            >
+          </div>
+          <flw-menu
+            ><button (click)="openDetail(channel)">
+              {{ "CHANNELS.OPEN_DETAIL" | translate }}</button
+            ><button (click)="openChannel(channel)">
+              {{ "COMMON.EDIT" | translate }}</button
+            ><button
+              *ngIf="!isFlexible(channel)"
+              (click)="generateBlueprint(channel)"
+            >
+              {{ "CHANNELS.GENERATE_BLUEPRINT" | translate }}</button
+            ><button (click)="generatePlayout(channel)">
+              {{ "CHANNELS.GENERATE_PLAYOUT" | translate }}
+            </button>
+            <hr />
+            <button (click)="push(channel)">
+              {{ "CHANNELS.PUSH_ETV" | translate }}
+            </button>
+            <hr />
+            <button class="danger" (click)="remove(channel)">
+              {{ "COMMON.DELETE" | translate }}
+            </button></flw-menu
+          >
+        </header>
+        <flw-timeline
+          [blocks]="timeline(channel)"
+          [pxPerHour]="52"
+          [style.height.px]="420"
+        />
+      </article>
+      <div class="empty card" *ngIf="!channels.length">
+        {{ "CHANNELS.NO_CHANNEL_HELP" | translate }}
+      </div>
+    </div></ng-container
+  >
+  <section class="card flexible" *ngIf="mode === 'flexible'">
+    <div>
+      <span class="section-label">{{
+        "CHANNELS.FLEXIBLE_TITLE" | translate
+      }}</span>
+      <h2>{{ "CHANNELS.FLEXIBLE_BUILD" | translate }}</h2>
+      <p>{{ "CHANNELS.FLEXIBLE_DESC" | translate }}</p>
+    </div>
+    <a
+      class="btn primary"
+      routerLink="/app/editorial-planning"
+      [queryParams]="{ catalog: selectedCatalogId }"
+      >{{ "CHANNELS.FLEXIBLE_OPEN" | translate }}</a
+    >
+  </section>
 </div>

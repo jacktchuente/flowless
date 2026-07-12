@@ -1,142 +1,93 @@
-import {Component, Inject} from '@angular/core';
-import {ReactiveFormsModule} from "@angular/forms";
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
-import {MatButtonModule} from "@angular/material/button";
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {FormlyFieldConfig, FormlyModule} from "@ngx-formly/core";
-import {FormGroup} from "@angular/forms";
-import {MediaSource, MediaSourcePayload} from "@project-interfaces/media-source";
-import {MediaSourceService} from "@project-services/media-source.service";
-import {DialogContainer1Component} from "@project-templates/dialog-container1/dialog-container1.component";
-import {NotificationService} from "@project-shared/services/notification.service";
-import {NgIf} from "@angular/common";
-
+import { Component, Inject } from "@angular/core";
+import { NgIf } from "@angular/common";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import {
+  MediaSource,
+  MediaSourcePayload,
+} from "@project-interfaces/media-source";
+import { MediaSourceService } from "@project-services/media-source.service";
+import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 @Component({
-  selector: 'app-media-source-dialog',
   standalone: true,
-  imports: [
-    DialogContainer1Component,
-    FormlyModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    NgIf,
-    ReactiveFormsModule
-  ],
-  templateUrl: './media-source-dialog.component.html',
-  styleUrl: './media-source-dialog.component.css'
+  imports: [NgIf, ReactiveFormsModule, TranslateModule, FlwModalComponent],
+  templateUrl: "./media-source-dialog.component.html",
+  styleUrl: "./media-source-dialog.component.css",
 })
 export class MediaSourceDialogComponent {
-  readonly form = new FormGroup({})
-  readonly model: MediaSourcePayload
-  readonly fields: FormlyFieldConfig[] = [
-    {
-      key: 'name',
-      type: 'input',
-      props: {
-        label: 'Nom',
-        required: true,
-        placeholder: 'Jellyfin principal',
-      }
-    },
-    {
-      fieldGroupClassName: 'credentials-grid',
-      fieldGroup: [
-        {
-          key: 'credentials.application_url',
-          type: 'input',
-          props: {
-            label: 'URL Jellyfin',
-            required: true,
-            placeholder: 'https://jellyfin.example.com',
-          }
-        },
-        {
-          key: 'credentials.username',
-          type: 'input',
-          props: {
-            label: 'Utilisateur',
-            required: true,
-          }
-        },
-        {
-          key: 'credentials.password',
-          type: 'input',
-          props: {
-            label: 'Mot de passe',
-            type: 'password',
-            required: true,
-          }
-        }
-      ]
-    }
-  ]
-
-  isSubmitting = false
-  errorMessage: string | null = null
-
+  isSubmitting = false;
+  errorMessage = "";
+  form = new FormGroup({
+    name: new FormControl(this.data.source?.name ?? "", {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    application_url: new FormControl(
+      this.data.source?.credentials.application_url ?? "",
+      { nonNullable: true, validators: [Validators.required] },
+    ),
+    username: new FormControl(this.data.source?.credentials.username ?? "", {
+      nonNullable: true,
+    }),
+    password: new FormControl(this.data.source?.credentials.password ?? "", {
+      nonNullable: true,
+    }),
+  });
   constructor(
-    private mediaSourceService: MediaSourceService,
-    private notificationService: NotificationService,
-    private dialogRef: MatDialogRef<MediaSourceDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { source?: MediaSource }
-  ) {
-    this.model = {
-      name: data.source?.name ?? '',
-      source_type: data.source?.source_type ?? 1,
-      credentials: {
-        application_url: data.source?.credentials?.application_url ?? '',
-        username: data.source?.credentials?.username ?? '',
-        password: data.source?.credentials?.password ?? '',
-      }
-    }
-  }
-
+    private service: MediaSourceService,
+    private translate: TranslateService,
+    public ref: DialogRef<boolean>,
+    @Inject(DIALOG_DATA) public data: { source?: MediaSource },
+  ) {}
   save() {
     if (this.form.invalid || this.isSubmitting) {
-      this.form.markAllAsTouched()
-      return
+      this.form.markAllAsTouched();
+      return;
     }
-
-    this.isSubmitting = true
-    this.errorMessage = null
-
-    this.mediaSourceService.verifyCredentials(this.model).subscribe((verifyResponse) => {
-      if (!verifyResponse.isOk) {
-        this.isSubmitting = false
-        this.errorMessage = this.extractErrorMessage(verifyResponse.body)
-        this.notificationService.notify(this.errorMessage)
-        return
+    this.isSubmitting = true;
+    this.errorMessage = "";
+    const v = this.form.getRawValue();
+    const payload: MediaSourcePayload = {
+      name: v.name,
+      source_type: this.data.source?.source_type ?? 1,
+      credentials: {
+        application_url: v.application_url,
+        username: v.username,
+        password: v.password,
+      },
+    };
+    this.service.verifyCredentials(payload).subscribe((verify) => {
+      if (!verify.isOk) {
+        this.isSubmitting = false;
+        this.errorMessage = this.error(verify.body);
+        return;
       }
-
       const request = this.data.source
-        ? this.mediaSourceService.patchObject(this.data.source.id.toString(), this.model)
-        : this.mediaSourceService.createObject(this.model)
-
-      request.subscribe((response) => {
-        this.isSubmitting = false
-        if (!response.isOk) {
-          this.errorMessage = this.extractErrorMessage(response.body)
-          this.notificationService.notify(this.errorMessage)
-          return
+        ? this.service.patchObject(String(this.data.source.id), payload)
+        : this.service.createObject(payload);
+      request.subscribe((result) => {
+        this.isSubmitting = false;
+        if (!result.isOk) {
+          this.errorMessage = this.error(result.body);
+          return;
         }
-
-        this.dialogRef.close(true)
-      })
-    })
+        this.ref.close(true);
+      });
+    });
   }
-
-  private extractErrorMessage(error: unknown): string {
-    const httpError = error as { error?: { credentials?: string[], detail?: string }, message?: string }
-    if (httpError?.error?.credentials?.length) {
-      return httpError.error.credentials[0]
-    }
-    if (httpError?.error?.detail) {
-      return httpError.error.detail
-    }
-    if (httpError?.message) {
-      return httpError.message
-    }
-    return "Une erreur est survenue lors de la verification de la source."
+  private error(value: unknown) {
+    const e = value as any;
+    return (
+      e?.error?.credentials?.[0] ??
+      e?.error?.detail ??
+      e?.message ??
+      this.translate.instant("MEDIA_SOURCE.DIALOG.CONNECTION_FAILED")
+    );
   }
 }

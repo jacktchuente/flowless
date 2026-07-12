@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Sources</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link active" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Sources</span>
+        <h1>Connexions média</h1>
+        <p class="sub">Les bibliothèques Jellyfin d'où proviennent vos titres. Synchronisez régulièrement pour que les nouveaux ajouts apparaissent dans vos collections.</p>
+      </div>
+      <div class="topline-actions">
+        <button class="btn primary" data-open-modal="modal-new-source"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nouvelle source</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <div class="table-wrap">
+          <table class="grid">
+            <thead>
+              <tr><th>Source</th><th>Type</th><th>Identifiant</th><th>Statut</th><th>Dernière synchro</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="cell-title">Showcase Library</div>
+                  <div class="cell-sub">http://jellyfin.local:8096</div>
+                </td>
+                <td>Jellyfin</td>
+                <td class="mono" style="color:var(--slate-500);">svc_flowless</td>
+                <td><span class="pill success"><span class="dot"></span>Connectée</span></td>
+                <td class="mono">il y a 6 min</td>
+                <td style="text-align:right;">
+                  <button class="btn sm ghost" onclick="showToast('Synchronisation de « Showcase Library » lancée.')">Synchroniser</button>
+                  <button class="btn sm icon-only ghost" data-open-modal="modal-new-source" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="cell-title">Archive Vault</div>
+                  <div class="cell-sub">http://archive.jellyfin.local:8096</div>
+                </td>
+                <td>Jellyfin</td>
+                <td class="mono" style="color:var(--slate-500);">svc_flowless</td>
+                <td><span class="pill warning"><span class="dot"></span>Synchro en retard</span></td>
+                <td class="mono">il y a 9 j</td>
+                <td style="text-align:right;">
+                  <button class="btn sm" onclick="showToast('Synchronisation de « Archive Vault » lancée.')">Synchroniser</button>
+                  <button class="btn sm icon-only ghost" data-open-modal="modal-new-source" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tooltip-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div><strong>Archive Vault</strong> n'a pas synchronisé depuis 9 jours. Les nouveaux titres ajoutés sur Jellyfin ne seront pas visibles dans vos collections tant qu'une synchronisation n'aura pas été relancée.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-scrim" id="modal-new-source">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Connecter une source Jellyfin</h3>
+        <p class="desc">Flowless lira les bibliothèques accessibles par ce compte pour construire vos collections.</p>
+      </div>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Nom de la source</label><input type="text" placeholder="ex. Showcase Library" /></div>
+      <div class="field-row cols-2">
+        <div class="field"><label>URL du serveur</label><input type="url" placeholder="http://jellyfin.local:8096" /></div>
+        <div class="field"><label>Identifiant</label><input type="text" placeholder="svc_flowless" /></div>
+      </div>
+      <div class="field"><label>Mot de passe</label><input type="password" placeholder="••••••••" /></div>
+      <div class="tooltip-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div>Un compte dédié en lecture seule est recommandé plutôt que votre compte administrateur Jellyfin.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" data-close-modal>Annuler</button>
+      <button class="btn primary" data-close-modal onclick="showToast('Source « Showcase Library » enregistrée.')">Tester la connexion et enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

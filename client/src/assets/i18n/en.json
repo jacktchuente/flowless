@@ -6,8 +6,107 @@
     "COLLECTIONS": "Collections",
     "MEDIAS": "Medias",
     "CHANNELS": "Channels",
+    "OVERVIEW": "Overview",
+    "EDITORIAL_PLANNING": "Flexible planning",
+    "ALL_CHANNELS_ON_AIR": "All active channels are on air",
     "LANGUAGE": "Language",
     "ADMIN": "Admin"
+  },
+  "OVERVIEW": {
+    "EYEBROW": "Control room",
+    "TITLE": "Overview",
+    "SUBTITLE": "Here is the current state of your channels and priority work.",
+    "LOADING": "Loading control-room status…",
+    "NEW_CHANNEL": "New channel",
+    "PRIORITY": "Priority work",
+    "NO_ALERTS": "No open alerts.",
+    "RECENT_ACTIVITY": "Recent activity",
+    "NO_ACTIVITY": "No recent activity.",
+    "ON_AIR": "Channels on air",
+    "ON_AIR_DESC": "Current and next programs.",
+    "VIEW_CHANNELS": "View all channels",
+    "LIVE": "Live",
+    "NEXT": "Next",
+    "NO_ON_AIR": "No channel is currently on air.",
+    "STATS": {
+      "ON_AIR": "Channels on air",
+      "ALERTS": "Alerts · {{count}} channels",
+      "STALE_SOURCES": "Sources to synchronize",
+      "LAST_GENERATION": "Minutes since generation"
+    },
+    "ALERTS": {
+      "STALE_SOURCE": "This source must be synchronized.",
+      "GRID_WARNING": "The editorial grid contains an inconsistency.",
+      "PLAYOUT_ISSUE": "The schedule contains an issue."
+    },
+    "ACTIVITY": {
+      "PLAYOUT_GENERATED": "Schedule for {{channel}} generated for {{days}} day(s)",
+      "PLAYOUT_FAILED": "Generation failed for {{channel}}",
+      "COLLECTION_ANALYZED": "Collection {{collection}} analyzed",
+      "EDITORIAL_RUN": "Editorial analysis for {{catalog}}"
+    },
+    "VIEW_REPORTS": "View all generation reports"
+  },
+  "EDITORIAL_PLANNING": {
+    "EYEBROW": "Programming",
+    "TITLE": "Flexible planning",
+    "SUBTITLE": "Turn analyzed collections into coherent segments and editorial channels.",
+    "LOADING": "Loading planning…",
+    "TABS": {
+      "COLLECTIONS": "1 · Collections",
+      "ANALYSIS": "2 · Run analysis",
+      "SEGMENTS": "3 · Segments",
+      "CANDIDATES": "4 · Candidates",
+      "REVIEW": "5 · Review"
+    },
+    "NOTIFY": {
+      "PROMOTED": "Flexible channel created.",
+      "MATCHED": "New media integrated.",
+      "NO_ACTIVE_RUN": "No active run."
+    },
+    "CATALOG": "Catalog",
+    "TITLES": "{{count}} titles",
+    "COLLECTIONS": {
+      "TITLE": "Analyzed collections",
+      "DESC": "Select the libraries that will feed the model.",
+      "SELECTED": "{{count}} selected"
+    },
+    "ANALYSIS": {
+      "LAST_RUN": "Latest run",
+      "MATCH_NEW": "Integrate new media",
+      "TARGET": "Target channel count",
+      "MAX_CANDIDATES": "Maximum candidates",
+      "MULTI_SEGMENT": "Allow multiple segments per channel",
+      "SHARING": "Allow segment sharing",
+      "THRESHOLD": "Affinity threshold",
+      "RUN": "Run analysis",
+      "VIEW_SEGMENTS": "View detected segments",
+      "STEPS": {
+        "COLLECTIONS": "Read selected collections",
+        "SEGMENTS": "Group into segments",
+        "VIABILITY": "Assess viability",
+        "CANDIDATES": "Build candidates"
+      }
+    },
+    "SEGMENTS": {
+      "DESC": "Each segment groups similar titles. Scores indicate editorial quality.",
+      "PROGRAMMABILITY": "Programmability",
+      "COHESION": "Cohesion",
+      "SEPARATION": "Separation",
+      "VIEW_CANDIDATES": "View candidates"
+    },
+    "CANDIDATES": {
+      "VIABILITY": "Viability",
+      "PROMOTED": "Already promoted",
+      "PROMOTE": "Promote to channel",
+      "REVIEW": "Review memberships"
+    },
+    "REVIEW": {
+      "SCORE": "Affinity score",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "MANUAL": "Manual review"
+    }
   },
   "COMMON": {
     "NAME": "Name",
@@ -38,7 +137,26 @@
       "SKIPPED": "Skipped",
       "COMPLETE_WITH_ERRORS": "Complete with errors",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "ERROR": "Error",
+    "WARNING": "Warning",
+    "OK": "OK",
+    "FAILURE": "Failure",
+    "INFO": "Info",
+    "AT": "at",
+    "SEARCH": "Search…",
+    "CONTINUE": "Continue",
+    "AVAILABLE": "Available",
+    "ACTIVATE": "Activate",
+    "DONE": "Done",
+    "CANCEL": "Cancel",
+    "CONFIRM": "Confirm",
+    "SAVE": "Save",
+    "APPLY": "Apply",
+    "TYPE": "Type",
+    "LOADING": "Loading…",
+    "CONFIRM_TITLE": "Confirm action",
+    "CONFIRM_MESSAGE": "Do you really want to continue?"
   },
   "MEDIA_SOURCE": {
     "EYEBROW": "Sources",
@@ -51,7 +169,27 @@
     "EMPTY_HELP": "Add a Jellyfin source to start collection synchronization.",
     "NOTIFY_DELETE_FAILED": "Delete failed.",
     "NOTIFY_SYNC_FAILED": "Collection synchronization failed.",
-    "NOTIFY_SYNC_STARTED": "Collection synchronization started in background."
+    "NOTIFY_SYNC_STARTED": "Collection synchronization started in background.",
+    "COLUMN_SOURCE": "Source",
+    "COLUMN_USERNAME": "Username",
+    "STATUS_SYNCING": "Syncing…",
+    "STATUS_STALE": "Sync overdue",
+    "STATUS_CONNECTED": "Connected",
+    "STALE_NOTE": "{{count}} source(s) need to be resynced. The oldest is {{days}} days overdue.",
+    "DELETE_TITLE": "Delete source",
+    "CONFIRM_DELETE": "Permanently delete “{{name}}”?",
+    "DIALOG": {
+      "EDIT_TITLE": "Edit source",
+      "NEW_TITLE": "New source",
+      "DESCRIPTION": "Connect a Jellyfin server to the control room.",
+      "URL": "Jellyfin URL",
+      "PASSWORD": "Password",
+      "NAME_PLACEHOLDER": "Main Jellyfin",
+      "HINT": "Prefer a dedicated Jellyfin account with read-only access.",
+      "SUBMIT": "Test connection and save",
+      "SUBMITTING": "Verifying…",
+      "CONNECTION_FAILED": "Connection to the source failed."
+    }
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",
@@ -71,7 +209,21 @@
     "NOTIFY_ANALYZE_STARTED": "Collection analysis started in background.",
     "FORCE_REANALYZE": "Yes, re-analyze everything",
     "ANALYZING_WARNING": "An analysis already seems to be running for this collection. If it got stuck (crash), only a forced re-analysis will restart the processing.",
-    "IS_ANIME": "Anime"
+    "IS_ANIME": "Anime",
+    "COLUMN_COLLECTION": "Collection",
+    "ROLE": "Editorial role",
+    "ACTIVE": "Active",
+    "DETAIL": {
+      "TITLE": "Collection — {{name}}",
+      "DESCRIPTION": "Adjust the metadata used for programming.",
+      "EXTERNAL_ID": "External ID",
+      "ROLE_LABEL": "Programming role",
+      "ROLE_HINT": "Determines where this collection fits in the grid.",
+      "KIND": "Container kind",
+      "CLASSIFICATION": "Classification",
+      "IS_ANIME": "Treat as anime",
+      "ANALYZE_NOW": "Analyze now"
+    }
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",
@@ -83,7 +235,7 @@
     "PAGE_SIZE": "Page size",
     "COLUMN_TITLE": "Title",
     "COLUMN_ANALYZED_AT": "Analyzed at",
-    "COLUMN_ITEM_COUNT": "Item count",
+    "COLUMN_ITEM_COUNT": "Items",
     "COLUMN_MISSING": "Missing",
     "ANALYZE": "Analyze",
     "EMPTY_TITLE": "No media available",
@@ -93,7 +245,43 @@
     "NOTIFY_ANALYZE_FAILED": "Media analysis failed.",
     "NOTIFY_ANALYZE_ALL_FAILED": "Global media analysis failed.",
     "NOTIFY_ANALYZE_ALL_STARTED": "Global media analysis started in background.",
-    "NOTIFY_ANALYZE_STARTED": "Media analysis started in background."
+    "NOTIFY_ANALYZE_STARTED": "Media analysis started in background.",
+    "SEARCH_PLACEHOLDER": "Search a title…",
+    "MORE_FILTERS": "More filters",
+    "CLEAR_FILTERS": "Clear all",
+    "NATURE": "Nature",
+    "STATUS_COMPLETE": "Complete",
+    "STATUS_ERROR": "Error",
+    "STATUS_ANALYZING": "Analyzing…",
+    "STATUS_PENDING": "Analyzing",
+    "STATUS_PARTIAL": "Partial",
+    "TOTAL_SUMMARY": "{{count}} titles in total · page {{page}} of {{pages}}",
+    "ANALYZE_ALL_TITLE": "Analyze all media",
+    "FILTERS": {
+      "TITLE": "Advanced filters",
+      "DESCRIPTION": "Narrow down the media list.",
+      "STATUS": "Status",
+      "CATEGORY": "Category",
+      "NATURE": "Nature",
+      "TYPE": "Type",
+      "ANIME": "Anime",
+      "ANY_M": "All",
+      "ANY_F": "All",
+      "ANIME_ONLY": "Anime",
+      "NOT_ANIME": "Not anime"
+    },
+    "DETAIL": {
+      "TITLE_FALLBACK": "Media detail",
+      "EXTERNAL_ID": "External ID",
+      "ANALYZED_AT": "Analyzed at",
+      "ITEMS": "Items",
+      "CATEGORIES": "Categories",
+      "GENRES": "Genres",
+      "TAGS": "Tags",
+      "COUNTRIES": "Countries",
+      "AUDIO_LANGUAGES": "Audio languages",
+      "DURATIONS": "Durations"
+    }
   },
   "CHANNEL_DETAIL": {
     "BACK": "Back to channels",
@@ -134,21 +322,66 @@
     "NOTIFY_RULES_RESET": "Rules reset.",
     "CALENDAR_HELP_FLEXIBLE": "Daily view of the schedule generated by the flexible planning.",
     "GENERATION_REPORTS": "Generation reports",
+    "TIME_WINDOW": "Time window",
+    "ACTIVE_BLOCKS_DESC": "Programming blocks in the active version.",
+    "BLOCK_TITLE": "Block — {{category}}",
+    "BLOCK_PRIORITY": "Priority {{priority}}",
+    "BLOCK_SUMMARY": "Priority {{priority}} · {{min}}–{{max}} titles",
+    "PROGRAMMING": "Programming",
     "GENERATE_LOGO": "Generate logo",
     "GENERATE_LOGO_LOCAL": "Local GPU (ComfyUI)",
     "GENERATE_LOGO_CLOUD": "Cloud (OpenAI)",
     "NOTIFY_LOGO_GENERATION_STARTED": "Logo generation started.",
-    "NOTIFY_LOGO_GENERATION_FAILED": "Logo generation failed to start."
+    "NOTIFY_LOGO_GENERATION_FAILED": "Logo generation failed to start.",
+    "ALLOWED": "Allowed",
+    "PREFERRED": "Preferred",
+    "FORBIDDEN": "Forbidden",
+    "UNCOVERED_SLOT": "No block covers this slot",
+    "ADD_BLOCK_HERE": "Add a block here"
   },
   "MANUAL_EDIT": {
-    "EDIT_EDITORIAL_LINE": "Edit editorial line", "NO_EDITORIAL_LINE": "No editorial line.",
-    "FIXED_GRID": "Fixed grid", "EDITORIAL_BLOCKS": "Editorial blocks", "EDIT_GRID": "Edit grid", "NEW_VERSION": "New version", "ADD_BLOCK": "Add block", "EDIT_BLOCK": "Edit block",
-    "BLOCK_SUMMARY": "Priority {{priority}} · {{min}}–{{max}} items", "CONFIRM_DELETE_BLOCK": "Delete this grid block?", "CONFIRM_NEW_VERSION": "Create a new version of the active grid?",
-    "DELETE_FAILED": "Deletion failed.", "VERSION_FAILED": "Version creation failed.", "OPTIONS_FAILED": "Form options loading failed.", "SAVE_FAILED": "Save failed.",
-    "SAVED_REGENERATE": "Changes saved. Regenerate the playout?", "REGENERATE": "Regenerate", "CANCEL": "Cancel", "SAVE": "Save", "NONE": "None",
-    "SUGGESTION_CONTEXT": "Suggestion context", "SUGGEST_LLM": "Suggest (LLM)", "FILLER_POLICY": "Filler policy", "POST_FILLER_POLICY": "Post-filler policy",
-    "START": "Start", "END": "End", "PRIORITY": "Priority", "MIN_ITEMS": "Minimum items", "MAX_ITEMS": "Maximum items", "MIN_DURATION": "Minimum duration (s)", "MAX_DURATION": "Maximum duration (s)", "ALLOW_FILLER": "Allow filler",
-    "ALLOWED_CATEGORIES": "Allowed categories", "FORBIDDEN_CATEGORIES": "Forbidden categories", "PREFERRED_CATEGORIES": "Preferred categories", "ALLOWED_NATURES": "Allowed natures", "FORBIDDEN_NATURES": "Forbidden natures", "PREFERRED_NATURES": "Preferred natures", "ALLOWED_KINDS": "Allowed types", "FORBIDDEN_KINDS": "Forbidden types", "PREFERRED_KINDS": "Preferred types"
+    "EDIT_EDITORIAL_LINE": "Edit editorial line",
+    "NO_EDITORIAL_LINE": "No editorial line.",
+    "FIXED_GRID": "Fixed grid",
+    "EDITORIAL_BLOCKS": "Editorial blocks",
+    "EDIT_GRID": "Edit grid",
+    "NEW_VERSION": "New version",
+    "CREATE": "Create",
+    "ADD_BLOCK": "Add block",
+    "EDIT_BLOCK": "Edit block",
+    "BLOCK_SUMMARY": "Priority {{priority}} · {{min}}–{{max}} items",
+    "CONFIRM_DELETE_BLOCK": "Delete this grid block?",
+    "CONFIRM_NEW_VERSION": "Create a new version of the active grid?",
+    "DELETE_FAILED": "Deletion failed.",
+    "VERSION_FAILED": "Version creation failed.",
+    "OPTIONS_FAILED": "Form options loading failed.",
+    "SAVE_FAILED": "Save failed.",
+    "SAVED_REGENERATE": "Changes saved. Regenerate the playout?",
+    "REGENERATE": "Regenerate",
+    "CANCEL": "Cancel",
+    "SAVE": "Save",
+    "NONE": "None",
+    "SUGGESTION_CONTEXT": "Suggestion context",
+    "SUGGEST_LLM": "Suggest (LLM)",
+    "FILLER_POLICY": "Filler policy",
+    "POST_FILLER_POLICY": "Post-filler policy",
+    "START": "Start",
+    "END": "End",
+    "PRIORITY": "Priority",
+    "MIN_ITEMS": "Minimum items",
+    "MAX_ITEMS": "Maximum items",
+    "MIN_DURATION": "Minimum duration (s)",
+    "MAX_DURATION": "Maximum duration (s)",
+    "ALLOW_FILLER": "Allow filler",
+    "ALLOWED_CATEGORIES": "Allowed categories",
+    "FORBIDDEN_CATEGORIES": "Forbidden categories",
+    "PREFERRED_CATEGORIES": "Preferred categories",
+    "ALLOWED_NATURES": "Allowed natures",
+    "FORBIDDEN_NATURES": "Forbidden natures",
+    "PREFERRED_NATURES": "Preferred natures",
+    "ALLOWED_KINDS": "Allowed types",
+    "FORBIDDEN_KINDS": "Forbidden types",
+    "PREFERRED_KINDS": "Preferred types"
   },
   "CHANNELS": {
     "EYEBROW": "Channels",
@@ -159,6 +392,8 @@
     "CATALOG_LABEL": "Catalog",
     "EDIT_CATALOG": "Edit catalog",
     "GENERATE_CHANNELS": "1 - Generate channels",
+    "GENERATE_CHANNELS_TITLE": "Generate channels",
+    "GENERATE": "Generate",
     "PREVIOUS_DAY": "Previous day",
     "TODAY": "Today",
     "NEXT_DAY": "Next day",
@@ -168,11 +403,15 @@
     "NO_CHANNEL": "No channels",
     "NO_CHANNEL_HELP": "Add a channel for this catalog.",
     "EDIT": "Edit",
+    "EDIT_CHANNEL": "Edit channel",
+    "CHANNEL_ACTIVE": "Active channel",
     "GENERATE_BLUEPRINT": "Generate blueprint",
     "GENERATE_PLAYOUT": "Generate playout",
     "RESET_RULES": "Reset rules",
     "PUSH_ETV": "Push ErsatzTV",
     "DELETE": "Delete",
+    "DELETE_CHANNEL_TITLE": "Delete channel",
+    "CONFIRM_DELETE": "Delete “{{name}}”?",
     "NO_CATALOG": "No catalog available",
     "NO_CATALOG_HELP": "Create a catalog first to start organizing channels.",
     "CONFIRM_GENERATE_CATALOG": "Automatically generate the channels for catalog {{name}}?",
@@ -197,10 +436,191 @@
       "SKIPPED": "Skipped",
       "COMPLETE_WITH_ERRORS": "Complete with errors",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "CLASSIC_HELP": "Manage fixed rules and compare them with the actual schedule.",
+    "FLEXIBLE_HELP": "Group media into segments and create flexible channels.",
+    "OPEN_DETAIL": "Open details",
+    "FLEXIBLE_TITLE": "Flexible planning",
+    "FLEXIBLE_BUILD": "Build channels from your collections",
+    "FLEXIBLE_DESC": "Analyze catalog cohesion, review segments, then promote the best candidates.",
+    "FLEXIBLE_OPEN": "Open flexible planning",
+    "ERRORS": "{{count}} errors",
+    "WARNINGS": "{{count}} warnings",
+    "UP_TO_DATE": "Up to date"
   },
   "TV_CHANNEL_DIALOG": {
     "SUGGEST_NAME": "Suggest a name",
     "NOTIFY_SUGGEST_NAME_FAILED": "Name suggestion failed."
+  },
+  "UI": {
+    "CATEGORIES": {
+      "FICTION": "Fiction",
+      "DOCUMENTARY": "Documentary",
+      "NEWS": "News",
+      "ENTERTAINMENT": "Entertainment",
+      "MUSIC": "Music",
+      "SPORT": "Sport",
+      "FILLER": "Filler"
+    },
+    "NATURES": {
+      "1": "Fiction",
+      "2": "Documentary",
+      "3": "Music",
+      "4": "Sport",
+      "5": "News",
+      "6": "Entertainment",
+      "99": "Other"
+    },
+    "CONTAINER_KINDS": {
+      "1": "Standalone video",
+      "2": "Series",
+      "3": "Album",
+      "4": "Music video",
+      "99": "Other"
+    },
+    "TIME_AGO": {
+      "NOW": "just now",
+      "MINUTES": "{{count}} min ago",
+      "HOURS": "{{count}} hr ago",
+      "DAYS": "{{count}} days ago"
+    },
+    "GEN_STEPS": {
+      "DONE": "Done",
+      "ERROR": "Failed"
+    },
+    "TAG_INPUT": {
+      "ADD": "Add…",
+      "INVALID": "Choose one of the suggested values."
+    },
+    "SUGGESTION": {
+      "TITLE": "Suggested changes",
+      "DISMISS": "Dismiss",
+      "APPLY": "Apply selection",
+      "ADD": "Add: {{value}}",
+      "REMOVE": "Remove: {{value}}"
+    },
+    "ROLES": {
+      "1": "Main",
+      "2": "Trailer",
+      "3": "Promo",
+      "4": "Ad",
+      "5": "Bumper",
+      "6": "Ident",
+      "7": "Filler",
+      "8": "PSA",
+      "99": "Other"
+    }
+  },
+  "CHANNEL_DIALOGS": {
+    "COMMON": {
+      "CLOSE": "Close",
+      "CANCEL": "Cancel",
+      "SAVE": "Save",
+      "DELETE": "Delete",
+      "ALLOWED": "Allowed",
+      "PREFERRED": "Preferred",
+      "FORBIDDEN": "Forbidden",
+      "CATEGORY_VALUE": "Category · {{value}}",
+      "NATURE_VALUE": "Nature · {{value}}",
+      "KIND_VALUE": "Type · {{value}}"
+    },
+    "GENERATION": {
+      "BLUEPRINT_TITLE": "Generate plan",
+      "PLAYOUT_TITLE": "Generate schedule",
+      "CHANNEL": "Channel — {{name}}",
+      "METHOD": "Method",
+      "AI": "AI assisted",
+      "PRESET": "Preset model",
+      "RANDOM": "Random",
+      "GRID_ONLY": "Grid only",
+      "REBOOT": "Force restart",
+      "DAYS": "Number of days",
+      "RESET": "Reset existing schedule",
+      "ERROR": "Generation failed or did not confirm completion within the expected time.",
+      "HIDE": "Hide",
+      "START": "Start generation",
+      "STEPS": {
+        "READ_COLLECTIONS": "Read collections",
+        "BUILD_BLOCKS": "Build blocks",
+        "CHECK_RULES": "Check rules",
+        "WRITE_GRID": "Write grid",
+        "READ_RULES": "Read rules",
+        "SELECT_MEDIA": "Select media",
+        "RESOLVE": "Resolve conflicts",
+        "WRITE_PLAYOUT": "Write schedule"
+      }
+    },
+    "LOGO": {
+      "TITLE": "Channel logo",
+      "DESC": "Upload an image or start generation.",
+      "UPLOAD": "Upload file",
+      "LOCAL": "Generate locally",
+      "CLOUD": "Generate with AI",
+      "HINT": "The prompt remains available after generation.",
+      "DOWNLOAD": "Download prompt"
+    },
+    "REPORT": {
+      "TITLE": "Generation reports",
+      "LOADING": "Loading…",
+      "ERRORS": "{{count}} errors",
+      "WARNINGS": "{{count}} warnings",
+      "INFO": "{{count}} information",
+      "PREVIOUS": "Previous runs",
+      "WITH_ERRORS": "With errors",
+      "DONE": "Done"
+    },
+    "RESET": {
+      "TITLE": "Reset rules",
+      "WARNING": "This operation cannot be undone.",
+      "WHAT": "What",
+      "NATURES": "Natures",
+      "KINDS": "Container types",
+      "CATEGORIES": "Categories",
+      "LEVEL": "Level",
+      "ACTION": "Reset selection"
+    },
+    "GRID": {
+      "SETTINGS": "Grid settings",
+      "FILLER_POLICY": "Filler policy",
+      "NONE": "None",
+      "EDIT_BLOCK": "Edit block",
+      "ADD_BLOCK": "Add block",
+      "DESC": "Define the time slot and its editorial rules.",
+      "RULE_HINT": "Allowed, preferred, and forbidden rules are combined to select media.",
+      "SUGGESTION": "Assisted suggestion",
+      "PROMPT": "Describe the editorial intent…",
+      "SUGGEST": "Suggest",
+      "START": "Start",
+      "END": "End",
+      "PRIORITY": "Priority",
+      "MIN_DURATION": "Min. duration (min)",
+      "MAX_DURATION": "Max. duration (min)",
+      "MIN_ITEMS": "Min. titles",
+      "MAX_ITEMS": "Max. titles",
+      "POST_FILLER": "Filler after block",
+      "MATCHING": "{{count}} titles match these rules.",
+      "DELETE_BLOCK": "Delete block",
+      "SAVE_BLOCK": "Save block",
+      "CONFIRM_DELETE": "Permanently delete this grid block?",
+      "SAVED": "Block saved.",
+      "REGENERATE": "Regenerate schedule",
+      "HIGH": "High",
+      "NORMAL": "Normal",
+      "LOW": "Low"
+    },
+    "EDITORIAL": {
+      "TITLE": "Edit editorial line",
+      "START": "Broadcast start",
+      "END": "Broadcast end",
+      "FILLER": "Allow filler between titles"
+    },
+    "SCHEDULE": {
+      "DESC": "Schedule item",
+      "CONTAINER": "Container",
+      "BROADCAST": "Broadcast",
+      "SELECTION": "Selection",
+      "ROLE": "Role",
+      "NO_DESCRIPTION": "No description."
+    }
   }
 }

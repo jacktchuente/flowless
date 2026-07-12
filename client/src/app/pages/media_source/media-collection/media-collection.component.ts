@@ -1,200 +1,126 @@
-import {Component, DestroyRef, inject} from '@angular/core';
-import {DatePipe, NgFor, NgIf} from "@angular/common";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {MatButtonModule} from "@angular/material/button";
-import {MatDialog} from "@angular/material/dialog";
-import {MatIconModule} from "@angular/material/icon";
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {MatSlideToggleModule} from "@angular/material/slide-toggle";
-import {TranslateModule, TranslateService} from "@ngx-translate/core";
-import {MediaCollection} from "@project-interfaces/media-collection";
-import {MediaCollectionService} from "@project-services/media-collection.service";
-import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
-import {NotificationService} from "@project-shared/services/notification.service";
-import {MediaCollectionDetailDialogComponent} from "../media-collection-detail-dialog/media-collection-detail-dialog.component";
-
+import { Component, DestroyRef, inject } from "@angular/core";
+import { DatePipe, NgFor, NgIf } from "@angular/common";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import { MediaCollection } from "@project-interfaces/media-collection";
+import { MediaCollectionService } from "@project-services/media-collection.service";
+import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
+import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import { MediaCollectionDetailDialogComponent } from "../media-collection-detail-dialog/media-collection-detail-dialog.component";
 @Component({
-  selector: 'app-media-collection',
+  selector: "app-media-collection",
   standalone: true,
   imports: [
     DatePipe,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    TranslateModule,
     NgFor,
-    NgIf
+    NgIf,
+    TranslateModule,
+    FlwSwitchComponent,
+    FlwIconComponent,
   ],
-  templateUrl: './media-collection.component.html',
-  styleUrl: './media-collection.component.css'
+  templateUrl: "./media-collection.component.html",
+  styleUrl: "./media-collection.component.css",
 })
 export class MediaCollectionComponent {
-  private readonly destroyRef = inject(DestroyRef)
-
-  collections: MediaCollection[] = []
-  readonly syncingIds = new Set<string>()
-  isPageLoading = false
-
+  private destroyRef = inject(DestroyRef);
+  collections: MediaCollection[] = [];
+  syncingIds = new Set<string>();
   constructor(
-    private mediaCollectionService: MediaCollectionService,
-    private notificationService: NotificationService,
-    private dialog: MatDialog,
-    private translateService: TranslateService,
+    private service: MediaCollectionService,
+    private dialogs: FlwDialogService,
+    private notification: NotificationService,
+    private translate: TranslateService,
   ) {
-    this.mediaCollectionService.listObject(null, true)
-
-    this.mediaCollectionService.getObjectBehaviorSubject()
+    service.listObject(null, true);
+    service
+      .getObjectBehaviorSubject()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((collections) => {
-        this.collections = collections
-      })
+      .subscribe((v) => (this.collections = v));
   }
-
   openDetail(collection: MediaCollection) {
-    this.dialog.open(MediaCollectionDetailDialogComponent, {
-      width: '820px',
-      maxWidth: '96vw',
-      data: {collection}
-    })
+    this.dialogs.open(MediaCollectionDetailDialogComponent, {
+      data: { collection },
+    });
   }
-
-  toggleActive(collection: MediaCollection, isActive: boolean) {
-    this.mediaCollectionService.patchObject(collection.id.toString(), {is_active: isActive}).subscribe((response) => {
-      if (!response.isOk) {
-        this.notificationService.notify("MEDIA_COLLECTION.NOTIFY_TOGGLE_FAILED")
-      }
-    })
-  }
-
-  analyze(collection: MediaCollection, event?: Event) {
-    event?.stopPropagation()
-    const key = collection.id.toString()
-    if (this.syncingIds.has(key) || !collection.is_active) {
-      return
-    }
-
-    const alreadyAnalyzed = !!collection.analyzed_at
-    const isAnalyzing = collection.analyze_status === 1
-    this.dialog.open(ConfirmationDialogComponent, {
-      width: '520px',
-      maxWidth: '92vw',
-      data: {
-        confirmationMessage: this.translateService.instant('MEDIA_COLLECTION.CONFIRM_ANALYZE', {name: collection.name}),
-        warningMessage: isAnalyzing ? 'MEDIA_COLLECTION.ANALYZING_WARNING' : null,
-        extraActionLabel: alreadyAnalyzed || isAnalyzing ? 'MEDIA_COLLECTION.FORCE_REANALYZE' : null,
-      }
-    }).afterClosed().subscribe((result) => {
-      if (!result) {
-        return
-      }
-      const force = result === 'extra'
-      this.syncingIds.add(key)
-      this.isPageLoading = true
-      this.mediaCollectionService.analyze(collection.id, force).subscribe((response) => {
-        this.syncingIds.delete(key)
-        this.isPageLoading = false
-        if (!response.isOk) {
-          this.notificationService.notify("MEDIA_COLLECTION.NOTIFY_ANALYZE_FAILED")
-          return
+  toggleActive(collection: MediaCollection, value: boolean) {
+    collection.is_active = value;
+    this.service
+      .patchObject(String(collection.id), { is_active: value })
+      .subscribe((r) => {
+        if (!r.isOk) {
+          collection.is_active = !value;
+          this.notification.notify("MEDIA_COLLECTION.NOTIFY_TOGGLE_FAILED");
         }
-        collection.analyze_status = 1
-        this.notificationService.notify("MEDIA_COLLECTION.NOTIFY_ANALYZE_STARTED")
+      });
+  }
+  analyze(collection: MediaCollection, e?: Event) {
+    e?.stopPropagation();
+    if (!collection.is_active) return;
+    this.dialogs
+      .open(FlwConfirmComponent, {
+        data: {
+          title: this.translate.instant("MEDIA_COLLECTION.ANALYZE_COLLECTION"),
+          message: this.translate.instant("MEDIA_COLLECTION.CONFIRM_ANALYZE", {
+            name: collection.name,
+          }),
+          confirmLabel: this.translate.instant("MEDIA_COLLECTION.ANALYZE"),
+        },
       })
-    })
+      .closed.subscribe((ok) => {
+        if (!ok) return;
+        const id = String(collection.id);
+        this.syncingIds.add(id);
+        this.service
+          .analyze(collection.id, !!collection.analyzed_at)
+          .subscribe((r) => {
+            this.syncingIds.delete(id);
+            if (!r.isOk) {
+              this.notification.notify(
+                "MEDIA_COLLECTION.NOTIFY_ANALYZE_FAILED",
+              );
+              return;
+            }
+            collection.analyze_status = 1;
+            this.notification.notify("MEDIA_COLLECTION.NOTIFY_ANALYZE_STARTED");
+          });
+      });
   }
-
-  getAnalyzeIcon(collection: MediaCollection): string {
-    switch (collection.analyze_status) {
-      case 1:
-        return 'progress_activity'
-      case 2:
-        return 'check_circle'
-      case 4:
-        return 'error'
-      case 5:
-        return 'cancel'
-      default:
-        return 'radio_button_unchecked'
-    }
+  role(c: MediaCollection) {
+    return this.label(c.programming_role, ROLES);
   }
-
-  getAnalyzeLabel(collection: MediaCollection): string {
-    switch (collection.analyze_status) {
-      case 1:
-        return this.translateService.instant('COMMON.STATUS.ANALYZING')
-      case 2:
-        return this.translateService.instant('COMMON.STATUS.COMPLETE')
-      case 4:
-        return this.translateService.instant('COMMON.STATUS.COMPLETE_WITH_ERRORS')
-      case 5:
-        return this.translateService.instant('COMMON.STATUS.CANCELLED')
-      case 3:
-        return this.translateService.instant('COMMON.STATUS.SKIPPED')
-      default:
-        return this.translateService.instant('COMMON.STATUS.IDLE')
-    }
+  nature(c: MediaCollection) {
+    return this.label(c.nature, NATURES);
   }
-
-  getAnalyzeClass(collection: MediaCollection): string {
-    switch (collection.analyze_status) {
-      case 1:
-        return 'is-analyzing'
-      case 2:
-        return 'is-complete'
-      case 4:
-        return 'is-warning'
-      default:
-        return 'is-idle'
-    }
+  kind(c: MediaCollection) {
+    return this.label(c.container_kind, KINDS);
   }
-
-  getProgrammingRoleLabel(collection: MediaCollection): string {
-    return this.findChoiceLabel(collection.programming_role, PROGRAMMING_ROLE_OPTIONS)
+  rolePill(c: MediaCollection) {
+    return c.programming_role === 1
+      ? "info"
+      : c.programming_role === 7
+        ? "neutral"
+        : "warning";
   }
-
-  getNatureLabel(collection: MediaCollection): string {
-    return this.findChoiceLabel(collection.nature, NATURE_OPTIONS)
-  }
-
-  getContainerKindLabel(collection: MediaCollection): string {
-    return this.findChoiceLabel(collection.container_kind, CONTAINER_KIND_OPTIONS)
-  }
-
-  private findChoiceLabel(value: number | null, choices: ReadonlyArray<{value: number, label: string}>): string {
-    if (value === null || value === undefined) {
-      return '—'
-    }
-    return choices.find((choice) => choice.value === value)?.label ?? `${value}`
+  private label(
+    value: number | null,
+    options: { value: number; label: string }[],
+  ) {
+    const key = options.find((o) => o.value === value)?.label;
+    return key ? this.translate.instant(key) : "—";
   }
 }
-
-const PROGRAMMING_ROLE_OPTIONS = [
-  {value: 1, label: 'main'},
-  {value: 2, label: 'trailer'},
-  {value: 3, label: 'promo'},
-  {value: 4, label: 'ad'},
-  {value: 5, label: 'bumper'},
-  {value: 6, label: 'ident'},
-  {value: 7, label: 'filler'},
-  {value: 8, label: 'psa'},
-  {value: 99, label: 'other'},
-] as const
-
-const NATURE_OPTIONS = [
-  {value: 1, label: 'fiction'},
-  {value: 2, label: 'documentary'},
-  {value: 3, label: 'music'},
-  {value: 4, label: 'sport'},
-  {value: 5, label: 'news'},
-  {value: 6, label: 'show'},
-  {value: 99, label: 'other'},
-] as const
-
-const CONTAINER_KIND_OPTIONS = [
-  {value: 1, label: 'standalone_video'},
-  {value: 2, label: 'series'},
-  {value: 3, label: 'music_release'},
-  {value: 4, label: 'music_video_release'},
-  {value: 99, label: 'other'},
-] as const
+export const ROLES = [1, 2, 3, 4, 5, 6, 7, 8, 99].map((value) => ({
+  value,
+  label: `UI.ROLES.${value}`,
+}));
+export const NATURES = [1, 2, 3, 4, 5, 6, 99].map((value) => ({
+  value,
+  label: `UI.NATURES.${value}`,
+}));
+export const KINDS = [1, 2, 3, 4, 99].map((value) => ({
+  value,
+  label: `UI.CONTAINER_KINDS.${value}`,
+}));

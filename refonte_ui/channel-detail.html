@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Harbor Street Nights</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link active" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline" style="padding-bottom:4px;">
+      <a href="channels.html" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--slate-500); text-decoration:none;">← Prime Time Showcase</a>
+    </div>
+
+    <div class="content">
+
+      <!-- HERO -->
+      <div class="card">
+        <div class="card-body" style="display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap;">
+
+          <div style="position:relative; flex:none;">
+            <div style="width:92px; height:92px; border-radius:var(--radius-l); background:linear-gradient(145deg, var(--cat-fiction), #333F92); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:34px; font-weight:700; color:#fff;">H</div>
+            <button class="btn icon-only sm" data-open-modal="modal-logo" style="position:absolute; bottom:-6px; right:-6px; background:#fff; border-radius:50%; box-shadow:var(--shadow-card);" title="Modifier le logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+            </button>
+          </div>
+
+          <div style="flex:1; min-width:280px;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <h1 style="font-size:24px;">Harbor Street Nights</h1>
+              <span class="pill critical"><span class="dot"></span>Trous non couverts</span>
+            </div>
+            <p style="font-size:13px; color:var(--slate-500); margin-top:6px; max-width:64ch;">Polars urbains et thrillers policiers en boucle de nuit, avec une pause documentaire courte avant l'aube.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+              <span class="pill neutral">Catalogue · Prime Time Showcase</span>
+              <span class="pill success"><span class="dot"></span>Active</span>
+              <span class="pill info"><span class="dot"></span>Grille classique</span>
+              <span class="pill neutral">1080p · 25 im/s</span>
+            </div>
+          </div>
+
+          <div style="flex:none; display:flex; flex-direction:column; gap:8px; min-width:220px;">
+            <div style="display:flex; gap:8px;">
+              <button class="btn sm" data-open-modal="modal-edit-channel" style="flex:1;">Modifier</button>
+              <button class="btn sm icon-only ghost" data-open-modal="modal-report" style="position:relative;" title="Rapports">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;"><path d="M9 12h6M9 16h6M9 8h6M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/></svg>
+                <span style="position:absolute; top:-5px; right:-5px; background:var(--critical); color:#fff; font-size:9.5px; font-weight:700; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
+              </button>
+            </div>
+            <button class="btn sm" data-open-modal="modal-blueprint">Générer le plan (blueprint)</button>
+            <button class="btn sm primary" data-open-modal="modal-playout">Générer le planning</button>
+            <button class="btn sm ghost" onclick="showToast('Chaîne publiée vers ErsatzTV.')">Publier vers ErsatzTV</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div class="card">
+          <div class="card-head"><h2>Paramètres techniques</h2></div>
+          <div class="card-body">
+            <div class="kv">
+              <div class="row"><span class="k">Catalogue</span><span class="v">Prime Time Showcase</span></div>
+              <div class="row"><span class="k">Mode de grille</span><span class="v">Classique (blocs horaires)</span></div>
+              <div class="row"><span class="k">Playout externe</span><span class="v">ErsatzTV — Harbor-01</span></div>
+              <div class="row"><span class="k">Planning actif</span><span class="v mono">jusqu'au 07/06 03:00</span></div>
+              <div class="row"><span class="k">Dernière mise à jour</span><span class="v mono">il y a 12 min</span></div>
+              <div class="row"><span class="k">Éléments programmés</span><span class="v mono">168</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Ligne éditoriale</h2>
+            <div style="display:flex; gap:6px;">
+              <button class="btn sm ghost" data-open-modal="modal-editorial-line">Modifier</button>
+              <button class="btn sm danger-ghost" data-open-modal="modal-reset-rules">Réinitialiser</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="kv">
+              <div class="row"><span class="k">Fenêtre horaire</span><span class="v mono">20:00 → 06:00</span></div>
+              <div class="row"><span class="k">Filler autorisé</span><span class="v">Oui, entre les blocs</span></div>
+              <div class="row"><span class="k">Autorisé</span><span class="v"><span class="tag allow">Fiction</span> <span class="tag allow">Documentaire</span></span></div>
+              <div class="row"><span class="k">Interdit</span><span class="v"><span class="tag forbid">Jeunesse</span> <span class="tag forbid">Clip live</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDITORIAL GRID -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Grille éditoriale</h2>
+            <p class="desc">4 blocs horaires actifs — cliquez un bloc pour ajuster ses règles.</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn sm ghost">Nouvelle version</button>
+            <button class="btn sm primary" data-open-modal="modal-grid-block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M12 5v14M5 12h14"/></svg>Ajouter un bloc</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:8px 0;">
+
+          <button class="block-row" data-open-modal="modal-grid-block" style="all:unset; cursor:pointer; display:flex; align-items:center; gap:16px; padding:13px 22px; width:100%; border-bottom:1px solid var(--slate-100); box-sizing:border-box;">
+            <span class="mono" style="width:110px; font-size:12.5px; font-weight:600; flex:none;">20:00–22:00</span>
+            <span class="tag allow">Fiction</span>
+            <span class="tag prefer">Prestige Crime</span>
+            <span class="tag forbid">Jeunesse</span>
+            <span style="margin-left:auto; font-size:11.5px; color:var(--slate-400);">Priorité haute · 45–90 min / titre</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px; color:var(--slate-300); flex:none;"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+
+          <button class="block-row" data-open-modal="modal-grid-block" style="all:unset; cursor:pointer; display:flex; align-items:center; gap:16px; padding:13px 22px; width:100%; border-bottom:1px solid var(--slate-100); box-sizing:border-box;">
+            <span class="mono" style="width:110px; font-size:12.5px; font-weight:600; flex:none;">22:00–00:00</span>
+            <span class="tag allow">Fiction</span>
+            <span class="tag prefer">Action Features</span>
+            <span style="margin-left:auto; font-size:11.5px; color:var(--slate-400);">Priorité normale · 20–60 min / titre</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px; color:var(--slate-300); flex:none;"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+
+          <div style="display:flex; align-items:center; gap:16px; padding:13px 22px; border-bottom:1px solid var(--slate-100); background:var(--critical-soft);">
+            <span class="mono" style="width:110px; font-size:12.5px; font-weight:700; flex:none; color:#A93636;">06:00–07:30</span>
+            <span style="font-size:12.5px; color:#A93636; font-weight:600;">Aucun bloc ne couvre ce créneau</span>
+            <button class="btn sm" style="margin-left:auto;" data-open-modal="modal-grid-block">Ajouter un bloc ici</button>
+          </div>
+
+          <button class="block-row" data-open-modal="modal-grid-block" style="all:unset; cursor:pointer; display:flex; align-items:center; gap:16px; padding:13px 22px; width:100%; box-sizing:border-box;">
+            <span class="mono" style="width:110px; font-size:12.5px; font-weight:600; flex:none;">07:30–08:00</span>
+            <span class="tag allow">Documentaire</span>
+            <span class="tag prefer">Current Affairs</span>
+            <span style="margin-left:auto; font-size:11.5px; color:var(--slate-400);">Priorité basse · filler autorisé</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px; color:var(--slate-300); flex:none;"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- CALENDARS -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2>Grille &amp; planning</h2>
+            <p class="desc">Vue jour par jour synchronisée : la grille à gauche pour les règles, le planning réel à droite pour vérifier la correspondance.</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div class="segmented">
+              <button class="active">‹ Veille</button>
+              <button>Aujourd'hui</button>
+              <button>Lendemain ›</button>
+            </div>
+            <strong class="mono" style="font-size:13px;">31 mai 2026</strong>
+          </div>
+        </div>
+        <div class="card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">Grille (règles)</div>
+            <div id="tl-grid" style="height:480px; border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:10px;"></div>
+          </div>
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">Planning (réel)</div>
+            <div id="tl-schedule" style="height:480px; border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: logo -->
+<div class="modal-scrim" id="modal-logo">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Logo de la chaîne</h3><p class="desc">Une seule entrée pour importer ou générer — le résultat remplace le logo actuel.</p></div>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:16px; align-items:center;">
+        <div style="width:72px; height:72px; border-radius:var(--radius-m); background:linear-gradient(145deg, var(--cat-fiction), #333F92); flex:none;"></div>
+        <div style="font-size:12.5px; color:var(--slate-500);">Logo actuel — 512×512</div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+        <button class="btn" style="flex-direction:column; height:auto; padding:16px 10px; gap:8px;" onclick="showToast('Sélectionnez un fichier image (simulation).')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:20px;height:20px;"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          Importer un fichier
+        </button>
+        <button class="btn" style="flex-direction:column; height:auto; padding:16px 10px; gap:8px;" data-close-modal onclick="showToast('Logo généré localement.')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:20px;height:20px;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5-5 3 3 4-5 4 5"/></svg>
+          Générer localement
+        </button>
+        <button class="btn" style="flex-direction:column; height:auto; padding:16px 10px; gap:8px;" data-close-modal onclick="showToast('Génération IA cloud lancée — logo prêt sous peu.')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:20px;height:20px;"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.4-6.4-2.1 2.1M8.7 15.3l-2.1 2.1m10.8 0-2.1-2.1M8.7 8.7 6.6 6.6"/></svg>
+          Générer avec l'IA (cloud)
+        </button>
+      </div>
+      <span class="hint">Le prompt utilisé pour la génération reste disponible en téléchargement après coup.</span>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-close-modal>Fermer</button><span></span></div>
+  </div>
+</div>
+
+<!-- MODAL: edit channel -->
+<div class="modal-scrim" id="modal-edit-channel">
+  <div class="modal">
+    <div class="modal-head"><div><h3>Modifier la chaîne</h3></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nom</label><input type="text" value="Harbor Street Nights" /></div>
+      <div class="field"><label>Description</label><textarea rows="3">Polars urbains et thrillers policiers en boucle de nuit, avec une pause documentaire courte avant l'aube.</textarea></div>
+      <div class="field-row cols-2">
+        <div class="field"><label>Catalogue</label><div class="select-fake"><select><option>Prime Time Showcase</option><option>Late Night Mix</option></select></div></div>
+        <div class="field"><label>Statut</label><label class="switch" style="height:36px;"><input type="checkbox" checked /><span class="track"></span><span class="lbl">Chaîne active</span></label></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-close-modal>Annuler</button><button class="btn primary" data-close-modal onclick="showToast('Chaîne mise à jour.')">Enregistrer</button></div>
+  </div>
+</div>
+
+<!-- MODAL: grid block rule builder -->
+<div class="modal-scrim" id="modal-grid-block">
+  <div class="modal wide">
+    <div class="modal-head">
+      <div><h3>Bloc 20:00–22:00</h3><p class="desc">Ce que la génération de planning peut piocher pour ce créneau.</p></div>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="tooltip-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div>Décrivez le changement en langage courant, l'assistant proposera les champs à modifier — rien n'est appliqué avant validation.</div>
+      </div>
+
+      <div class="field">
+        <label>Suggestion assistée</label>
+        <textarea id="sugg-input" rows="2" placeholder="ex. « Ouvrir ce bloc aux documentaires également, sans dépasser 60 minutes »"></textarea>
+        <div style="display:flex; justify-content:flex-end;"><button class="btn sm" onclick="document.getElementById('sugg-preview').style.display='flex'; this.closest('.field').querySelector('textarea').blur();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.4-6.4-2.1 2.1M8.7 15.3l-2.1 2.1m10.8 0-2.1-2.1M8.7 8.7 6.6 6.6"/></svg>Suggérer</button></div>
+      </div>
+
+      <div id="sugg-preview" style="display:none; flex-direction:column; gap:10px; border:1px solid var(--signal-line); background:var(--signal-soft); border-radius:var(--radius-m); padding:14px;">
+        <div style="font-size:12px; font-weight:700; color:var(--signal-strong);">2 changements proposés — cochez ce que vous voulez garder</div>
+        <label style="display:flex; align-items:flex-start; gap:10px; font-size:12.5px;">
+          <input type="checkbox" checked style="margin-top:3px;" />
+          <span><strong>Autorisé</strong> — ajout de <span class="tag allow" style="margin:0 2px;">Documentaire</span></span>
+        </label>
+        <label style="display:flex; align-items:flex-start; gap:10px; font-size:12.5px;">
+          <input type="checkbox" checked style="margin-top:3px;" />
+          <span><strong>Durée max / titre</strong> — <span class="mono">90 min</span> → <span class="mono">60 min</span></span>
+        </label>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn sm ghost" onclick="document.getElementById('sugg-preview').style.display='none'">Ignorer</button>
+          <button class="btn sm primary" onclick="document.getElementById('sugg-preview').style.display='none'; showToast('Suggestions appliquées au formulaire.')">Appliquer la sélection</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-row cols-3">
+        <div class="field"><label>Début</label><input type="text" value="20:00" class="mono" /></div>
+        <div class="field"><label>Fin</label><input type="text" value="22:00" class="mono" /></div>
+        <div class="field"><label>Priorité</label><div class="select-fake"><select><option>Haute</option><option>Normale</option><option>Basse</option></select></div></div>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field"><label>Durée par titre</label><input type="text" value="45 – 90 min" class="mono" /></div>
+        <div class="field"><label>Filler après le bloc</label><label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Autorisé</span></label></div>
+      </div>
+
+      <div class="section-label">Règles de contenu</div>
+
+      <div class="rule-group allow">
+        <div class="rg-head"><span class="lbl">Autorisé</span><span class="hint">Le bloc ne peut piocher qu'ici</span></div>
+        <div class="tag-input" data-tag-class="allow">
+          <span class="tag allow">Fiction<button type="button">✕</button></span>
+          <input type="text" placeholder="Ajouter une catégorie, nature ou type… (Entrée)" />
+        </div>
+      </div>
+
+      <div class="rule-group prefer">
+        <div class="rg-head"><span class="lbl">Préféré</span><span class="hint">Priorisé quand plusieurs titres sont éligibles</span></div>
+        <div class="tag-input" data-tag-class="prefer">
+          <span class="tag prefer">Prestige Crime<button type="button">✕</button></span>
+          <input type="text" placeholder="Ajouter…" />
+        </div>
+      </div>
+
+      <div class="rule-group forbid">
+        <div class="rg-head"><span class="lbl">Interdit</span><span class="hint">Exclu même si autorisé plus haut</span></div>
+        <div class="tag-input" data-tag-class="forbid">
+          <span class="tag forbid">Jeunesse<button type="button">✕</button></span>
+          <input type="text" placeholder="Ajouter…" />
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn danger-ghost" data-close-modal onclick="showToast('Bloc supprimé.')">Supprimer le bloc</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost" data-close-modal>Annuler</button>
+        <button class="btn primary" data-close-modal onclick="showToast('Bloc 20:00–22:00 enregistré.', {action:'Régénérer le planning', onAction:() => showToast('Génération du planning relancée.')})">Enregistrer le bloc</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: editorial line -->
+<div class="modal-scrim" id="modal-editorial-line">
+  <div class="modal wide">
+    <div class="modal-head"><div><h3>Ligne éditoriale — Harbor Street Nights</h3><p class="desc">S'applique à toute la chaîne, en complément des blocs de grille.</p></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body">
+      <div class="field-row cols-2">
+        <div class="field"><label>Début de diffusion</label><input type="text" value="20:00" class="mono" /></div>
+        <div class="field"><label>Fin de diffusion</label><input type="text" value="06:00" class="mono" /></div>
+      </div>
+      <label class="switch" style="height:36px;"><input type="checkbox" checked /><span class="track"></span><span class="lbl">Autoriser le filler entre les titres</span></label>
+      <div class="divider"></div>
+      <div class="section-label">Règles de contenu</div>
+      <div class="rule-group allow">
+        <div class="rg-head"><span class="lbl">Autorisé</span></div>
+        <div class="tag-input" data-tag-class="allow"><span class="tag allow">Fiction<button type="button">✕</button></span><span class="tag allow">Documentaire<button type="button">✕</button></span><input type="text" placeholder="Ajouter…" /></div>
+      </div>
+      <div class="rule-group forbid">
+        <div class="rg-head"><span class="lbl">Interdit</span></div>
+        <div class="tag-input" data-tag-class="forbid"><span class="tag forbid">Jeunesse<button type="button">✕</button></span><span class="tag forbid">Clip live<button type="button">✕</button></span><input type="text" placeholder="Ajouter…" /></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-close-modal>Annuler</button><button class="btn primary" data-close-modal onclick="showToast('Ligne éditoriale mise à jour.')">Enregistrer</button></div>
+  </div>
+</div>
+
+<!-- MODAL: reset rules -->
+<div class="modal-scrim" id="modal-reset-rules">
+  <div class="modal">
+    <div class="modal-head"><div><h3>Réinitialiser des règles</h3><p class="desc">Sélectionnez ce qui doit revenir aux valeurs par défaut du catalogue.</p></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body">
+      <div class="tooltip-note amber">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 9v4M12 17h.01M10.3 3.9 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>Cette action est irréversible pour les éléments cochés — les blocs personnalisés seront perdus.</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <label style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" /><span style="font-size:13px;"><strong>Ligne éditoriale</strong> — fenêtre horaire et règles globales</span></label>
+        <label style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" checked /><span style="font-size:13px;"><strong>Blocs de grille</strong> — toutes les règles par créneau</span></label>
+        <label style="display:flex; align-items:center; gap:10px; padding:10px 4px;"><input type="checkbox" /><span style="font-size:13px;"><strong>Filler</strong> — politique de remplissage entre les titres</span></label>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-close-modal>Annuler</button><button class="btn primary" style="background:var(--critical); border-color:var(--critical);" data-close-modal onclick="showToast('Règles réinitialisées.')">Réinitialiser la sélection</button></div>
+  </div>
+</div>
+
+<!-- MODAL: generation report -->
+<div class="modal-scrim" id="modal-report">
+  <div class="modal wide">
+    <div class="modal-head"><div><h3>Rapports de génération</h3><p class="desc">Dernier planning généré — 31 mai 2026, 21:48.</p></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex; gap:10px;">
+        <span class="pill critical"><span class="dot"></span>1 erreur</span>
+        <span class="pill warning"><span class="dot"></span>1 avertissement</span>
+        <span class="pill neutral"><span class="dot"></span>4 blocs traités</span>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:var(--radius-m); background:var(--critical-soft);">
+        <span class="pill critical" style="flex:none;"><span class="dot"></span>Erreur</span>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:var(--slate-900);">Créneau 06:00–07:30 sans média correspondant</div>
+          <div style="font-size:12px; color:var(--slate-500); margin-top:3px;">Aucun bloc de grille ne couvre cet horaire. Ajoutez un bloc ou étendez le précédent.</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:var(--radius-m); background:var(--warning-soft);">
+        <span class="pill warning" style="flex:none;"><span class="dot"></span>Avertissement</span>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:var(--slate-900);">3 titres de « Comedy Evenings » n'entrent dans aucune règle</div>
+          <div style="font-size:12px; color:var(--slate-500); margin-top:3px;">Ils resteront ignorés tant qu'aucun bloc ne les autorise explicitement.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Runs précédents</div>
+        <div class="kv">
+          <div class="row"><span class="k mono">30/05 21:40</span><span class="v"><span class="pill success"><span class="dot"></span>OK</span></span></div>
+          <div class="row"><span class="k mono">29/05 21:38</span><span class="v"><span class="pill success"><span class="dot"></span>OK</span></span></div>
+          <div class="row"><span class="k mono">28/05 21:41</span><span class="v"><span class="pill warning"><span class="dot"></span>1 avertissement</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" data-close-modal>Fermer</button><button class="btn primary" data-close-modal data-open-modal="modal-playout">Régénérer le planning</button></div>
+  </div>
+</div>
+
+<!-- MODAL: generate blueprint -->
+<div class="modal-scrim" id="modal-blueprint">
+  <div class="modal">
+    <div class="modal-head"><div><h3>Générer le plan (blueprint)</h3><p class="desc">Construit ou reconstruit la structure de blocs de la grille.</p></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body" id="blueprint-body">
+      <label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Grille seule — ne pas régénérer le planning</span></label>
+      <div class="field">
+        <label>Méthode de génération</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="radio" name="bp-mode" checked /> Assistée par IA — décrit la structure à partir de vos collections</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="radio" name="bp-mode" /> Modèle prédéfini — grille type par créneau</label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="radio" name="bp-mode" /> Aléatoire — pour explorer rapidement</label>
+        </div>
+      </div>
+      <label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Forcer le redémarrage complet de la grille</span></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" data-close-modal>Annuler</button>
+      <button class="btn primary" onclick="runBlueprint(this)">Lancer la génération</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: generate playout -->
+<div class="modal-scrim" id="modal-playout">
+  <div class="modal">
+    <div class="modal-head"><div><h3>Générer le planning</h3><p class="desc">Remplit la grille avec des titres réels pour la période choisie.</p></div><button class="modal-close" data-close-modal>✕</button></div>
+    <div class="modal-body" id="playout-body">
+      <div class="field"><label>Nombre de jours à générer</label><input type="text" value="7" class="mono" style="width:100px;" /></div>
+      <label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Réinitialiser le planning existant avant génération</span></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" data-close-modal>Annuler</button>
+      <button class="btn primary" onclick="runPlayout(this)">Lancer la génération</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  renderTimeline(document.getElementById('tl-grid'), [
+    {start:'20:00', end:'22:00', title:'Bloc — Fiction (préf. Prestige Crime)', category:'fiction'},
+    {start:'22:00', end:'24:00', title:'Bloc — Fiction (préf. Action Features)', category:'fiction'},
+    {start:'07:30', end:'08:00', title:'Bloc — Documentaire', category:'documentary'},
+  ], {startHour:19, endHour:32, pxPerHour:34});
+
+  renderTimeline(document.getElementById('tl-schedule'), [
+    {start:'20:03', end:'21:00', title:'Harbor Homicide · Ép. 3', sub:'Prestige Crime', category:'fiction'},
+    {start:'21:00', end:'21:52', title:'Harbor Homicide · Ép. 4', sub:'Prestige Crime', category:'fiction'},
+    {start:'21:52', end:'22:47', title:'Cold Ledger · Ép. 1', sub:'Action Features', category:'fiction'},
+    {start:'22:47', end:'23:40', title:'Cold Ledger · Ép. 2', sub:'Action Features', category:'fiction'},
+    {start:'31:30', end:'32:00', title:'Deep Current', sub:'Current Affairs', category:'documentary'},
+  ], {startHour:19, endHour:32, pxPerHour:34});
+
+  function buildSteps(labels) {
+    return `<div class="gen-steps">${labels.map((l,i)=>`<div class="gen-step" data-label="${l}"><span class="mark"></span><span>${l}</span></div>`).join('')}</div>
+      <div class="progress-track" style="margin-top:4px;"><span style="width:0%"></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="mono gen-status" style="font-size:11.5px; color:var(--slate-500);">En préparation…</span>
+        <span class="gen-done" style="display:none; font-size:12px; font-weight:600; color:var(--success);">✓ Planning prêt</span>
+      </div>`;
+  }
+
+  function runBlueprint(btn) {
+    const body = document.getElementById('blueprint-body');
+    body.innerHTML = buildSteps(['Lecture des collections', 'Construction des blocs', 'Vérification des règles', 'Écriture de la grille']);
+    btn.closest('.modal-foot').style.display = 'none';
+    startProgressSequence(body);
+    setTimeout(() => { btn.closest('.modal-foot').style.display = ''; btn.closest('.modal-foot').innerHTML = '<span></span><button class="btn primary" data-close-modal onclick="showToast(\'Nouveau plan généré pour Harbor Street Nights.\')">Fermer</button>'; initModals(btn.closest('.modal-scrim')); }, 3600);
+  }
+  function runPlayout(btn) {
+    const body = document.getElementById('playout-body');
+    body.innerHTML = buildSteps(['Lecture des règles', 'Sélection des médias', 'Résolution des conflits', 'Écriture du planning']);
+    btn.closest('.modal-foot').style.display = 'none';
+    startProgressSequence(body);
+    setTimeout(() => { btn.closest('.modal-foot').style.display = ''; btn.closest('.modal-foot').innerHTML = '<span></span><button class="btn primary" data-close-modal onclick="showToast(\'Planning régénéré pour Harbor Street Nights.\')">Fermer</button>'; initModals(btn.closest('.modal-scrim')); }, 3200);
+  }
+</script>
+</body>
+</html>

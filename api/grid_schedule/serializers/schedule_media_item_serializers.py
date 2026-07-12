@@ -6,9 +6,18 @@ from media_source.constants import MediaProgrammingRole
 
 class ScheduleMediaItemSerializer(serializers.ModelSerializer):
     media_item_title = serializers.CharField(source="item.title", read_only=True)
-    media_item_description = serializers.CharField(source="item.description", read_only=True)
-    media_container_title = serializers.CharField(source="item.container.title", read_only=True)
-    media_container_id = serializers.IntegerField(source="item.container_id", read_only=True)
+    media_item_description = serializers.CharField(
+        source="item.description", read_only=True
+    )
+    media_container_title = serializers.CharField(
+        source="item.container.title", read_only=True
+    )
+    media_container_id = serializers.IntegerField(
+        source="item.container_id", read_only=True
+    )
+    media_nature = serializers.IntegerField(
+        source="item.container.nature", read_only=True
+    )
     block_name = serializers.SerializerMethodField()
     block_id = serializers.SerializerMethodField()
     flexible_selection_id = serializers.IntegerField(read_only=True)
@@ -26,6 +35,7 @@ class ScheduleMediaItemSerializer(serializers.ModelSerializer):
             "media_item_description",
             "media_container_id",
             "media_container_title",
+            "media_nature",
             "block_id",
             "block_name",
             "flexible_selection_id",

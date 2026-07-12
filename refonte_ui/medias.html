@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Médias</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link active" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Médias</span>
+        <h1>Titres de la bibliothèque</h1>
+        <p class="sub">Tous les contenants importés depuis vos sources. Analysez un titre pour en extraire les métadonnées et le rendre disponible aux règles de grille.</p>
+      </div>
+      <div class="topline-actions">
+        <button class="btn primary" onclick="showToast('Analyse de 214 titres lancée en arrière-plan.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.4-6.4-2.1 2.1M8.7 15.3l-2.1 2.1m10.8 0-2.1-2.1M8.7 8.7 6.6 6.6"/></svg>Analyser tout</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div style="position:relative; flex:1;">
+              <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--slate-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
+              <input type="search" placeholder="Rechercher un titre — résultats instantanés" style="width:100%; height:38px; padding-left:36px; border-radius:var(--radius-s); border:1px solid var(--slate-200); font-size:13px;" />
+            </div>
+            <button class="btn" data-open-modal="modal-filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Plus de filtres</button>
+            <div class="select-fake" style="width:120px;">
+              <select style="width:100%; height:38px;"><option>10 / page</option><option>25 / page</option><option>50 / page</option></select>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="section-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--slate-400);">Filtres actifs :</span>
+            <span class="chip-filter">Statut : Complet<button data-chip-remove>✕</button></span>
+            <span class="chip-filter">Nature : Fiction<button data-chip-remove>✕</button></span>
+            <button class="btn ghost sm" style="color:var(--slate-500);">Tout effacer</button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="grid">
+            <thead>
+              <tr><th>Titre</th><th>Statut</th><th>Analysé le</th><th>Éléments</th><th>Nature</th><th>Type</th><th>Manquants</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="cell-title">Harbor Homicide</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">6</td><td>Fiction</td><td>Série</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Harbor Homicide » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Cold Ledger</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">4</td><td>Fiction</td><td>Série</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Cold Ledger » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">South Precinct</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">4</td><td>Fiction</td><td>Série</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « South Precinct » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Midnight Run '89</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">1</td><td>Fiction</td><td>Film</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Midnight Run 89 » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Neon Pursuit</td><td><span class="pill warning"><span class="dot"></span>Partiel</span></td><td class="mono">31/05 09:45</td><td class="mono">1</td><td>Fiction</td><td>Film</td><td><span class="pill critical">2 manquants</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Neon Pursuit » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Steel Frontier</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">1</td><td>Fiction</td><td>Film</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Steel Frontier » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Pulse Report Weekly</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">5</td><td>Documentaire</td><td>Série</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Pulse Report Weekly » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Atlas of Conflict</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">3</td><td>Documentaire</td><td>Série</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Atlas of Conflict » lancée.')">Analyser</button></td></tr>
+              <tr><td class="cell-title">Deep Current</td><td><span class="pill success"><span class="dot"></span>Complet</span></td><td class="mono">31/05 09:45</td><td class="mono">1</td><td>Documentaire</td><td>Film</td><td><span class="pill neutral">Non</span></td><td style="text-align:right;"><button class="btn sm ghost" onclick="showToast('Analyse de « Deep Current » lancée.')">Analyser</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-top:1px solid var(--slate-100);">
+          <span style="font-size:12px; color:var(--slate-500);">214 titres au total · page 1 sur 22</span>
+          <div class="segmented">
+            <button>← Précédent</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>Suivant →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="modal-scrim" id="modal-filters">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Filtrer les titres</h3><p class="desc">Combinez les critères — la liste se met à jour à la fermeture.</p></div>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row cols-2">
+        <div class="field"><label>Statut</label><div class="select-fake"><select><option>Tous</option><option>Complet</option><option>Partiel</option><option>En erreur</option></select></div></div>
+        <div class="field"><label>Catégorie</label><input type="text" placeholder="ex. Prestige Crime" /></div>
+        <div class="field"><label>Nature</label><div class="select-fake"><select><option>Toutes</option><option>Fiction</option><option>Documentaire</option><option>Musique</option></select></div></div>
+        <div class="field"><label>Type de contenant</label><div class="select-fake"><select><option>Tous</option><option>Série</option><option>Film</option><option>Clip live</option></select></div></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" data-close-modal>Réinitialiser</button>
+      <button class="btn primary" data-close-modal>Appliquer les filtres</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

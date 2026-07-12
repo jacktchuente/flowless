@@ -1,30 +1,30 @@
 <section class="shell">
-    <aside class="sidebar">
-        <div class="brand">
-            <span class="brand-kicker">{{ appName }}</span>
-            <h1>{{ 'NAV.TITLE' | translate }}</h1>
-            <p>{{ 'NAV.SUBTITLE' | translate }}</p>
-        </div>
-
-        <nav class="menu">
-            <a
-                    *ngFor="let item of menuItems"
-                    class="menu-item"
-                    [routerLink]="item.route"
-                    routerLinkActive="is-active"
-            >
-                {{ item.label | translate }}
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <a class="sidebar-admin-link" [href]="adminUrl">
-                {{ 'NAV.ADMIN' | translate }}
-            </a>
-        </div>
-    </aside>
-
-    <main class="content">
-        <router-outlet></router-outlet>
-    </main>
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">{{ appName }}</span
+      ><span class="name"
+        >{{ "NAV.TITLE" | translate }}<i class="tally"></i></span
+      ><span class="tagline">{{ "NAV.SUBTITLE" | translate }}</span>
+    </div>
+    <nav class="rail-nav" aria-label="Navigation principale">
+      <a
+        *ngFor="let item of menuItems"
+        class="rail-link"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        ><flw-icon class="ico" [name]="item.icon" /><span>{{
+          item.label | translate
+        }}</span></a
+      >
+    </nav>
+    <div class="rail-foot">
+      <p class="rail-status">
+        <span class="dot"></span
+        ><span>{{ "NAV.ALL_CHANNELS_ON_AIR" | translate }}</span>
+      </p>
+      <a class="rail-admin" [href]="adminUrl">{{ "NAV.ADMIN" | translate }}</a>
+    </div>
+  </aside>
+  <main class="main"><router-outlet /></main>
+  <flw-toast-host />
 </section>

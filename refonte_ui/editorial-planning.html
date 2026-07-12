@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Planification flexible</title>
+<link rel="stylesheet" href="assets/styles.css" />
+<style>
+  .meter{ display:flex; align-items:center; gap:8px; }
+  .meter .lbl{ width:120px; flex:none; font-size:11.5px; color:var(--slate-500); }
+  .meter .progress-track{ flex:1; }
+  .meter .val{ width:34px; flex:none; text-align:right; font-size:11.5px; }
+  .seg-card{ border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .status-btn{ border:1px solid var(--slate-200); background:#fff; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; color:var(--slate-500); }
+  .status-btn.active.accept{ background:var(--success-soft); border-color:var(--success); color:#1F7A45; }
+  .status-btn.active.reject{ background:var(--critical-soft); border-color:var(--critical); color:#A93636; }
+  .status-btn.active.manual{ background:var(--signal-soft); border-color:var(--signal); color:var(--signal-strong); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link active" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Planification flexible</span>
+        <h1>Laisser Flowless proposer des chaînes</h1>
+        <p class="sub">Cette analyse regroupe automatiquement les titres qui se ressemblent (des <strong>segments</strong>), puis en propose des enchaînements viables comme <strong>candidats de chaîne</strong>. Vous validez chaque étape avant qu'elle ne devienne réelle.</p>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <div class="tabs" id="ep-tabs">
+          <button class="active" data-tab="collections">1 · Collections</button>
+          <button data-tab="run">2 · Lancer l'analyse</button>
+          <button data-tab="segments">3 · Segments détectés</button>
+          <button data-tab="candidates">4 · Candidats de chaîne</button>
+          <button data-tab="review">5 · Vérifier les rattachements</button>
+        </div>
+
+        <!-- STEP 1: collections -->
+        <div class="tab-panel active" data-tab="collections">
+          <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+            <p style="font-size:13px; color:var(--slate-500); max-width:70ch;">Choisissez les collections que l'analyse peut utiliser. Seuls les titres actifs et déjà analysés seront pris en compte.</p>
+            <input type="search" placeholder="Rechercher une collection…" style="height:36px; border-radius:var(--radius-s); border:1px solid var(--slate-200); padding:0 12px; font-size:13px; max-width:320px;" />
+            <div style="display:flex; flex-direction:column;">
+              <label style="display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" checked /><span style="font-size:13px; flex:1;"><strong>Prestige Crime</strong> <span style="color:var(--slate-500);">— Fiction · Série</span></span><span class="mono" style="font-size:11.5px; color:var(--slate-400);">6 titres</span></label>
+              <label style="display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" checked /><span style="font-size:13px; flex:1;"><strong>Action Features</strong> <span style="color:var(--slate-500);">— Fiction · Film</span></span><span class="mono" style="font-size:11.5px; color:var(--slate-400);">4 titres</span></label>
+              <label style="display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" checked /><span style="font-size:13px; flex:1;"><strong>Current Affairs</strong> <span style="color:var(--slate-500);">— Documentaire · Série</span></span><span class="mono" style="font-size:11.5px; color:var(--slate-400);">4 titres</span></label>
+              <label style="display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--slate-100);"><input type="checkbox" /><span style="font-size:13px; flex:1;"><strong>Comedy Evenings</strong> <span style="color:var(--slate-500);">— Divertissement · Série</span></span><span class="mono" style="font-size:11.5px; color:var(--slate-400);">6 titres</span></label>
+              <label style="display:flex; align-items:center; gap:12px; padding:11px 4px;"><input type="checkbox" /><span style="font-size:13px; flex:1;"><strong>Live Sessions</strong> <span style="color:var(--slate-500);">— Musique · Clip live</span></span><span class="mono" style="font-size:11.5px; color:var(--slate-400);">5 titres</span></label>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12px; color:var(--slate-500);">3 collections sélectionnées · 14 titres</span>
+              <button class="btn primary" onclick="document.querySelector('#ep-tabs button[data-tab=run]').click()">Continuer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: run -->
+        <div class="tab-panel" data-tab="run">
+          <div class="card-body" style="display:flex; flex-direction:column; gap:18px;">
+            <div class="field-row cols-2">
+              <div class="field">
+                <label>Nombre de chaînes visé</label>
+                <input type="text" value="3" class="mono" />
+                <span class="hint">Un objectif, pas une garantie — l'analyse peut proposer moins si peu de segments sont viables.</span>
+              </div>
+              <div class="field">
+                <label>Candidats maximum à générer</label>
+                <input type="text" value="6" class="mono" />
+                <span class="hint">Plafonne le nombre de propositions à examiner à l'étape 4.</span>
+              </div>
+            </div>
+            <label class="switch" style="height:36px;"><input type="checkbox" checked /><span class="track"></span><span class="lbl">Autoriser un titre à appartenir à plusieurs segments</span></label>
+            <label class="switch" style="height:36px;"><input type="checkbox" /><span class="track"></span><span class="lbl">Autoriser deux chaînes à partager un même segment</span></label>
+            <div class="field" style="max-width:340px;">
+              <label>Seuil de raffinement</label>
+              <input type="range" min="0" max="100" value="65" />
+              <span class="hint">Plus haut = segments plus précis mais plus nombreux et plus petits.</span>
+            </div>
+
+            <div id="run-body">
+              <button class="btn primary" style="align-self:flex-start;" onclick="startRun(this)">Lancer l'analyse</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: segments -->
+        <div class="tab-panel" data-tab="segments">
+          <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+            <p style="font-size:13px; color:var(--slate-500); max-width:70ch;">Un <strong>segment</strong> est un regroupement automatique de titres qui s'enchaînent bien — même ton, même durée, même univers. 7 segments détectés sur ce run.</p>
+
+            <div class="seg-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:13.5px;">Segment A — Polars nocturnes</strong>
+                <span class="pill success"><span class="dot"></span>Viable</span>
+              </div>
+              <div style="font-size:12px; color:var(--slate-500);">10 titres · Prestige Crime, Action Features</div>
+              <div class="meter"><span class="lbl">Programmabilité</span><div class="progress-track"><span style="width:88%"></span></div><span class="val mono">88%</span></div>
+              <div class="meter"><span class="lbl">Cohésion</span><div class="progress-track"><span style="width:81%"></span></div><span class="val mono">81%</span></div>
+              <div class="meter"><span class="lbl">Séparation</span><div class="progress-track"><span style="width:74%"></span></div><span class="val mono">74%</span></div>
+            </div>
+
+            <div class="seg-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:13.5px;">Segment B — Actualités &amp; enquêtes</strong>
+                <span class="pill success"><span class="dot"></span>Viable</span>
+              </div>
+              <div style="font-size:12px; color:var(--slate-500);">4 titres · Current Affairs</div>
+              <div class="meter"><span class="lbl">Programmabilité</span><div class="progress-track"><span style="width:76%"></span></div><span class="val mono">76%</span></div>
+              <div class="meter"><span class="lbl">Cohésion</span><div class="progress-track"><span style="width:90%"></span></div><span class="val mono">90%</span></div>
+              <div class="meter"><span class="lbl">Séparation</span><div class="progress-track"><span style="width:68%"></span></div><span class="val mono">68%</span></div>
+            </div>
+
+            <div class="seg-card" style="opacity:.75;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:13.5px;">Segment C — Titres isolés</strong>
+                <span class="pill neutral"><span class="dot"></span>Trop petit</span>
+              </div>
+              <div style="font-size:12px; color:var(--slate-500);">2 titres · sans catégorie dominante</div>
+              <div class="meter"><span class="lbl">Programmabilité</span><div class="progress-track"><span style="width:31%"></span></div><span class="val mono">31%</span></div>
+            </div>
+
+            <button class="btn primary" style="align-self:flex-start;" onclick="document.querySelector('#ep-tabs button[data-tab=candidates]').click()">Voir les candidats de chaîne</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: candidates -->
+        <div class="tab-panel" data-tab="candidates">
+          <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+            <p style="font-size:13px; color:var(--slate-500); max-width:70ch;">Un <strong>candidat</strong> est une proposition de chaîne prête à activer, construite à partir d'un ou plusieurs segments enchaînés dans un ordre cohérent.</p>
+
+            <div class="seg-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:13.5px;">Candidat — « Polars nocturnes »</strong>
+                <span class="pill info"><span class="dot"></span>Viabilité 84%</span>
+              </div>
+              <div style="font-size:12px; color:var(--slate-500);">Basé sur le segment A · 10 titres · rythme 45–90 min</div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn sm primary" onclick="showToast('« Polars nocturnes » promu en chaîne flexible.')">Promouvoir en chaîne</button>
+                <button class="btn sm ghost" onclick="document.querySelector('#ep-tabs button[data-tab=review]').click()">Revoir les rattachements</button>
+              </div>
+            </div>
+
+            <div class="seg-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:13.5px;">Candidat — « Actualités &amp; enquêtes »</strong>
+                <span class="pill info"><span class="dot"></span>Viabilité 79%</span>
+              </div>
+              <div style="font-size:12px; color:var(--slate-500);">Basé sur le segment B · 4 titres · rythme 22–35 min</div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn sm primary" onclick="showToast('« Actualités & enquêtes » promu en chaîne flexible.')">Promouvoir en chaîne</button>
+                <button class="btn sm ghost" onclick="document.querySelector('#ep-tabs button[data-tab=review]').click()">Revoir les rattachements</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: review -->
+        <div class="tab-panel" data-tab="review">
+          <div class="card-body" style="display:grid; grid-template-columns:260px 1fr; gap:0; padding:0;">
+            <div style="border-right:1px solid var(--slate-100); padding:18px;">
+              <div class="section-label" style="margin-bottom:10px;">Segments</div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn sm" style="justify-content:flex-start; background:var(--signal-soft); border-color:var(--signal-line); color:var(--signal-strong);">Segment A · Polars nocturnes</button>
+                <button class="btn sm ghost" style="justify-content:flex-start;">Segment B · Actualités &amp; enquêtes</button>
+                <button class="btn sm ghost" style="justify-content:flex-start;">Segment C · Titres isolés</button>
+              </div>
+            </div>
+            <div style="padding:18px; display:flex; flex-direction:column; gap:10px;">
+              <p style="font-size:12.5px; color:var(--slate-500);">Rattachements proposés pour <strong>Segment A</strong> — acceptez, rejetez ou marquez en revue manuelle chaque titre.</p>
+
+              <div style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid var(--slate-100); border-radius:var(--radius-m);">
+                <div style="flex:1;"><strong style="font-size:13px;">Harbor Homicide</strong><div style="font-size:11.5px; color:var(--slate-500);">Score d'affinité 0.91</div></div>
+                <button class="status-btn active accept">Accepté</button>
+                <button class="status-btn">Rejeté</button>
+                <button class="status-btn">Revue manuelle</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid var(--slate-100); border-radius:var(--radius-m);">
+                <div style="flex:1;"><strong style="font-size:13px;">Cold Ledger</strong><div style="font-size:11.5px; color:var(--slate-500);">Score d'affinité 0.87</div></div>
+                <button class="status-btn active accept">Accepté</button>
+                <button class="status-btn">Rejeté</button>
+                <button class="status-btn">Revue manuelle</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid var(--slate-100); border-radius:var(--radius-m);">
+                <div style="flex:1;"><strong style="font-size:13px;">Midnight Run '89</strong><div style="font-size:11.5px; color:var(--slate-500);">Score d'affinité 0.58 — en dessous du seuil habituel</div></div>
+                <button class="status-btn">Accepté</button>
+                <button class="status-btn">Rejeté</button>
+                <button class="status-btn active manual">Revue manuelle</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid var(--slate-100); border-radius:var(--radius-m);">
+                <div style="flex:1;"><strong style="font-size:13px;">Neon Pursuit</strong><div style="font-size:11.5px; color:var(--slate-500);">Score d'affinité 0.34</div></div>
+                <button class="status-btn">Accepté</button>
+                <button class="status-btn active reject">Rejeté</button>
+                <button class="status-btn">Revue manuelle</button>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                <button class="btn primary" onclick="showToast('Rattachements du segment A enregistrés.')">Enregistrer les rattachements</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.parentElement.querySelectorAll('.status-btn');
+      group.forEach(b => b.classList.remove('active', 'accept', 'reject', 'manual'));
+      const kind = btn.textContent.trim() === 'Accepté' ? 'accept' : btn.textContent.trim() === 'Rejeté' ? 'reject' : 'manual';
+      btn.classList.add('active', kind);
+    });
+  });
+
+  function startRun(btn) {
+    const body = document.getElementById('run-body');
+    body.innerHTML = `<div class="gen-steps">
+        <div class="gen-step" data-label="Lecture des collections choisies"><span class="mark"></span><span>Lecture des collections choisies</span></div>
+        <div class="gen-step" data-label="Regroupement des titres en segments"><span class="mark"></span><span>Regroupement des titres en segments</span></div>
+        <div class="gen-step" data-label="Évaluation de la viabilité"><span class="mark"></span><span>Évaluation de la viabilité</span></div>
+        <div class="gen-step" data-label="Construction des candidats"><span class="mark"></span><span>Construction des candidats</span></div>
+      </div>
+      <div class="progress-track" style="margin-top:6px;"><span style="width:0%"></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="mono gen-status" style="font-size:11.5px; color:var(--slate-500);">En préparation…</span>
+        <span class="gen-done" style="display:none; font-size:12px; font-weight:600; color:var(--success);">✓ 7 segments détectés</span>
+      </div>`;
+    startProgressSequence(body);
+    setTimeout(() => {
+      const cta = document.createElement('button');
+      cta.className = 'btn primary';
+      cta.style.marginTop = '14px';
+      cta.textContent = 'Voir les segments détectés';
+      cta.onclick = () => document.querySelector('#ep-tabs button[data-tab=segments]').click();
+      body.appendChild(cta);
+    }, 3200);
+  }
+</script>
+</body>
+</html>

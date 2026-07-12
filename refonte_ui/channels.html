@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowless — Chaînes</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="eyebrow">Flowless</span>
+      <div class="name"><span class="tally"></span>TV Control</div>
+      <span class="tagline">Régie de vos chaînes pseudo-TV</span>
+    </div>
+    <nav class="rail-nav">
+      <a class="rail-link" href="index.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Vue d'ensemble</a>
+      <a class="rail-link" href="sources.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v4M16 3v4M6 8h12l-1 5a5 5 0 0 1-10 0L6 8Z"/><path d="M11 17v2a2 2 0 0 0 2 2h1"/></svg>Sources</a>
+      <a class="rail-link" href="collections.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Collections</a>
+      <a class="rail-link" href="medias.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5M16 4v5"/></svg>Médias</a>
+      <a class="rail-link active" href="channels.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg>Chaînes</a>
+      <a class="rail-link" href="editorial-planning.html"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3v4M3 5h4M19 13v4M17 15h4"/><path d="M12 3v18M12 3 8 7M12 21l4-4"/></svg>Planification flexible</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="rail-status"><span class="dot"></span>Toutes les chaînes actives émettent</div>
+      <a class="rail-admin" href="#">Admin Django ↗</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div>
+        <span class="eyebrow">Chaînes</span>
+        <h1>Catalogues et chaînes</h1>
+        <p class="sub">Choisissez un catalogue, puis pilotez ses chaînes dans une vue calendrier façon grille TV.</p>
+      </div>
+      <div class="topline-actions">
+        <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nouveau catalogue</button>
+        <a class="btn primary" href="channel-detail.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nouvelle chaîne</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <div class="card-body" style="display:flex; flex-direction:column; gap:16px;">
+
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+            <div class="field" style="min-width:260px;">
+              <label>Catalogue</label>
+              <div class="select-fake"><select><option>Prime Time Showcase</option><option>Late Night Mix</option><option>Weekend Family</option></select></div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn sm ghost">Éditer le catalogue</button>
+              <button class="btn sm" onclick="showToast('Génération des chaînes du catalogue lancée.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.4-6.4-2.1 2.1M8.7 15.3l-2.1 2.1m10.8 0-2.1-2.1M8.7 8.7 6.6 6.6"/></svg>Générer les chaînes</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <div class="segmented" id="planning-mode">
+              <button class="active" data-mode="fixed">Grille classique</button>
+              <button data-mode="flex">Planification flexible</button>
+            </div>
+            <p class="hint" style="margin-top:8px; max-width:70ch;" id="planning-mode-hint">
+              Chaque chaîne suit une grille horaire que vous définissez bloc par bloc — un modèle fixe, répété chaque jour.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FIXED MODE -->
+      <div id="panel-fixed">
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-body" style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div class="segmented">
+                <button class="active">‹ Veille</button>
+                <button>Aujourd'hui</button>
+                <button>Lendemain ›</button>
+              </div>
+              <strong style="font-size:14px;">Dimanche 31 mai 2026</strong>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div class="legend" id="legend"></div>
+              <div class="segmented">
+                <button class="active">Grille</button>
+                <button>Planning</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div style="display:grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap:14px; min-width:900px;">
+
+            <div class="card">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 14px 10px;">
+                <div style="min-width:0;">
+                  <div style="font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Harbor Street Nights</div>
+                  <span class="pill critical" style="margin-top:4px;"><span class="dot"></span>Trous non couverts</span>
+                </div>
+                <details class="menu">
+                  <summary class="btn sm icon-only ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></summary>
+                  <div class="menu-panel">
+                    <button onclick="location.href='channel-detail.html'">Ouvrir la fiche</button>
+                    <button onclick="showToast('Génération du plan lancée pour Harbor Street Nights.')">Générer le plan</button>
+                    <button onclick="showToast('Génération du planning lancée pour Harbor Street Nights.')">Générer le planning</button>
+                    <hr>
+                    <button onclick="showToast('Poussé vers ErsatzTV.')">Publier vers ErsatzTV</button>
+                    <hr>
+                    <button class="danger" onclick="showToast('Chaîne supprimée (simulation).')">Supprimer</button>
+                  </div>
+                </details>
+              </div>
+              <div class="timeline" id="tl-1" style="height:420px; padding:0 10px 10px;"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 14px 10px;">
+                <div style="min-width:0;">
+                  <div style="font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Night Shift Radio</div>
+                  <span class="pill success" style="margin-top:4px;"><span class="dot"></span>À jour</span>
+                </div>
+                <details class="menu">
+                  <summary class="btn sm icon-only ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></summary>
+                  <div class="menu-panel">
+                    <button onclick="location.href='channel-detail.html'">Ouvrir la fiche</button>
+                    <button onclick="showToast('Génération du plan lancée pour Night Shift Radio.')">Générer le plan</button>
+                    <button onclick="showToast('Génération du planning lancée pour Night Shift Radio.')">Générer le planning</button>
+                    <hr>
+                    <button onclick="showToast('Poussé vers ErsatzTV.')">Publier vers ErsatzTV</button>
+                    <hr>
+                    <button class="danger">Supprimer</button>
+                  </div>
+                </details>
+              </div>
+              <div class="timeline" id="tl-2" style="height:420px; padding:0 10px 10px;"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 14px 10px;">
+                <div style="min-width:0;">
+                  <div style="font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Pulse Report Weekly</div>
+                  <span class="pill success" style="margin-top:4px;"><span class="dot"></span>À jour</span>
+                </div>
+                <details class="menu">
+                  <summary class="btn sm icon-only ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></summary>
+                  <div class="menu-panel">
+                    <button onclick="location.href='channel-detail.html'">Ouvrir la fiche</button>
+                    <button onclick="showToast('Génération du plan lancée pour Pulse Report Weekly.')">Générer le plan</button>
+                    <button onclick="showToast('Génération du planning lancée pour Pulse Report Weekly.')">Générer le planning</button>
+                    <hr>
+                    <button onclick="showToast('Poussé vers ErsatzTV.')">Publier vers ErsatzTV</button>
+                    <hr>
+                    <button class="danger">Supprimer</button>
+                  </div>
+                </details>
+              </div>
+              <div class="timeline" id="tl-3" style="height:420px; padding:0 10px 10px;"></div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 14px 10px;">
+                <div style="min-width:0;">
+                  <div style="font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Velvet Rewind</div>
+                  <span class="pill warning" style="margin-top:4px;"><span class="dot"></span>3 titres orphelins</span>
+                </div>
+                <details class="menu">
+                  <summary class="btn sm icon-only ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg></summary>
+                  <div class="menu-panel">
+                    <button onclick="location.href='channel-detail.html'">Ouvrir la fiche</button>
+                    <button onclick="showToast('Génération du plan lancée pour Velvet Rewind.')">Générer le plan</button>
+                    <button onclick="showToast('Génération du planning lancée pour Velvet Rewind.')">Générer le planning</button>
+                    <hr>
+                    <button onclick="showToast('Poussé vers ErsatzTV.')">Publier vers ErsatzTV</button>
+                    <hr>
+                    <button class="danger">Supprimer</button>
+                  </div>
+                </details>
+              </div>
+              <div class="timeline" id="tl-4" style="height:420px; padding:0 10px 10px;"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- FLEX MODE -->
+      <div id="panel-flex" style="display:none;">
+        <div class="card">
+          <div class="card-body" style="display:flex; gap:24px; align-items:flex-start;">
+            <div style="flex:1;">
+              <h2 style="font-size:16px; margin-bottom:8px;">Laisser Flowless proposer des chaînes</h2>
+              <p style="font-size:13px; color:var(--slate-500); max-width:60ch; line-height:1.6;">
+                Plutôt que de définir une grille horaire à la main, ce mode analyse vos collections, regroupe les titres qui se ressemblent (des <strong>segments</strong>), puis propose des <strong>candidats de chaîne</strong> prêts à activer. Vous gardez la main pour valider ou corriger chaque rattachement.
+              </p>
+              <div style="display:flex; gap:10px; margin-top:16px;">
+                <a class="btn primary" href="editorial-planning.html">Ouvrir la planification flexible</a>
+                <span class="pill info"><span class="dot"></span>3 candidats en attente de revue</span>
+              </div>
+            </div>
+            <div style="width:280px; flex:none; display:flex; flex-direction:column; gap:10px;">
+              <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:12px 14px;">
+                <div style="font-size:12px; color:var(--slate-500);">Dernier run</div>
+                <div style="font-weight:600; font-size:13px; margin-top:2px;">Terminé — il y a 3 h</div>
+              </div>
+              <div style="border:1px solid var(--slate-100); border-radius:var(--radius-m); padding:12px 14px;">
+                <div style="font-size:12px; color:var(--slate-500);">Segments détectés</div>
+                <div style="font-weight:600; font-size:13px; margin-top:2px;">7</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  const legend = document.getElementById('legend');
+  const cats = [
+    ['fiction','Fiction'], ['documentary','Documentaire'], ['comedy','Divertissement'],
+    ['music','Musique'], ['live','Live'], ['news','Actualités'], ['filler','Filler']
+  ];
+  legend.innerHTML = cats.map(([k,l]) => `<span class="item"><span class="sw" style="background:${CATEGORY_COLOR[k].sw}"></span>${l}</span>`).join('');
+
+  renderTimeline(document.getElementById('tl-1'), [
+    {start:'00:00', end:'01:00', title:'Harbor Homicide · Ép.1', category:'fiction'},
+    {start:'01:00', end:'02:00', title:'Harbor Homicide · Ép.2', category:'fiction'},
+    {start:'02:00', end:'03:30', title:'Cold Ledger · Ép.1', category:'fiction'},
+    {start:'03:30', end:'04:30', title:'Cold Ledger · Ép.2', category:'fiction'},
+    {start:'06:00', end:'07:30', title:'— trou non couvert —', category:'filler', sub:'à combler'},
+  ], {pxPerHour:52});
+
+  renderTimeline(document.getElementById('tl-2'), [
+    {start:'00:00', end:'01:45', title:'Live Sessions · Set 01', category:'live'},
+    {start:'01:45', end:'03:15', title:'Live Sessions · Set 02', category:'live'},
+    {start:'03:15', end:'04:45', title:'Live Sessions · Set 03', category:'live'},
+    {start:'04:45', end:'06:15', title:'Live Sessions · Set 04', category:'live'},
+  ], {pxPerHour:52});
+
+  renderTimeline(document.getElementById('tl-3'), [
+    {start:'00:00', end:'01:00', title:'Pulse Report · Ép.1', category:'news'},
+    {start:'01:00', end:'02:00', title:'Atlas of Conflict · Ép.1', category:'documentary'},
+    {start:'02:00', end:'03:30', title:'Deep Current', category:'documentary'},
+    {start:'03:30', end:'04:30', title:'Pulse Report · Ép.2', category:'news'},
+    {start:'04:30', end:'05:30', title:'Atlas of Conflict · Ép.2', category:'documentary'},
+  ], {pxPerHour:52});
+
+  renderTimeline(document.getElementById('tl-4'), [
+    {start:'00:00', end:'01:00', title:'Comedy Evenings · Ép.1', category:'comedy'},
+    {start:'01:00', end:'02:00', title:'Comedy Evenings · Ép.2', category:'comedy'},
+  ], {pxPerHour:52});
+
+  document.getElementById('planning-mode').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-mode]');
+    if (!btn) return;
+    document.querySelectorAll('#planning-mode button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const flex = btn.dataset.mode === 'flex';
+    document.getElementById('panel-fixed').style.display = flex ? 'none' : '';
+    document.getElementById('panel-flex').style.display = flex ? '' : 'none';
+    document.getElementById('planning-mode-hint').textContent = flex
+      ? "Flowless segmente votre bibliothèque et propose des chaînes prêtes à activer — vous validez chaque rattachement avant diffusion."
+      : "Chaque chaîne suit une grille horaire que vous définissez bloc par bloc — un modèle fixe, répété chaque jour.";
+  });
+</script>
+</body>
+</html>

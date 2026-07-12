@@ -1,0 +1,15 @@
+.demo-alert {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px;
+  background: var(--info-soft);
+  color: var(--info);
+  font-size: 12px;
+}
+.demo-alert button {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}

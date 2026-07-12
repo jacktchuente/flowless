@@ -1,0 +1,267 @@
+<header class="topline">
+  <div>
+    <span class="eyebrow">{{ "EDITORIAL_PLANNING.EYEBROW" | translate }}</span>
+    <h1>{{ "EDITORIAL_PLANNING.TITLE" | translate }}</h1>
+    <p class="sub">{{ "EDITORIAL_PLANNING.SUBTITLE" | translate }}</p>
+  </div>
+</header>
+<div class="content">
+  <section class="card">
+    <div class="catalog field">
+      <label>{{ "EDITORIAL_PLANNING.CATALOG" | translate }}</label
+      ><flw-select
+        [value]="catalogId"
+        [options]="catalogOptions"
+        (valueChange)="changeCatalog($event)"
+      />
+    </div>
+    <flw-tabs
+      [tabs]="tabs"
+      [active]="active"
+      (activeChange)="active = $event"
+    />
+    <div class="panel" *ngIf="active === 'collections'">
+      <div class="panel-head">
+        <div>
+          <h2>{{ "EDITORIAL_PLANNING.COLLECTIONS.TITLE" | translate }}</h2>
+          <p>{{ "EDITORIAL_PLANNING.COLLECTIONS.DESC" | translate }}</p>
+        </div>
+        <input
+          [(ngModel)]="search"
+          type="search"
+          [placeholder]="'COMMON.SEARCH' | translate"
+        />
+      </div>
+      <div class="collections">
+        <label class="collection" *ngFor="let collection of visibleCollections"
+          ><input
+            type="checkbox"
+            [checked]="selected.has(collection.id.toString())"
+            (change)="toggle(collection.id, $any($event.target).checked)"
+          /><span class="name"
+            ><strong>{{ collection.name }}</strong
+            ><span class="meta" *ngIf="collectionMeta(collection) as meta">
+              — {{ meta }}</span
+            ></span
+          ></label
+        >
+      </div>
+      <footer>
+        <span>{{
+          "EDITORIAL_PLANNING.COLLECTIONS.SELECTED"
+            | translate: { count: selected.size }
+        }}</span
+        ><button
+          class="btn primary"
+          [disabled]="!selected.size"
+          (click)="active = 'analysis'"
+        >
+          {{ "COMMON.CONTINUE" | translate }}
+        </button>
+      </footer>
+    </div>
+    <div class="panel" *ngIf="active === 'analysis'">
+      <div class="runs" *ngIf="runs.length">
+        <span class="section-label">{{
+          "EDITORIAL_PLANNING.ANALYSIS.LAST_RUN" | translate
+        }}</span
+        ><strong
+          >#{{ runs[0].id }} · {{ runs[0].segment_count }} segments</strong
+        ><span class="pill" [class.success]="runs[0].is_active">{{
+          (runs[0].is_active ? "COMMON.ACTIVE" : "COMMON.AVAILABLE") | translate
+        }}</span
+        ><button
+          class="btn ghost sm"
+          *ngIf="!runs[0].is_active"
+          (click)="activate(runs[0])"
+        >
+          {{ "COMMON.ACTIVATE" | translate }}</button
+        ><button class="btn ghost sm" (click)="match()">
+          {{ "EDITORIAL_PLANNING.ANALYSIS.MATCH_NEW" | translate }}
+        </button>
+      </div>
+      <div class="field-row cols-2">
+        <div class="field">
+          <label>{{ "EDITORIAL_PLANNING.ANALYSIS.TARGET" | translate }}</label
+          ><input [(ngModel)]="target" type="number" min="1" />
+        </div>
+        <div class="field">
+          <label>{{
+            "EDITORIAL_PLANNING.ANALYSIS.MAX_CANDIDATES" | translate
+          }}</label
+          ><input [(ngModel)]="maxCandidates" type="number" min="1" />
+        </div>
+      </div>
+      <flw-switch
+        [(ngModel)]="multi"
+        [label]="'EDITORIAL_PLANNING.ANALYSIS.MULTI_SEGMENT' | translate"
+      /><flw-switch
+        [(ngModel)]="sharing"
+        [label]="'EDITORIAL_PLANNING.ANALYSIS.SHARING' | translate"
+      />
+      <div class="field threshold">
+        <label
+          >{{ "EDITORIAL_PLANNING.ANALYSIS.THRESHOLD" | translate }} —
+          {{ threshold }} %</label
+        ><input [(ngModel)]="threshold" type="range" min="0" max="100" />
+      </div>
+      <button
+        class="btn primary"
+        [disabled]="!selected.size || generation === 'running'"
+        (click)="generate()"
+      >
+        {{ "EDITORIAL_PLANNING.ANALYSIS.RUN" | translate }}</button
+      ><flw-gen-steps
+        *ngIf="generation !== 'idle'"
+        [state]="generation"
+        [steps]="generationSteps"
+      /><button
+        class="btn"
+        *ngIf="generation === 'done'"
+        (click)="active = 'segments'"
+      >
+        {{ "EDITORIAL_PLANNING.ANALYSIS.VIEW_SEGMENTS" | translate }}
+      </button>
+    </div>
+    <div class="panel" *ngIf="active === 'segments'">
+      <p>
+        {{ "EDITORIAL_PLANNING.SEGMENTS.DESC" | translate }}
+      </p>
+      <div class="seg-grid">
+        <article class="seg-card" *ngFor="let segment of segments">
+          <header>
+            <h3>{{ segment.name }}</h3>
+            <span
+              class="pill"
+              [class.success]="
+                segment.programmable_score >= segment.acceptance_threshold
+              "
+              [class.warning]="
+                segment.programmable_score < segment.acceptance_threshold
+              "
+              >{{
+                "EDITORIAL_PLANNING.TITLES"
+                  | translate: { count: segment.media_count }
+              }}</span
+            >
+          </header>
+          <div class="meter">
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.PROGRAMMABILITY" | translate
+            }}</span>
+            <div class="progress-track">
+              <span
+                [style.width.%]="percent(segment.programmable_score)"
+              ></span>
+            </div>
+            <b class="mono">{{ percent(segment.programmable_score) }}%</b>
+          </div>
+          <div class="meter">
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.COHESION" | translate
+            }}</span>
+            <div class="progress-track">
+              <span [style.width.%]="percent(segment.cohesion_score)"></span>
+            </div>
+            <b class="mono">{{ percent(segment.cohesion_score) }}%</b>
+          </div>
+          <div class="meter">
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.SEPARATION" | translate
+            }}</span>
+            <div class="progress-track">
+              <span [style.width.%]="percent(segment.separation_score)"></span>
+            </div>
+            <b class="mono">{{ percent(segment.separation_score) }}%</b>
+          </div>
+        </article>
+      </div>
+      <button class="btn primary" (click)="active = 'candidates'">
+        {{ "EDITORIAL_PLANNING.SEGMENTS.VIEW_CANDIDATES" | translate }}
+      </button>
+    </div>
+    <div class="panel" *ngIf="active === 'candidates'">
+      <article class="candidate" *ngFor="let candidate of candidates">
+        <header>
+          <h3>{{ candidate.name }}</h3>
+          <div class="pills">
+            <span class="pill neutral" *ngIf="candidate.tv_channel"
+              >{{ "EDITORIAL_PLANNING.CANDIDATES.PROMOTED" | translate }} —
+              {{ candidate.tv_channel_name }}</span
+            ><span class="pill info"
+              ><span class="dot"></span
+              >{{ "EDITORIAL_PLANNING.CANDIDATES.VIABILITY" | translate }}
+              {{ percent(candidate.viability_score) }} %</span
+            >
+          </div>
+        </header>
+        <p>{{ candidate.description }}</p>
+        <div class="actions">
+          <button
+            class="btn sm primary"
+            *ngIf="!candidate.tv_channel"
+            (click)="promote(candidate)"
+          >
+            {{ "EDITORIAL_PLANNING.CANDIDATES.PROMOTE" | translate }}</button
+          ><button class="btn sm ghost" (click)="active = 'review'">
+            {{ "EDITORIAL_PLANNING.CANDIDATES.REVIEW" | translate }}
+          </button>
+        </div>
+      </article>
+    </div>
+    <div class="panel review" *ngIf="active === 'review'">
+      <aside>
+        <button
+          *ngFor="let segment of segments"
+          [class.active]="segment.id === selectedSegment?.id"
+          (click)="selectSegment(segment)"
+        >
+          {{ segment.name
+          }}<small>{{
+            "EDITORIAL_PLANNING.TITLES"
+              | translate: { count: segment.media_count }
+          }}</small>
+        </button>
+      </aside>
+      <main>
+        <div class="memberships">
+          <div class="membership" *ngFor="let m of memberships">
+            <div class="who">
+              <strong>{{ m.media_container_title }}</strong
+              ><small
+                >{{ "EDITORIAL_PLANNING.REVIEW.SCORE" | translate }}
+                {{ m.score | number: "1.2-2" }}</small
+              >
+            </div>
+            <div class="status">
+              <button
+                class="status-btn accept"
+                [class.active]="m.status === 'accepted'"
+                (click)="setStatus(m, 'accepted')"
+              >
+                {{ "EDITORIAL_PLANNING.REVIEW.ACCEPTED" | translate }}</button
+              ><button
+                class="status-btn reject"
+                [class.active]="m.status === 'rejected'"
+                (click)="setStatus(m, 'rejected')"
+              >
+                {{ "EDITORIAL_PLANNING.REVIEW.REJECTED" | translate }}</button
+              ><button
+                class="status-btn manual"
+                [class.active]="m.status === 'manual_override'"
+                (click)="setStatus(m, 'manual_override')"
+              >
+                {{ "EDITORIAL_PLANNING.REVIEW.MANUAL" | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="save-row">
+          <button class="btn primary" (click)="active = 'candidates'">
+            {{ "COMMON.DONE" | translate }}
+          </button>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>

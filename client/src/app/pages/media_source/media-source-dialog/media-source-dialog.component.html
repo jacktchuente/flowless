@@ -1,21 +1,66 @@
-<app-dialog-container1>
-  <div dialogTitle>
-    {{ data.source ? 'Modifier la source' : 'Nouvelle source' }}
-  </div>
-
-  <div dialogContent>
-    <form [formGroup]="form" class="source-form">
-      <formly-form [form]="form" [model]="model" [fields]="fields"></formly-form>
-    </form>
-
-    <p *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</p>
-  </div>
-
-  <div dialogActions>
-    <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
-    <button mat-flat-button color="primary" (click)="save()" [disabled]="isSubmitting">
-      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
-      <span>{{ data.source ? 'Enregistrer' : 'Verifier et creer' }}</span>
-    </button>
-  </div>
-</app-dialog-container1>
+<flw-modal
+  [title]="
+    (data.source
+      ? 'MEDIA_SOURCE.DIALOG.EDIT_TITLE'
+      : 'MEDIA_SOURCE.DIALOG.NEW_TITLE'
+    ) | translate
+  "
+  [description]="'MEDIA_SOURCE.DIALOG.DESCRIPTION' | translate"
+  ><form [formGroup]="form">
+    <div class="field">
+      <label>{{ "COMMON.NAME" | translate }}</label
+      ><input
+        type="text"
+        formControlName="name"
+        [placeholder]="'MEDIA_SOURCE.DIALOG.NAME_PLACEHOLDER' | translate"
+      />
+    </div>
+    <div class="field">
+      <label>{{ "MEDIA_SOURCE.DIALOG.URL" | translate }}</label
+      ><input
+        type="url"
+        formControlName="application_url"
+        placeholder="https://jellyfin.example.com"
+      />
+    </div>
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>{{ "COMMON.USERNAME" | translate }}</label
+        ><input type="text" formControlName="username" />
+      </div>
+      <div class="field">
+        <label>{{ "MEDIA_SOURCE.DIALOG.PASSWORD" | translate }}</label
+        ><input type="password" formControlName="password" />
+      </div>
+    </div>
+  </form>
+  <p class="tooltip-note amber" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="tooltip-note">
+    {{ "MEDIA_SOURCE.DIALOG.HINT" | translate }}
+  </p>
+  <div modal-footer>
+    <span></span>
+    <div class="actions">
+      <button
+        class="btn ghost"
+        type="button"
+        (click)="ref.close(false)"
+        [disabled]="isSubmitting"
+      >
+        {{ "COMMON.CANCEL" | translate }}</button
+      ><button
+        class="btn primary"
+        type="button"
+        (click)="save()"
+        [disabled]="isSubmitting"
+      >
+        {{
+          (isSubmitting
+            ? "MEDIA_SOURCE.DIALOG.SUBMITTING"
+            : "MEDIA_SOURCE.DIALOG.SUBMIT"
+          ) | translate
+        }}
+      </button>
+    </div>
+  </div></flw-modal
+>

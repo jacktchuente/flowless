@@ -1,47 +1,30 @@
-import {Component, Inject} from '@angular/core';
-import {DatePipe, JsonPipe, NgFor, NgIf} from "@angular/common";
-import {MAT_DIALOG_DATA, MatDialogModule} from "@angular/material/dialog";
-import {MatButtonModule} from "@angular/material/button";
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {MediaContainerDetail} from "@project-interfaces/media-container";
-import {MediaContainerService} from "@project-services/media-container.service";
-
+import { Component, Inject } from "@angular/core";
+import { DatePipe, NgIf } from "@angular/common";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { TranslateModule } from "@ngx-translate/core";
+import { MediaContainerDetail } from "@project-interfaces/media-container";
+import { MediaContainerService } from "@project-services/media-container.service";
+import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 @Component({
-  selector: 'app-media-container-detail-dialog',
   standalone: true,
-  imports: [
-    DatePipe,
-    JsonPipe,
-    MatButtonModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    NgFor,
-    NgIf
-  ],
-  templateUrl: './media-container-dialog.component.html',
-  styleUrl: './media-container-dialog.component.css'
+  imports: [DatePipe, NgIf, TranslateModule, FlwModalComponent],
+  templateUrl: "./media-container-dialog.component.html",
+  styleUrl: "./media-container-dialog.component.css",
 })
 export class MediaContainerDetailDialogComponent {
-  container: MediaContainerDetail | null = null
-  isLoading = true
-
+  container: MediaContainerDetail | null = null;
+  isLoading = true;
   constructor(
-    private mediaContainerService: MediaContainerService,
-    @Inject(MAT_DIALOG_DATA) public data: { containerId: string | number }
+    service: MediaContainerService,
+    public ref: DialogRef<void>,
+    @Inject(DIALOG_DATA) public data: { containerId: string | number },
   ) {
-    this.mediaContainerService.getDetail(data.containerId).subscribe((response) => {
-      this.isLoading = false
-      if (!response.isOk) {
-        return
-      }
-      this.container = response.body as MediaContainerDetail
-    })
+    service.getDetail(data.containerId).subscribe((r) => {
+      this.isLoading = false;
+      if (r.isOk) this.container = r.body as MediaContainerDetail;
+    });
   }
-
-  formatList(values: string[] | null | undefined): string {
-    if (!values?.length) {
-      return '—'
-    }
-    return values.join(', ')
+  format(values: string[] | null | undefined) {
+    return values?.length ? values.join(", ") : "—";
   }
 }

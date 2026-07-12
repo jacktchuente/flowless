@@ -1,76 +1,83 @@
-<section class="page-head">
+<header class="topline">
   <div>
-    <span class="eyebrow">{{ 'MEDIA_COLLECTION.EYEBROW' | translate }}</span>
-    <h2>{{ 'MEDIA_COLLECTION.TITLE' | translate }}</h2>
-    <p>{{ 'MEDIA_COLLECTION.SUBTITLE' | translate }}</p>
+    <span class="eyebrow">{{ "MEDIA_COLLECTION.EYEBROW" | translate }}</span>
+    <h1>{{ "MEDIA_COLLECTION.TITLE" | translate }}</h1>
+    <p class="sub">{{ "MEDIA_COLLECTION.SUBTITLE" | translate }}</p>
   </div>
-</section>
-
-<section class="table-card" *ngIf="collections.length; else emptyState">
-  <div class="table-scroll">
-    <table class="data-table">
-      <thead>
-      <tr>
-        <th>{{ 'COMMON.NAME' | translate }}</th>
-        <th>{{ 'MEDIA_COLLECTION.SOURCE' | translate }}</th>
-        <th>Programming role</th>
-        <th>{{ 'MEDIA_COLLECTION.NATURE' | translate }}</th>
-        <th>{{ 'MEDIA_COLLECTION.CONTAINER_KIND' | translate }}</th>
-        <th>{{ 'COMMON.ACTIVE' | translate }}</th>
-        <th>{{ 'MEDIA_COLLECTION.LAST_ANALYSIS' | translate }}</th>
-        <th>{{ 'MEDIA_COLLECTION.ANALYZE' | translate }}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr class="clickable-row" *ngFor="let collection of collections" (click)="openDetail(collection)">
-        <td>
-          <strong>{{ collection.name }}</strong>
-          <div class="secondary-line">{{ collection.external_id }}</div>
-        </td>
-        <td>{{ collection.media_source_name }}</td>
-        <td>{{ getProgrammingRoleLabel(collection) }}</td>
-        <td>{{ getNatureLabel(collection) }}</td>
-        <td>{{ getContainerKindLabel(collection) }}</td>
-        <td (click)="$event.stopPropagation()">
-          <mat-slide-toggle
-            [checked]="collection.is_active"
-            (change)="toggleActive(collection, $event.checked)"
+</header>
+<div class="content">
+  <section class="card">
+    <div class="table-wrap" *ngIf="collections.length; else empty">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th>{{ "MEDIA_COLLECTION.COLUMN_COLLECTION" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.SOURCE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.ROLE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.NATURE" | translate }}</th>
+            <th>{{ "COMMON.TYPE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.ACTIVE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.LAST_ANALYSIS" | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let collection of collections"
+            (click)="openDetail(collection)"
           >
-            {{ collection.is_active ? ('COMMON.ON' | translate) : ('COMMON.OFF' | translate) }}
-          </mat-slide-toggle>
-        </td>
-        <td>{{ collection.analyzed_at ? (collection.analyzed_at | date:'dd/MM/yyyy HH:mm') : ('COMMON.NEVER' | translate) }}</td>
-        <td class="analyze-cell">
-          <div class="analyze-stack">
-            <span class="analyze-status" [class.is-analyzing]="getAnalyzeClass(collection) === 'is-analyzing'"
-                  [class.is-complete]="getAnalyzeClass(collection) === 'is-complete'"
-                  [class.is-warning]="getAnalyzeClass(collection) === 'is-warning'">
-              <mat-icon>{{ getAnalyzeIcon(collection) }}</mat-icon>
-              {{ getAnalyzeLabel(collection) }}
-            </span>
-            <button
-              mat-icon-button
-              [disabled]="!collection.is_active || syncingIds.has(collection.id.toString())"
-              (click)="analyze(collection, $event)"
-              [attr.aria-label]="'MEDIA_COLLECTION.ANALYZE_COLLECTION' | translate"
-            >
-              <mat-icon>psychology</mat-icon>
-            </button>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<ng-template #emptyState>
-  <section class="empty-state">
-    <h3>{{ 'MEDIA_COLLECTION.EMPTY_TITLE' | translate }}</h3>
-    <p>{{ 'MEDIA_COLLECTION.EMPTY_HELP' | translate }}</p>
+            <td>
+              <div class="cell-title">{{ collection.name }}</div>
+              <div class="cell-sub">{{ collection.external_id }}</div>
+            </td>
+            <td>
+              {{ collection.media_source_name || collection.media_source }}
+            </td>
+            <td>
+              <span class="pill" [class]="rolePill(collection)">{{
+                role(collection)
+              }}</span>
+            </td>
+            <td>{{ nature(collection) }}</td>
+            <td>{{ kind(collection) }}</td>
+            <td (click)="$event.stopPropagation()">
+              <flw-switch
+                [value]="collection.is_active"
+                (click)="$event.stopPropagation()"
+                (valueChange)="toggleActive(collection, $event)"
+              />
+            </td>
+            <td class="mono">
+              {{
+                collection.analyzed_at
+                  ? (collection.analyzed_at | date: "dd/MM HH:mm")
+                  : "—"
+              }}
+            </td>
+            <td>
+              <button
+                class="btn sm ghost"
+                type="button"
+                [disabled]="
+                  !collection.is_active ||
+                  syncingIds.has(collection.id.toString())
+                "
+                (click)="analyze(collection, $event)"
+              >
+                <flw-icon name="sync" />{{
+                  "MEDIA_COLLECTION.ANALYZE" | translate
+                }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #empty
+      ><div class="empty">
+        <h3>{{ "MEDIA_COLLECTION.EMPTY_TITLE" | translate }}</h3>
+        <p>{{ "MEDIA_COLLECTION.EMPTY_HELP" | translate }}</p>
+      </div></ng-template
+    >
   </section>
-</ng-template>
-
-<div class="page-loading-overlay" *ngIf="isPageLoading">
-  <mat-spinner diameter="64"></mat-spinner>
 </div>

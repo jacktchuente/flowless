@@ -1,31 +1,9 @@
-.source-form {
-  min-width: min(620px, 78vw);
-}
-
-.error-banner {
-  margin: 12px 0 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(185, 28, 28, 0.08);
-  color: #a11313;
-}
-
-:host ::ng-deep .credentials-grid {
-  display: grid;
+form {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
-
-:host ::ng-deep .form-group {
-  margin-bottom: 14px;
-}
-
-:host ::ng-deep .form-control {
-  border-radius: 12px;
-  min-height: 46px;
-}
-
-button[mat-flat-button] {
-  display: inline-flex;
-  align-items: center;
+.actions {
+  display: flex;
   gap: 8px;
 }

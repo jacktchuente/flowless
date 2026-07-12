@@ -1,8 +1,7 @@
-<mtx-alert type="info" *ngIf="showAlert"
-           [elevation]="1"
-           (closed)="showAlert = false"
-           [dismissible]="true">
-  <p style="text-align: center;">Ce site est en phase de test. Aucune donnée saisie n'est conservée ni sécurisée. Veuillez ne pas partager
-    d'informations sensibles. Merci pour votre compréhension !</p>
-</mtx-alert>
-<router-outlet></router-outlet>
+<aside class="demo-alert" *ngIf="showAlert">
+  <span
+    >Ce site est en phase de test. Ne partagez aucune information
+    sensible.</span
+  ><button type="button" (click)="showAlert = false">✕</button>
+</aside>
+<router-outlet />

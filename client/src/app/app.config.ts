@@ -1,33 +1,30 @@
-import {ApplicationConfig, importProvidersFrom} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
-import {InitialModule} from "./initial.module";
-import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
-import {provideRouter, withComponentInputBinding} from "@angular/router";
-import {routes} from "./app.routes";
-import {DatePipe} from "@angular/common";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {providePrimeNG} from "primeng/config";
-import Aura from '@primeng/themes/aura';
-import {CalendarModule, DateAdapter} from "angular-calendar";
-import {adapterFactory} from "angular-calendar/date-adapters/date-fns";
+import {
+  ApplicationConfig,
+  LOCALE_ID,
+  importProvidersFrom,
+} from "@angular/core";
+import { registerLocaleData } from "@angular/common";
+import localeFr from "@angular/common/locales/fr";
+import { BrowserModule } from "@angular/platform-browser";
+import { InitialModule } from "./initial.module";
+import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
+import { provideRouter, withComponentInputBinding } from "@angular/router";
+import { routes } from "./app.routes";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+
+registerLocaleData(localeFr);
+
+const browserLocale = navigator.languages?.some((v) =>
+  v.toLowerCase().startsWith("fr"),
+)
+  ? "fr"
+  : "en-US";
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
-    importProvidersFrom(
-      BrowserModule,
-      BrowserAnimationsModule,
-      InitialModule,
-      CalendarModule.forRoot({
-        provide: DateAdapter,
-        useFactory: adapterFactory,
-      }),
-    ),
+    importProvidersFrom(BrowserModule, BrowserAnimationsModule, InitialModule),
     provideAnimationsAsync(),
-    providePrimeNG({
-      theme: {
-        preset: Aura
-      }
-    })
-  ]
+    { provide: LOCALE_ID, useValue: browserLocale },
+  ],
 };

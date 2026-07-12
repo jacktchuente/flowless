@@ -1,0 +1,288 @@
+import { Component, DestroyRef, inject } from "@angular/core";
+import { DecimalPipe, NgFor, NgIf } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Catalog } from "../../_interfaces/catalog";
+import { MediaCollection } from "../../_interfaces/media-collection";
+import {
+  EditorialChannelCandidate,
+  EditorialFlowRun,
+  EditorialSegment,
+  EditorialSegmentMembership,
+} from "../../_interfaces/editorial-planning";
+import { CatalogService } from "../../_services/catalog.service";
+import { MediaCollectionService } from "../../_services/media-collection.service";
+import { EditorialPlanningService } from "../../_services/editorial-planning.service";
+import { NotificationService } from "../../_shared/services/notification.service";
+import { FlwSelectComponent } from "../../ui/select/flw-select.component";
+import { FlwTabsComponent } from "../../ui/tabs/flw-tabs.component";
+import { FlwSwitchComponent } from "../../ui/switch/flw-switch.component";
+import { FlwGenStepsComponent } from "../../ui/gen-steps/flw-gen-steps.component";
+import { TimeAgoPipe } from "../../ui/pipes/time-ago.pipe";
+import { containerKindLabel, natureLabel } from "../../ui/category";
+import { WebsocketService } from "@kwyxyz/ngx-request";
+import { filter } from "rxjs";
+import { AnalyzeStatus } from "../../_utils/analyze-status";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
+@Component({
+  standalone: true,
+  imports: [
+    DecimalPipe,
+    NgFor,
+    NgIf,
+    FormsModule,
+    FlwSelectComponent,
+    FlwTabsComponent,
+    FlwSwitchComponent,
+    FlwGenStepsComponent,
+    TimeAgoPipe,
+    TranslateModule,
+  ],
+  templateUrl: "./editorial-planning.component.html",
+  styleUrl: "./editorial-planning.component.css",
+})
+export class EditorialPlanningComponent {
+  private destroyRef = inject(DestroyRef);
+  catalogs: Catalog[] = [];
+  collections: MediaCollection[] = [];
+  selected = new Set<string>();
+  catalogId: string | null = null;
+  active = "collections";
+  tabs: Array<{ id: string; label: string }> = [];
+  generationSteps: string[] = [];
+  target = 4;
+  maxCandidates = 8;
+  multi = true;
+  sharing = false;
+  threshold = 70;
+  generation: "idle" | "running" | "done" | "error" = "idle";
+  runs: EditorialFlowRun[] = [];
+  segments: EditorialSegment[] = [];
+  candidates: EditorialChannelCandidate[] = [];
+  memberships: EditorialSegmentMembership[] = [];
+  selectedSegment: EditorialSegment | null = null;
+  search = "";
+  private generationStartedAt = 0;
+  private generationPoll?: ReturnType<typeof setInterval>;
+  private generationTimeout?: ReturnType<typeof setTimeout>;
+  constructor(
+    private catalogService: CatalogService,
+    collectionsService: MediaCollectionService,
+    private planning: EditorialPlanningService,
+    private notification: NotificationService,
+    route: ActivatedRoute,
+    private router: Router,
+    websocket: WebsocketService,
+    private translate: TranslateService,
+  ) {
+    this.tabs = [
+      "collections",
+      "analysis",
+      "segments",
+      "candidates",
+      "review",
+    ].map((id) => ({
+      id,
+      label: this.translate.instant(
+        `EDITORIAL_PLANNING.TABS.${id.toUpperCase()}`,
+      ),
+    }));
+    this.generationSteps = [
+      "COLLECTIONS",
+      "SEGMENTS",
+      "VIABILITY",
+      "CANDIDATES",
+    ].map((step) =>
+      this.translate.instant(`EDITORIAL_PLANNING.ANALYSIS.STEPS.${step}`),
+    );
+    const requested = route.snapshot.queryParamMap.get("catalog");
+    catalogService
+      .getObjectBehaviorSubject()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => {
+        this.catalogs = v;
+        if (!this.catalogId && v.length) {
+          this.catalogId =
+            requested && v.some((c: Catalog) => String(c.id) === requested)
+              ? requested
+              : String(v[0].id);
+          this.load();
+        }
+      });
+    collectionsService.listObject(null, true);
+    collectionsService
+      .getObjectBehaviorSubject()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(
+        (v) =>
+          (this.collections = v.filter(
+            (c: MediaCollection) =>
+              c.is_active && c.analyze_status === AnalyzeStatus.Done,
+          )),
+      );
+    websocket.crudEvent
+      .pipe(
+        filter(
+          (event: any) => event.type?.toLowerCase?.() === "editorialflowrun",
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.checkGeneration());
+    this.destroyRef.onDestroy(() => this.clearGenerationWatch());
+  }
+  get catalogOptions() {
+    return this.catalogs.map((c) => ({ label: c.name, value: String(c.id) }));
+  }
+  get visibleCollections() {
+    return this.collections.filter((c) =>
+      c.name.toLowerCase().includes(this.search.toLowerCase()),
+    );
+  }
+  toggle(id: string | number, on: boolean) {
+    on ? this.selected.add(String(id)) : this.selected.delete(String(id));
+  }
+  changeCatalog(v: unknown) {
+    this.catalogId = String(v);
+    this.router.navigate([], {
+      queryParams: { catalog: this.catalogId },
+      queryParamsHandling: "merge",
+    });
+    this.load();
+  }
+  load() {
+    if (!this.catalogId) return;
+    this.planning.listRuns(this.catalogId).subscribe((r) => {
+      if (r.isOk)
+        this.runs = (r.body as EditorialFlowRun[]).sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
+    });
+    this.planning.listSegmentsForCatalog(this.catalogId).subscribe((r) => {
+      if (r.isOk) {
+        this.segments = r.body as EditorialSegment[];
+        if (this.segments.length && !this.selectedSegment)
+          this.selectSegment(this.segments[0]);
+      }
+    });
+    this.planning.listCandidates({ catalog: this.catalogId }).subscribe((r) => {
+      if (r.isOk) this.candidates = r.body as EditorialChannelCandidate[];
+    });
+  }
+  generate() {
+    if (!this.catalogId || !this.selected.size) return;
+    this.generation = "running";
+    this.generationStartedAt = Date.now();
+    this.catalogService
+      .generateEditorialPlanning(this.catalogId, {
+        media_collection_ids: [...this.selected],
+        target_channel_count: this.target,
+        max_channel_candidates: this.maxCandidates,
+        allow_multi_segment: this.multi,
+        allow_segment_sharing: this.sharing,
+        refine_membership_threshold: this.threshold / 100,
+      })
+      .subscribe((r) => {
+        if (!r.isOk) {
+          this.generation = "error";
+          return;
+        }
+        this.notification.notify("CHANNELS.NOTIFY_GENERATION_STARTED");
+        this.startGenerationWatch();
+      });
+  }
+  private startGenerationWatch() {
+    this.clearGenerationWatch();
+    this.generationPoll = setInterval(() => this.checkGeneration(), 3000);
+    this.generationTimeout = setTimeout(
+      () => {
+        if (this.generation === "running") this.generation = "error";
+        this.clearGenerationWatch();
+      },
+      15 * 60 * 1000,
+    );
+  }
+  private checkGeneration() {
+    if (this.generation !== "running" || !this.catalogId) return;
+    this.planning.listRuns(this.catalogId).subscribe((response) => {
+      if (!response.isOk) return;
+      const latest = (response.body as EditorialFlowRun[])
+        .filter(
+          (run) =>
+            new Date(run.created_at).getTime() >=
+            this.generationStartedAt - 5000,
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        )[0];
+      if (!latest) return;
+      if (Number(latest.status) === AnalyzeStatus.Done) {
+        this.generation = "done";
+        this.clearGenerationWatch();
+        this.load();
+      } else if (
+        [AnalyzeStatus.DoneWithErrors, AnalyzeStatus.Cancelled].includes(
+          Number(latest.status),
+        )
+      ) {
+        this.generation = "error";
+        this.clearGenerationWatch();
+      }
+    });
+  }
+  private clearGenerationWatch() {
+    if (this.generationPoll) clearInterval(this.generationPoll);
+    if (this.generationTimeout) clearTimeout(this.generationTimeout);
+    this.generationPoll = undefined;
+    this.generationTimeout = undefined;
+  }
+  selectSegment(segment: EditorialSegment) {
+    this.selectedSegment = segment;
+    this.planning.listMemberships(segment.id).subscribe((r) => {
+      if (r.isOk) this.memberships = r.body as EditorialSegmentMembership[];
+    });
+  }
+  setStatus(m: EditorialSegmentMembership, status: string) {
+    this.planning.setMembershipStatus(m.id, status).subscribe((r) => {
+      if (r.isOk) m.status = (r.body as EditorialSegmentMembership).status;
+    });
+  }
+  promote(c: EditorialChannelCandidate) {
+    this.planning.createFlexibleChannel(c.id, c.name).subscribe((r) => {
+      if (r.isOk) {
+        this.notification.notify("EDITORIAL_PLANNING.NOTIFY.PROMOTED");
+        this.load();
+      }
+    });
+  }
+  activate(run: EditorialFlowRun) {
+    this.planning.activateRun(run.id).subscribe(() => this.load());
+  }
+  match() {
+    if (this.catalogId)
+      this.planning
+        .matchNewMediaForCatalog(this.catalogId)
+        .subscribe((r) =>
+          this.notification.notify(
+            r.isOk
+              ? "EDITORIAL_PLANNING.NOTIFY.MATCHED"
+              : "EDITORIAL_PLANNING.NOTIFY.NO_ACTIVE_RUN",
+          ),
+        );
+  }
+  percent(v: number) {
+    return Math.round(v * 100);
+  }
+  collectionMeta(collection: MediaCollection) {
+    const parts: string[] = [];
+    if (collection.nature != null)
+      parts.push(this.translate.instant(natureLabel(collection.nature)));
+    if (collection.container_kind != null)
+      parts.push(
+        this.translate.instant(containerKindLabel(collection.container_kind)),
+      );
+    return parts.join(" · ");
+  }
+}

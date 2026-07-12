@@ -1,723 +1,459 @@
-import {Component, DestroyRef, ElementRef, ViewChild, inject} from '@angular/core';
-import {DatePipe, NgClass, NgFor, NgIf} from "@angular/common";
-import {ActivatedRoute, Router, RouterLink} from "@angular/router";
-import {MatButtonModule} from "@angular/material/button";
-import {MatDialog} from "@angular/material/dialog";
-import {MatIconModule} from "@angular/material/icon";
-import {MatMenuModule} from "@angular/material/menu";
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {filter} from "rxjs/operators";
-import {CalendarEvent, CalendarModule} from "angular-calendar";
-import {WebsocketService} from "@kwyxyz/ngx-request";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslateModule, TranslateService} from "@ngx-translate/core";
-import {EditorialLineData, FormOptions, GridBlock, GridWarningsResponse, ScheduledMediaItem, TvChannel} from "@project-interfaces/tv-channel";
-import {TvChannelLogoPromptResponse, TvChannelService} from "@project-services/tv-channel.service";
-import {ConfirmationDialogComponent} from "@project-shared/confirmation-dialog/confirmation-dialog.component";
-import {NotificationService} from "@project-shared/services/notification.service";
-import {BlueprintGenerationDialogComponent} from "../blueprint-generation-dialog/blueprint-generation-dialog.component";
-import {GridBlockDetailDialogComponent} from "../grid-block-detail-dialog/grid-block-detail-dialog.component";
-import {GenerationReportDialogComponent} from "../generation-report-dialog/generation-report-dialog.component";
-import {PlayoutGenerationDialogComponent} from "../playout-generation-dialog/playout-generation-dialog.component";
-import {ResetRulesDialogComponent} from "../reset-rules-dialog/reset-rules-dialog.component";
-import {ScheduleMediaItemDetailDialogComponent} from "../schedule-media-item-detail-dialog/schedule-media-item-detail-dialog.component";
-import {TvChannelDialogComponent} from "../tv-channel-dialog/tv-channel-dialog.component";
-import {EditorialLineEditDialogComponent} from "../editorial-line-edit-dialog/editorial-line-edit-dialog.component";
-import {GridBlockEditDialogComponent} from "../grid-block-edit-dialog/grid-block-edit-dialog.component";
-import {GridEditDialogComponent} from "../grid-edit-dialog/grid-edit-dialog.component";
-import {GridBlockService} from "@project-services/grid-block.service";
-
-type ChannelCalendarEventMeta =
-  | {kind: 'schedule', item: ScheduledMediaItem}
-  | {kind: 'block', block: GridBlock}
-
-type ChannelCalendarEvent = CalendarEvent<ChannelCalendarEventMeta>
-
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  ViewChild,
+  inject,
+} from "@angular/core";
+import { DatePipe, NgClass, NgFor, NgIf } from "@angular/common";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { filter } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { WebsocketService } from "@kwyxyz/ngx-request";
+import {
+  EditorialLineData,
+  GridBlock,
+  FormOptions,
+  PlayoutGenerationReport,
+  ScheduledMediaItem,
+  TvChannel,
+} from "@project-interfaces/tv-channel";
+import { TvChannelService } from "@project-services/tv-channel.service";
+import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { FlwSegmentedComponent } from "../../../ui/segmented/flw-segmented.component";
+import {
+  FlwTimelineComponent,
+  TimelineBlock,
+} from "../../../ui/timeline/flw-timeline.component";
+import { TimeAgoPipe } from "../../../ui/pipes/time-ago.pipe";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import {
+  containerKindLabel,
+  natureLabel,
+  natureToCategory,
+} from "../../../ui/category";
+import { TvChannelDialogComponent } from "../tv-channel-dialog/tv-channel-dialog.component";
+import { GenerationDialogComponent } from "../channel-dialogs/generation-dialog.component";
+import { LogoDialogComponent } from "../channel-dialogs/logo-dialog.component";
+import { ReportDialogComponent } from "../channel-dialogs/report-dialog.component";
+import { ResetRulesDialogComponent } from "../channel-dialogs/reset-rules-dialog.component";
+import { ScheduleDetailDialogComponent } from "../channel-dialogs/schedule-detail-dialog.component";
+import { GridSettingsDialogComponent } from "../channel-dialogs/grid-settings-dialog.component";
+import { EditorialLineDialogComponent } from "../channel-dialogs/editorial-line-dialog.component";
+import { GridBlockDialogComponent } from "../channel-dialogs/grid-block-dialog.component";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
-  selector: 'app-channel-detail',
+  selector: "app-channel-detail",
   standalone: true,
   imports: [
-    RouterLink,
     DatePipe,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
-    TranslateModule,
     NgClass,
     NgFor,
     NgIf,
-    CalendarModule,
+    RouterLink,
+    FlwIconComponent,
+    FlwSegmentedComponent,
+    FlwTimelineComponent,
+    TimeAgoPipe,
+    TranslateModule,
   ],
-  templateUrl: './channel-detail.component.html',
-  styleUrl: './channel-detail.component.css'
+  templateUrl: "./channel-detail.component.html",
+  styleUrl: "./channel-detail.component.css",
 })
 export class ChannelDetailComponent {
-  private readonly destroyRef = inject(DestroyRef)
-  @ViewChild('logoUploadInput') private logoUploadInput?: ElementRef<HTMLInputElement>
-
-  channel: TvChannel | null = null
-  isLoading = true
-  isPageLoading = false
-  logoLoadFailed = false
-  calendarDate = new Date()
-  scheduleCalendarEvents: ChannelCalendarEvent[] = []
-  gridCalendarEvents: ChannelCalendarEvent[] = []
-  formOptions: FormOptions | null = null
-  gridWarnings: string[] = []
-
+  private destroyRef = inject(DestroyRef);
+  @ViewChild("file") file?: ElementRef<HTMLInputElement>;
+  channel: TvChannel | null = null;
+  isLoading = true;
+  calendarDate = new Date();
+  dayOffset = 0;
+  gridWarnings: string[] = [];
+  formOptions: FormOptions | null = null;
+  reportCount = 0;
+  dayOptions: Array<{ label: string; value: number }> = [];
   constructor(
-    private route: ActivatedRoute,
+    route: ActivatedRoute,
     private router: Router,
-    private tvChannelService: TvChannelService,
-    private websocketService: WebsocketService,
-    private notificationService: NotificationService,
-    private dialog: MatDialog,
-    private translateService: TranslateService,
-    private gridBlockService: GridBlockService,
-    private snackBar: MatSnackBar,
+    private service: TvChannelService,
+    ws: WebsocketService,
+    private notification: NotificationService,
+    private dialogs: FlwDialogService,
+    private translate: TranslateService,
   ) {
-    this.route.paramMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const channelId = params.get('channelId')
-        if (!channelId) {
-          this.router.navigate(['/app/channels'])
-          return
-        }
-        this.loadChannel(channelId)
-      })
-
-    this.websocketService.crudEvent
+    route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((p) => {
+      const id = p.get("channelId");
+      if (id) this.load(id);
+      else router.navigate(["/app/channels"]);
+    });
+    ws.crudEvent
       .pipe(
-        filter((event: any) => event.type?.toLowerCase?.() === 'tvchannel'),
+        filter((e: any) => e.type?.toLowerCase?.() === "tvchannel"),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((event: any) => {
-        const currentId = this.channel?.id?.toString()
-        if (!currentId) {
-          return
-        }
-        if (event.id?.toString?.() !== currentId) {
-          return
-        }
-        if (event.action === 'destroy') {
-          this.router.navigate(['/app/channels'])
-          return
-        }
-        this.loadChannel(currentId)
-      })
+      .subscribe((e: any) => {
+        if (String(e.id) === String(this.channel?.id)) this.load(String(e.id));
+      });
+    this.dayOptions = [
+      { label: this.translate.instant("CHANNELS.PREVIOUS_DAY"), value: -1 },
+      { label: this.translate.instant("CHANNELS.TODAY"), value: 0 },
+      { label: this.translate.instant("CHANNELS.NEXT_DAY"), value: 1 },
+    ];
   }
-
-  get editorialLine(): EditorialLineData | null {
-    return this.channel?.editorial_line_data ?? null
+  get isFlexible() {
+    return this.channel?.grid_data?.mode === 2;
   }
-
-  get isFlexibleChannel(): boolean {
-    return this.channel?.grid_data?.mode === 2
+  get gridRows(): Array<{
+    block?: GridBlock;
+    gap?: { starts_at: string; ends_at: string };
+  }> {
+    const blocks = [...(this.channel?.grid_data?.blocks ?? [])].sort((a, b) =>
+      a.starts_at.localeCompare(b.starts_at),
+    );
+    const rows: Array<{
+      block?: GridBlock;
+      gap?: { starts_at: string; ends_at: string };
+    }> = [];
+    blocks.forEach((block, index) => {
+      rows.push({ block });
+      const next = blocks[index + 1];
+      if (next && block.ends_at.slice(0, 5) < next.starts_at.slice(0, 5))
+        rows.push({
+          gap: {
+            starts_at: block.ends_at.slice(0, 5),
+            ends_at: next.starts_at.slice(0, 5),
+          },
+        });
+    });
+    return rows;
   }
-
-  loadChannel(channelId: string) {
-    this.isLoading = true
-    this.tvChannelService.getDetail(channelId).subscribe((response) => {
-      this.isLoading = false
-      if (!response.isOk) {
-        this.isPageLoading = false
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOAD_FAILED")
-        return
-      }
-      this.channel = response.body as TvChannel
-      this.logoLoadFailed = false
-      this.calendarDate = this.getTodayDate()
-      this.refreshCalendarData()
-      this.loadGridWarnings()
-      this.isPageLoading = false
-    })
+  get otherWarnings() {
+    // Les trous entre blocs sont déjà rendus en lignes riches intercalées.
+    return this.gridWarnings.filter((w) => !w.startsWith("Gap between blocks"));
   }
-
-  get reportIssueCount(): number {
-    const counts = this.channel?.latest_generation_report?.issue_counts
-    if (!counts) {
-      return 0
-    }
-    return counts.error + counts.warning
-  }
-
-  get reportBadgeClass(): string {
-    const counts = this.channel?.latest_generation_report?.issue_counts
-    if (counts?.error) {
-      return 'report-badge-error'
-    }
-    if (counts?.warning) {
-      return 'report-badge-warning'
-    }
-    return ''
-  }
-
-  openGenerationReportsDialog() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(GenerationReportDialogComponent, {
-      width: '760px',
-      maxWidth: '96vw',
-      data: {
-        channelId: this.channel.id,
-        channelName: this.channel.name,
+  lineRules(line: EditorialLineData) {
+    const tags = (
+      categories: string[],
+      natures: Array<string | number>,
+      kinds: Array<string | number>,
+    ) => [
+      ...categories,
+      ...natures.map((v) => this.translate.instant(natureLabel(v))),
+      ...kinds.map((v) => this.translate.instant(containerKindLabel(v))),
+    ];
+    return [
+      {
+        label: "CHANNEL_DETAIL.ALLOWED",
+        kind: "allow",
+        tags: tags(
+          line.allowed_categories,
+          line.allowed_natures,
+          line.allowed_container_kinds,
+        ),
       },
-    })
+      {
+        label: "CHANNEL_DETAIL.PREFERRED",
+        kind: "prefer",
+        tags: tags(
+          line.preferred_categories,
+          line.preferred_natures,
+          line.preferred_container_kinds,
+        ),
+      },
+      {
+        label: "CHANNEL_DETAIL.FORBIDDEN",
+        kind: "forbid",
+        tags: tags(
+          line.forbidden_categories,
+          line.forbidden_natures,
+          line.forbidden_container_kinds,
+        ),
+      },
+    ].filter((rule) => rule.tags.length);
   }
-
-  openEditChannelDialog() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(TvChannelDialogComponent, {
-      width: '720px',
-      maxWidth: '96vw',
-      data: {
-        channel: this.channel,
-        selectedCatalogId: this.channel.catalog?.toString?.() ?? null,
-        catalogs: [{
-          id: this.channel.catalog,
-          name: this.channel.catalog_name,
-          description: '',
-        }],
-      }
-    }).afterClosed().subscribe((result) => {
-      if (result && this.channel) {
-        this.loadChannel(this.channel.id.toString())
-      }
-    })
+  status() {
+    const c = this.channel?.latest_generation_report?.issue_counts;
+    if ((c?.error ?? 0) > 0)
+      return {
+        kind: "critical",
+        label: this.translate.instant("CHANNELS.ERRORS", { count: c!.error }),
+      };
+    if ((c?.warning ?? 0) > 0)
+      return {
+        kind: "warning",
+        label: this.translate.instant("CHANNELS.WARNINGS", {
+          count: c!.warning,
+        }),
+      };
+    return {
+      kind: "success",
+      label: this.translate.instant("CHANNELS.UP_TO_DATE"),
+    };
   }
-
+  load(id: string) {
+    this.isLoading = true;
+    this.service.getDetail(id).subscribe((r) => {
+      this.isLoading = false;
+      if (!r.isOk) {
+        this.notification.notify("CHANNEL_DETAIL.NOTIFY_LOAD_FAILED");
+        return;
+      }
+      this.channel = r.body as TvChannel;
+      this.service
+        .getGridWarnings(id)
+        .subscribe(
+          (w) => (this.gridWarnings = w.isOk ? (w.body as any).warnings : []),
+        );
+      this.service.getGenerationReports(id).subscribe((r2) => {
+        const reports = r2.body as PlayoutGenerationReport[] | null;
+        this.reportCount =
+          r2.isOk && Array.isArray(reports) ? reports.length : 0;
+      });
+    });
+  }
+  edit() {
+    if (!this.channel) return;
+    this.dialogs
+      .open(TvChannelDialogComponent, {
+        data: {
+          channel: this.channel,
+          selectedCatalogId: String(this.channel.catalog),
+          catalogs: [
+            {
+              id: this.channel.catalog,
+              name: this.channel.catalog_name,
+              description: null,
+            },
+          ],
+        },
+      })
+      .closed.subscribe((ok) => {
+        if (ok) this.load(String(this.channel!.id));
+      });
+  }
   generateBlueprint() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(BlueprintGenerationDialogComponent, {
-      width: '720px',
-      maxWidth: '96vw',
-      data: {
-        channelId: this.channel.id,
-        channelName: this.channel.name,
-      }
-    }).afterClosed().subscribe((result) => {
-      if (result && this.channel) {
-        this.channel.analyze_status = 'ANALYZING'
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_BLUEPRINT_STARTED")
-      }
-    })
+    if (!this.channel) return;
+    this.openGeneration("blueprint");
   }
-
-  openGeneratePlayoutDialog() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(PlayoutGenerationDialogComponent, {
-      width: '720px',
-      maxWidth: '96vw',
-      data: {channelId: this.channel.id}
-    }).afterClosed().subscribe((result) => {
-      if (result && this.channel) {
-        this.channel.analyze_status = 'ANALYZING'
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_PLAYOUT_STARTED")
-      }
-    })
+  generatePlayout() {
+    if (!this.channel) return;
+    this.openGeneration("playout");
   }
-
-  pushChannel() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(ConfirmationDialogComponent, {
-      width: '520px',
-      maxWidth: '92vw',
-      data: {
-        confirmationMessage: this.translateService.instant('CHANNEL_DETAIL.CONFIRM_PUSH', {name: this.channel.name})
-      }
-    }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed || !this.channel) {
-        return
-      }
-      this.isPageLoading = true
-      this.tvChannelService.push(this.channel.id).subscribe((response) => {
-        this.isPageLoading = false
-        if (!response.isOk) {
-          this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_PUSH_FAILED")
-          return
-        }
-        this.channel!.analyze_status = 'ANALYZING'
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_PUSH_STARTED")
-      })
-    })
-  }
-
-  triggerLogoUpload() {
-    this.logoUploadInput?.nativeElement.click()
-  }
-
-  onLogoSelected(event: Event) {
-    if (!this.channel) {
-      return
-    }
-    const input = event.target as HTMLInputElement | null
-    const file = input?.files?.[0]
-    if (!file) {
-      return
-    }
-    this.isPageLoading = true
-    this.tvChannelService.uploadLogo(this.channel.id, file).subscribe((response) => {
-      if (input) {
-        input.value = ''
-      }
-      if (!response.isOk) {
-        this.isPageLoading = false
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_UPLOAD_FAILED")
-        return
-      }
-      this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_UPDATED")
-      this.loadChannel(this.channel!.id.toString())
-    })
-  }
-
-  generateLogo(backend: 'comfyui' | 'openai') {
-    if (!this.channel) {
-      return
-    }
-    this.tvChannelService.generateLogo(this.channel.id, backend)
-      .subscribe((response) => {
-        if (!response.isOk) {
-          this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_FAILED")
-          return
-        }
-        this.logoLoadFailed = false
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_STARTED")
-      })
-  }
-
-  downloadLogoPrompt() {
-    if (!this.channel) {
-      return
-    }
-    this.isPageLoading = true
-    this.tvChannelService.exportLogoPrompt(this.channel.id).subscribe((response) => {
-      this.isPageLoading = false
-      if (!response.isOk) {
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_PROMPT_FAILED")
-        return
-      }
-      const body = response.body as TvChannelLogoPromptResponse
-      const prompt = body?.prompt ?? ''
-      const safeName = this.channel!.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '') || `channel-${this.channel!.id}`
-      const blob = new Blob([prompt], {type: 'text/plain;charset=utf-8'})
-      const url = URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = url
-      anchor.download = `${safeName}-logo-prompt.txt`
-      anchor.click()
-      URL.revokeObjectURL(url)
-      this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_LOGO_PROMPT_DOWNLOADED")
-    })
-  }
-
-  openResetRulesDialog() {
-    if (!this.channel) {
-      return
-    }
-    this.dialog.open(ResetRulesDialogComponent, {
-      width: '560px',
-      maxWidth: '94vw',
-      data: {
-        channelId: this.channel.id,
-        channelName: this.channel.name,
-      }
-    }).afterClosed().subscribe((result) => {
-      if (result && this.channel) {
-        this.isPageLoading = true
-        this.notificationService.notify("CHANNEL_DETAIL.NOTIFY_RULES_RESET")
-        this.loadChannel(this.channel.id.toString())
-      }
-    })
-  }
-
-  getChannelStatusLabel(): string {
-    const statusKey = this.normalizeAnalyzeStatus(this.channel?.analyze_status)
-    return this.translateService.instant(`COMMON.STATUS.${statusKey}`, {
-      defaultValue: statusKey,
-    })
-  }
-
-  private normalizeAnalyzeStatus(status: string | number | null | undefined): string {
-    if (typeof status === 'string') {
-      return status
-    }
-    switch (status) {
-      case 0:
-        return 'IDLE'
-      case 1:
-        return 'ANALYZING'
-      case 2:
-        return 'COMPLETE'
-      case 3:
-        return 'SKIPPED'
-      case 4:
-        return 'COMPLETE_WITH_ERRORS'
-      case 5:
-        return 'CANCELLED'
-      default:
-        return String(status ?? '')
-    }
-  }
-
-  openEditorialLineDetailDialog() {
-    if (!this.channel) {
-      return
-    }
-    this.withFormOptions((options) => this.dialog.open(EditorialLineEditDialogComponent, {
-      width: '860px',
-      maxWidth: '96vw',
+  private openGeneration(kind: "blueprint" | "playout") {
+    this.dialogs.open(GenerationDialogComponent, {
       data: {
         channelId: this.channel!.id,
-        editorialLine: this.editorialLine,
-        formOptions: options,
-      }
-    }).afterClosed().subscribe(result => this.afterGridWrite(result)))
+        channelName: this.channel!.name,
+        kind,
+      },
+    });
   }
-
-  openGridEditDialog() {
-    if (!this.channel?.grid_data || this.isFlexibleChannel) {
-      return
-    }
-    this.withFormOptions((options) => {
-      this.dialog.open(GridEditDialogComponent, {
-        width: '620px',
-        maxWidth: '96vw',
+  push() {
+    if (!this.channel) return;
+    this.service
+      .push(this.channel.id)
+      .subscribe((r) =>
+        this.notification.notify(
+          r.isOk
+            ? "CHANNEL_DETAIL.NOTIFY_PUSH_STARTED"
+            : "CHANNEL_DETAIL.NOTIFY_PUSH_FAILED",
+        ),
+      );
+  }
+  newVersion() {
+    if (!this.channel) return;
+    this.dialogs
+      .open(FlwConfirmComponent, {
         data: {
-          channelId: this.channel!.id,
-          postFillerPolicy: this.channel!.grid_data!.post_filler_policy,
-          formOptions: options,
+          title: this.translate.instant("MANUAL_EDIT.NEW_VERSION"),
+          message: this.translate.instant("MANUAL_EDIT.CONFIRM_NEW_VERSION"),
+          confirmLabel: this.translate.instant("MANUAL_EDIT.CREATE"),
         },
-      }).afterClosed().subscribe((result) => this.afterGridWrite(result))
-    })
+      })
+      .closed.subscribe((ok) => {
+        if (ok)
+          this.service
+            .createGridVersion(this.channel!.id)
+            .subscribe(() => this.load(String(this.channel!.id)));
+      });
   }
-
-  openBlockEditDialog(block: GridBlock | null) {
-    if (!this.channel?.grid_data || this.isFlexibleChannel) {
-      return
-    }
-    this.withFormOptions((options) => {
-      this.dialog.open(GridBlockEditDialogComponent, {
-        width: '900px',
-        maxWidth: '96vw',
+  upload(e: Event) {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f && this.channel)
+      this.service.uploadLogo(this.channel.id, f).subscribe((r) => {
+        if (r.isOk) this.load(String(this.channel!.id));
+      });
+  }
+  generateLogo(backend: "comfyui" | "openai") {
+    if (this.channel)
+      this.service
+        .generateLogo(this.channel.id, backend)
+        .subscribe((r) =>
+          this.notification.notify(
+            r.isOk
+              ? "CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_STARTED"
+              : "CHANNEL_DETAIL.NOTIFY_LOGO_GENERATION_FAILED",
+          ),
+        );
+  }
+  openLogoDialog() {
+    if (!this.channel) return;
+    this.dialogs
+      .open(LogoDialogComponent, {
         data: {
-          channelId: this.channel!.id,
-          gridLayoutId: this.channel!.grid_data!.id,
-          block,
-          formOptions: options,
+          channelId: this.channel.id,
+          channelName: this.channel.name,
+          logo: this.channel.logo ?? null,
         },
-      }).afterClosed().subscribe((result) => this.afterGridWrite(result))
-    })
-  }
-
-  deleteBlock(block: GridBlock) {
-    if (!this.channel || this.isFlexibleChannel) {
-      return
-    }
-    this.dialog.open(ConfirmationDialogComponent, {
-      width: '520px',
-      data: {confirmationMessage: this.translateService.instant('MANUAL_EDIT.CONFIRM_DELETE_BLOCK')},
-    }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed) {
-        return
-      }
-      this.gridBlockService.delete(block.id).subscribe((response) => {
-        if (!response.isOk) {
-          this.notificationService.notify('MANUAL_EDIT.DELETE_FAILED')
-          return
-        }
-        this.afterGridWrite({saved: true})
       })
-    })
+      .closed.subscribe((changed) => {
+        if (changed) this.load(String(this.channel!.id));
+      });
   }
-
-  createGridVersion() {
-    if (!this.channel || this.isFlexibleChannel) {
-      return
-    }
-    this.dialog.open(ConfirmationDialogComponent, {
-      width: '520px',
-      data: {confirmationMessage: this.translateService.instant('MANUAL_EDIT.CONFIRM_NEW_VERSION')},
-    }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed || !this.channel) {
-        return
-      }
-      this.tvChannelService.createGridVersion(this.channel.id).subscribe((response) => {
-        if (!response.isOk) {
-          this.notificationService.notify('MANUAL_EDIT.VERSION_FAILED')
-          return
-        }
-        this.afterGridWrite({saved: true})
+  openReports() {
+    if (this.channel)
+      this.dialogs.open(ReportDialogComponent, {
+        data: { channelId: this.channel.id, channelName: this.channel.name },
+      });
+  }
+  openResetRules() {
+    if (!this.channel) return;
+    this.dialogs
+      .open(ResetRulesDialogComponent, {
+        data: { channelId: this.channel.id, channelName: this.channel.name },
       })
-    })
+      .closed.subscribe((saved) => {
+        if (saved) this.load(String(this.channel!.id));
+      });
   }
-
+  openEditorialLine() {
+    if (!this.channel?.editorial_line_data) return;
+    this.withFormOptions((options) =>
+      this.dialogs
+        .open(EditorialLineDialogComponent, {
+          data: {
+            channelId: this.channel!.id,
+            line: this.channel!.editorial_line_data!,
+            formOptions: options,
+          },
+        })
+        .closed.subscribe((saved) => {
+          if (saved) this.load(String(this.channel!.id));
+        }),
+    );
+  }
+  openGridSettings() {
+    if (!this.channel?.grid_data) return;
+    this.withFormOptions((options) =>
+      this.dialogs
+        .open(GridSettingsDialogComponent, {
+          data: {
+            channelId: this.channel!.id,
+            policy: this.channel!.grid_data!.post_filler_policy,
+            formOptions: options,
+          },
+        })
+        .closed.subscribe((saved) => {
+          if (saved) this.load(String(this.channel!.id));
+        }),
+    );
+  }
+  openBlock(
+    block: GridBlock | null,
+    defaults?: { starts_at: string; ends_at: string },
+  ) {
+    if (!this.channel?.grid_data) return;
+    this.withFormOptions((options) =>
+      this.dialogs
+        .open(GridBlockDialogComponent, {
+          data: {
+            channelId: this.channel!.id,
+            channelName: this.channel!.name,
+            gridLayoutId: this.channel!.grid_data!.id,
+            block,
+            defaults,
+            formOptions: options,
+          },
+        })
+        .closed.subscribe((saved) => {
+          if (saved) this.load(String(this.channel!.id));
+        }),
+    );
+  }
+  openScheduleBlock(block: TimelineBlock) {
+    const item = this.channel?.active_schedule_items.find(
+      (candidate) =>
+        candidate.media_item_title === block.title &&
+        this.time(candidate.starts_at) === block.start,
+    );
+    if (item)
+      this.dialogs.open(ScheduleDetailDialogComponent, { data: { item } });
+  }
   private withFormOptions(callback: (options: FormOptions) => void) {
     if (this.formOptions) {
-      callback(this.formOptions)
-      return
+      callback(this.formOptions);
+      return;
     }
-    this.tvChannelService.getFormOptions().subscribe((response) => {
-      if (!response.isOk) {
-        this.notificationService.notify('MANUAL_EDIT.OPTIONS_FAILED')
-        return
+    this.service.getFormOptions().subscribe((response) => {
+      if (response.isOk) {
+        this.formOptions = response.body as FormOptions;
+        callback(this.formOptions);
       }
-      this.formOptions = response.body as FormOptions
-      callback(this.formOptions)
-    })
+    });
   }
-
-  private loadGridWarnings() {
-    if (!this.channel) {
-      this.gridWarnings = []
-      return
-    }
-    this.tvChannelService.getGridWarnings(this.channel.id).subscribe((response) => {
-      this.gridWarnings = response.isOk ? (response.body as GridWarningsResponse).warnings : []
-    })
+  gridBlocks(): TimelineBlock[] {
+    return (this.channel?.grid_data?.blocks ?? []).map((b) => ({
+      start: b.starts_at.slice(0, 5),
+      end: b.ends_at.slice(0, 5),
+      title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
+        category:
+          b.allowed_categories[0] ??
+          this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
+      }),
+      sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
+        priority: b.priority,
+      }),
+      category: natureToCategory(b.allowed_natures[0]),
+    }));
   }
-
-  private afterGridWrite(result: any) {
-    if (!result?.saved || !this.channel) {
-      return
-    }
-    const channelId = this.channel.id.toString()
-    this.loadChannel(channelId)
-    this.snackBar.open(
-      this.translateService.instant('MANUAL_EDIT.SAVED_REGENERATE'),
-      this.translateService.instant('MANUAL_EDIT.REGENERATE'),
-      {duration: 10000},
-    ).onAction().subscribe(() => {
-      this.dialog.open(PlayoutGenerationDialogComponent, {
-        width: '720px',
-        maxWidth: '96vw',
-        data: {channelId, reset: true},
-      })
-    })
+  scheduleBlocks(): TimelineBlock[] {
+    return (this.channel?.active_schedule_items ?? [])
+      .filter((i) => this.sameDay(i.starts_at))
+      .map((i) => ({
+        start: this.time(i.starts_at),
+        end: this.time(i.ends_at),
+        title: i.media_item_title,
+        sub: i.media_container_title,
+        category: natureToCategory(i.media_nature),
+      }));
   }
-
-  openBlockDetails(block: GridBlock) {
-    if (!this.channel?.grid_data || !this.channel.editorial_line_data) {
-      return
-    }
-    this.dialog.open(GridBlockDetailDialogComponent, {
-      width: '780px',
-      maxWidth: '96vw',
-      data: {
-        block,
-        grid: this.channel.grid_data,
-        editorialLine: this.channel.editorial_line_data,
-      }
-    })
+  blockTags(b: GridBlock) {
+    return [
+      ...b.allowed_categories,
+      ...b.allowed_natures.map((value) =>
+        this.translate.instant(natureLabel(value)),
+      ),
+      ...b.allowed_container_kinds.map((value) =>
+        this.translate.instant(containerKindLabel(value)),
+      ),
+    ].slice(0, 4);
   }
-
-  openScheduleItemDetails(item: ScheduledMediaItem) {
-    this.dialog.open(ScheduleMediaItemDetailDialogComponent, {
-      width: '780px',
-      maxWidth: '96vw',
-      data: {item}
-    })
+  setDay(offset: unknown) {
+    this.dayOffset = Number(offset);
+    const next = new Date();
+    next.setDate(next.getDate() + this.dayOffset);
+    this.calendarDate = next;
   }
-
-  shiftCalendarDay(days: number) {
-    const nextDate = new Date(this.calendarDate)
-    nextDate.setDate(nextDate.getDate() + days)
-    this.calendarDate = nextDate
-    this.refreshCalendarData()
+  private sameDay(v: string) {
+    const d = new Date(v);
+    return d.toDateString() === this.calendarDate.toDateString();
   }
-
-  resetCalendarDay() {
-    this.calendarDate = this.getTodayDate()
-    this.refreshCalendarData()
+  private time(v: string) {
+    return new Date(v).toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   }
-
-  onCalendarEventClicked(event: ChannelCalendarEvent) {
-    if (event.meta?.kind === 'schedule') {
-      this.openScheduleItemDetails(event.meta.item)
-      return
-    }
-    if (event.meta?.kind === 'block') {
-      this.openBlockDetails(event.meta.block)
-    }
-  }
-
-  getBlockTimeLabel(block: GridBlock): string {
-    return `${block.starts_at.slice(0, 5)} - ${block.ends_at.slice(0, 5)}`
-  }
-
-  getScheduleTimeLabel(item: ScheduledMediaItem): string {
-    return `${this.extractTimeLabel(item.starts_at)} - ${this.extractTimeLabel(item.ends_at)}`
-  }
-
-  private refreshCalendarData() {
-    const dayBounds = this.getCalendarDayBounds()
-    this.scheduleCalendarEvents = this.buildScheduleCalendarEvents(dayBounds.dayStart, dayBounds.dayEnd)
-    this.gridCalendarEvents = this.buildGridCalendarEvents(dayBounds.dayStart, dayBounds.dayEnd)
-  }
-
-  private buildScheduleCalendarEvents(dayStart: Date, dayEnd: Date): ChannelCalendarEvent[] {
-    const items = this.channel?.active_schedule_items ?? []
-    return items
-      .filter((item) => {
-        const start = this.parseIsoAsWallClock(item.starts_at)
-        const end = this.parseIsoAsWallClock(item.ends_at)
-        return start < dayEnd && end > dayStart
-      })
-      .map((item) => {
-        const clippedRange = this.clipRangeToDay(
-          this.parseIsoAsWallClock(item.starts_at),
-          this.parseIsoAsWallClock(item.ends_at),
-          dayStart,
-          dayEnd,
-        )
-
-        const isInterstitial = this.isInterstitialItem(item)
-        const titlePrefix = isInterstitial ? `▸ ${item.role_label ?? 'interlude'} · ` : ''
-
-        return {
-          start: clippedRange.start,
-          end: clippedRange.end,
-        title: `${titlePrefix}${item.media_item_title} · ${item.block_name} · ${this.getScheduleTimeLabel(item)}`,
-        color: this.buildScheduleCalendarColor(item),
-        meta: {kind: 'schedule', item},
-        }
-      })
-  }
-
-  private isInterstitialItem(item: ScheduledMediaItem): boolean {
-    return item.parent_schedule_item !== null && item.parent_schedule_item !== undefined
-  }
-
-  private buildGridCalendarEvents(dayStart: Date, dayEnd: Date): ChannelCalendarEvent[] {
-    const blocks = this.channel?.grid_data?.blocks ?? []
-    const previousDay = new Date(dayStart)
-    previousDay.setDate(previousDay.getDate() - 1)
-
-    return blocks.flatMap((block) => {
-      const occurrences = [
-        this.buildBlockOccurrence(block, previousDay),
-        this.buildBlockOccurrence(block, dayStart),
-      ]
-
-      return occurrences
-        .filter((occurrence) => occurrence.start < dayEnd && occurrence.end > dayStart)
-        .map((occurrence) => {
-          const clippedRange = this.clipRangeToDay(occurrence.start, occurrence.end, dayStart, dayEnd)
-
-          return {
-            start: clippedRange.start,
-            end: clippedRange.end,
-            title: this.getBlockTimeLabel(block),
-            color: this.buildGridCalendarColor(block),
-            meta: {kind: 'block', block},
-          }
-        })
-    })
-  }
-
-  private buildScheduleCalendarColor(item: ScheduledMediaItem) {
-    if (this.isInterstitialItem(item)) {
-      return {
-        primary: 'hsla(0, 0%, 42%, 0.85)',
-        secondary: 'hsla(0, 0%, 68%, 0.9)',
-      }
-    }
-    const itemKey = item.id?.toString?.() ?? `${item.media_container_id}-${item.media_item_title}`
-    const seed = Array.from(itemKey).reduce((total, char) => total + char.charCodeAt(0), 0)
-    const hue = (seed * 43) % 360
-    return {
-      primary: `hsla(${hue}, 74%, 40%, 0.92)`,
-      secondary: `hsla(${hue}, 88%, 66%, 0.98)`,
-    }
-  }
-
-  private buildGridCalendarColor(block: GridBlock) {
-    const blockKey = block.id?.toString?.() ?? `${block.starts_at}-${block.ends_at}`
-    const seed = Array.from(blockKey).reduce((total, char) => total + char.charCodeAt(0), 0)
-    const hue = (seed * 37) % 360
-    return {
-      primary: `hsla(${hue}, 56%, 34%, 0.82)`,
-      secondary: `hsla(${hue}, 74%, 72%, 0.92)`,
-    }
-  }
-
-  private buildBlockOccurrence(block: GridBlock, anchorDate: Date): {start: Date, end: Date} {
-    const start = this.combineDateAndTime(anchorDate, block.starts_at)
-    const end = this.combineDateAndTime(anchorDate, block.ends_at)
-    if (end <= start) {
-      end.setDate(end.getDate() + 1)
-    }
-    return {start, end}
-  }
-
-  private clipRangeToDay(start: Date, end: Date, dayStart: Date, dayEnd: Date): {start: Date, end: Date} {
-    return {
-      start: start < dayStart ? new Date(dayStart) : start,
-      end: end > dayEnd ? new Date(dayEnd) : end,
-    }
-  }
-
-  private getCalendarDayBounds(): {dayStart: Date, dayEnd: Date} {
-    const dayStart = new Date(this.calendarDate.getFullYear(), this.calendarDate.getMonth(), this.calendarDate.getDate(), 0, 0, 0, 0)
-    const dayEnd = new Date(dayStart)
-    dayEnd.setDate(dayEnd.getDate() + 1)
-    return {dayStart, dayEnd}
-  }
-
-  private parseIsoAsWallClock(value: string): Date {
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/)
-    if (match) {
-      return new Date(
-        Number(match[1]),
-        Number(match[2]) - 1,
-        Number(match[3]),
-        Number(match[4]),
-        Number(match[5]),
-        Number(match[6] || 0),
-        0,
-      )
-    }
-    return new Date(value)
-  }
-
-  private getTodayDate(): Date {
-    const now = new Date()
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  }
-
-  private combineDateAndTime(date: Date, time: string): Date {
-    const [hours, minutes] = time.split(':').map((part) => Number(part))
-    return new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      hours,
-      minutes,
-      0,
-      0,
-    )
-  }
-
-  private extractTimeLabel(value: string): string {
-    const match = value.match(/T(\d{2}:\d{2})/)
-    if (match) {
-      return match[1]
-    }
-    return value.slice(11, 16)
-  }
-
 }
