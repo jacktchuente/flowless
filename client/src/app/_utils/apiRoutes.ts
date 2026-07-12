@@ -10,4 +10,5 @@ export const apiRoutes = {
     editorialFlowRun: "editorial-flow-run",
     editorialSegment: "editorial-segment",
     editorialSegmentMembership: "editorial-segment-membership",
+    dashboard: "dashboard/overview",
 }
