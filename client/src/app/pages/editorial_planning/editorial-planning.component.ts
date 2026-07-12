@@ -20,6 +20,7 @@ import { FlwTabsComponent } from "../../ui/tabs/flw-tabs.component";
 import { FlwSwitchComponent } from "../../ui/switch/flw-switch.component";
 import { FlwGenStepsComponent } from "../../ui/gen-steps/flw-gen-steps.component";
 import { TimeAgoPipe } from "../../ui/pipes/time-ago.pipe";
+import { containerKindLabel, natureLabel } from "../../ui/category";
 import { WebsocketService } from "@kwyxyz/ngx-request";
 import { filter } from "rxjs";
 import { AnalyzeStatus } from "../../_utils/analyze-status";
@@ -273,5 +274,15 @@ export class EditorialPlanningComponent {
   }
   percent(v: number) {
     return Math.round(v * 100);
+  }
+  collectionMeta(collection: MediaCollection) {
+    const parts: string[] = [];
+    if (collection.nature != null)
+      parts.push(this.translate.instant(natureLabel(collection.nature)));
+    if (collection.container_kind != null)
+      parts.push(
+        this.translate.instant(containerKindLabel(collection.container_kind)),
+      );
+    return parts.join(" · ");
   }
 }

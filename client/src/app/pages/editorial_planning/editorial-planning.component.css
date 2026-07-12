@@ -10,8 +10,7 @@
 }
 .panel-head,
 .panel footer,
-.runs,
-.candidate {
+.runs {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -21,16 +20,31 @@
 .candidate p {
   color: var(--slate-500);
 }
+.panel > .btn {
+  align-self: flex-start;
+}
+.threshold {
+  max-width: 340px;
+}
+.collections {
+  display: flex;
+  flex-direction: column;
+}
 .collection {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--slate-100);
-  border-radius: var(--radius-m);
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--slate-100);
 }
-.collection small {
-  display: block;
+.collection:last-of-type {
+  border-bottom: 0;
+}
+.collection .name {
+  font-size: 13px;
+  flex: 1;
+}
+.collection .meta {
   color: var(--slate-500);
 }
 .runs {
@@ -41,7 +55,7 @@
 }
 .seg-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
 .seg-card,
@@ -50,29 +64,63 @@
   border: 1px solid var(--slate-100);
   border-radius: var(--radius-m);
 }
-.seg-card header {
+.seg-card,
+.candidate {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.seg-card header,
+.candidate header {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
+}
+.candidate .pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.candidate .actions {
+  display: flex;
+  gap: 8px;
 }
 .meter {
   display: grid;
   grid-template-columns: 110px 1fr 40px;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
   font-size: 12px;
-}
-.candidate {
-  align-items: flex-start;
 }
 .review {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 260px 1fr;
+  gap: 18px;
+}
+.review main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.review .memberships {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.review .save-row {
+  display: flex;
+  justify-content: flex-end;
 }
 .review aside {
   display: grid;
   align-content: start;
   gap: 6px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 .review aside button {
   border: 0;
@@ -91,31 +139,46 @@
 }
 .membership {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--slate-100);
+  padding: 10px;
+  border: 1px solid var(--slate-100);
+  border-radius: var(--radius-m);
+}
+.membership .who {
+  flex: 1;
 }
 .status {
   display: flex;
+  gap: 12px;
 }
-.status button {
+.status .status-btn {
   border: 1px solid var(--slate-200);
   background: #fff;
-  padding: 6px 8px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--slate-500);
 }
-.status button.active {
+.status .status-btn.active.accept {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: #1f7a45;
+}
+.status .status-btn.active.reject {
+  background: var(--critical-soft);
+  border-color: var(--critical);
+  color: #a93636;
+}
+.status .status-btn.active.manual {
   background: var(--signal-soft);
+  border-color: var(--signal);
   color: var(--signal-strong);
 }
-@media (max-width: 900px) {
-  .seg-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 700px) {
   .review {
     grid-template-columns: 1fr;
-  }
-  .candidate {
-    flex-direction: column;
   }
 }
