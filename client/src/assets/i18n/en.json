@@ -6,9 +6,14 @@
     "COLLECTIONS": "Collections",
     "MEDIAS": "Medias",
     "CHANNELS": "Channels",
+    "OVERVIEW": "Overview",
+    "EDITORIAL_PLANNING": "Flexible planning",
+    "ALL_CHANNELS_ON_AIR": "All active channels are on air",
     "LANGUAGE": "Language",
     "ADMIN": "Admin"
   },
+  "OVERVIEW": {"EYEBROW":"Control room","TITLE":"Overview","LOADING":"Loading control-room status…"},
+  "EDITORIAL_PLANNING": {"EYEBROW":"Programming","TITLE":"Flexible planning","SUBTITLE":"Analyze collections, build segments and promote the best candidates.","LOADING":"Loading planning…"},
   "COMMON": {
     "NAME": "Name",
     "USERNAME": "Username",

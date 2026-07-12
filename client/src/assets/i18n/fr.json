@@ -6,9 +6,14 @@
     "COLLECTIONS": "Collections",
     "MEDIAS": "Médias",
     "CHANNELS": "Chaînes",
+    "OVERVIEW": "Vue d'ensemble",
+    "EDITORIAL_PLANNING": "Planification flexible",
+    "ALL_CHANNELS_ON_AIR": "Toutes les chaînes actives émettent",
     "LANGUAGE": "Langue",
     "ADMIN": "Admin"
   },
+  "OVERVIEW": {"EYEBROW":"Régie","TITLE":"Vue d'ensemble","LOADING":"Chargement de l'état de la régie…"},
+  "EDITORIAL_PLANNING": {"EYEBROW":"Programmation","TITLE":"Planification flexible","SUBTITLE":"Analysez les collections, construisez des segments et promouvez les meilleurs candidats.","LOADING":"Chargement de la planification…"},
   "COMMON": {
     "NAME": "Nom",
     "USERNAME": "Utilisateur",
