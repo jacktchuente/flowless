@@ -25,17 +25,8 @@
               "src/favicon.ico",
               "src/assets"
             ],
-            "styles": [
-              "src/custom-theme.scss",
-              "src/styles.css",
-              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/@ng-select/ng-select/themes/default.theme.css",
-              "node_modules/primeicons/primeicons.css",
-              "node_modules/angular-calendar/css/angular-calendar.css"
-            ],
-            "scripts": [
-              "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ],
+            "styles": ["src/styles.css"],
+            "scripts": [],
             "browser": "src/main.ts"
           },
           "configurations": {
@@ -99,10 +90,7 @@
               "src/favicon.ico",
               "src/assets"
             ],
-            "styles": [
-              "@angular/material/prebuilt-themes/azure-blue.css",
-              "src/styles.css"
-            ],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }
