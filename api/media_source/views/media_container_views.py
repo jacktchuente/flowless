@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from rest_framework import mixins, status
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -19,7 +20,19 @@ class MediaContainerViewSet(
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        queryset = MediaContainer.objects.filter(media_collection__is_active=True)
+        # item_count stocké = instantané Jellyfin de la dernière analyse ; on
+        # expose le nombre réel de MediaItem programmables (non manquants).
+        queryset = (
+            MediaContainer.objects
+            .filter(media_collection__is_active=True)
+            .annotate(
+                live_item_count=Count(
+                    "items",
+                    filter=Q(items__is_missing=False),
+                    distinct=True,
+                )
+            )
+        )
         title = self.request.query_params.get("title")
         status_value = self.request.query_params.get("status")
         category = self.request.query_params.get("category")

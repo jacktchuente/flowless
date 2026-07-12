@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { MediaCollection } from "@project-interfaces/media-collection";
 import { MediaCollectionService } from "@project-services/media-collection.service";
 import { NotificationService } from "@project-shared/services/notification.service";
+import { AnalyzeStatus } from "../../../_utils/analyze-status";
 import { FlwDialogService } from "../../../ui/dialog.service";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
@@ -59,6 +60,8 @@ export class MediaCollectionComponent {
   analyze(collection: MediaCollection, e?: Event) {
     e?.stopPropagation();
     if (!collection.is_active) return;
+    const alreadyAnalyzed = !!collection.analyzed_at;
+    const isAnalyzing = collection.analyze_status === AnalyzeStatus.Running;
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
@@ -66,15 +69,22 @@ export class MediaCollectionComponent {
           message: this.translate.instant("MEDIA_COLLECTION.CONFIRM_ANALYZE", {
             name: collection.name,
           }),
+          warning: isAnalyzing
+            ? this.translate.instant("MEDIA_COLLECTION.ANALYZING_WARNING")
+            : undefined,
           confirmLabel: this.translate.instant("MEDIA_COLLECTION.ANALYZE"),
+          extraLabel:
+            alreadyAnalyzed || isAnalyzing
+              ? this.translate.instant("MEDIA_COLLECTION.FORCE_REANALYZE")
+              : undefined,
         },
       })
-      .closed.subscribe((ok) => {
-        if (!ok) return;
+      .closed.subscribe((result) => {
+        if (!result) return;
         const id = String(collection.id);
         this.syncingIds.add(id);
         this.service
-          .analyze(collection.id, !!collection.analyzed_at)
+          .analyze(collection.id, result === "extra")
           .subscribe((r) => {
             this.syncingIds.delete(id);
             if (!r.isOk) {

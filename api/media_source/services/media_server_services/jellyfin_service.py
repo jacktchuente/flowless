@@ -350,6 +350,10 @@ class JellyfinService:
             params={
                 "UserId": user_id,
                 "Fields": self.SERIES_EPISODE_FIELDS,
+                # Exclut les épisodes virtuels (métadonnées sans fichier) que
+                # Jellyfin renvoie quand « afficher les épisodes manquants »
+                # est actif côté serveur.
+                "IsMissing": False,
             },
         )
 
@@ -656,6 +660,10 @@ class JellyfinService:
         external_id = item.get("Id")
 
         if not isinstance(external_id, str):
+            return None
+
+        # Garde-fou : ne jamais ingérer un item virtuel (aucun fichier).
+        if item.get("LocationType") == "Virtual" or item.get("IsVirtualItem") is True:
             return None
 
         common = cls._extract_common_metadata(item)

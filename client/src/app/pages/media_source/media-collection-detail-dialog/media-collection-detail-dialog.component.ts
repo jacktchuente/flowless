@@ -4,6 +4,9 @@ import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { MediaCollection } from "@project-interfaces/media-collection";
 import { MediaCollectionService } from "@project-services/media-collection.service";
+import { AnalyzeStatus } from "../../../_utils/analyze-status";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
@@ -40,6 +43,7 @@ export class MediaCollectionDetailDialogComponent {
   constructor(
     private service: MediaCollectionService,
     private translate: TranslateService,
+    private dialogs: FlwDialogService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA) public data: { collection: MediaCollection },
   ) {}
@@ -62,10 +66,33 @@ export class MediaCollectionDetailDialogComponent {
       });
   }
   analyze() {
-    this.service
-      .analyze(this.data.collection.id, !!this.data.collection.analyzed_at)
-      .subscribe((r) => {
-        if (r.isOk) this.ref.close(true);
+    const collection = this.data.collection;
+    const alreadyAnalyzed = !!collection.analyzed_at;
+    const isAnalyzing = collection.analyze_status === AnalyzeStatus.Running;
+    this.dialogs
+      .open(FlwConfirmComponent, {
+        data: {
+          title: this.translate.instant("MEDIA_COLLECTION.ANALYZE_COLLECTION"),
+          message: this.translate.instant("MEDIA_COLLECTION.CONFIRM_ANALYZE", {
+            name: collection.name,
+          }),
+          warning: isAnalyzing
+            ? this.translate.instant("MEDIA_COLLECTION.ANALYZING_WARNING")
+            : undefined,
+          confirmLabel: this.translate.instant("MEDIA_COLLECTION.ANALYZE"),
+          extraLabel:
+            alreadyAnalyzed || isAnalyzing
+              ? this.translate.instant("MEDIA_COLLECTION.FORCE_REANALYZE")
+              : undefined,
+        },
+      })
+      .closed.subscribe((result) => {
+        if (!result) return;
+        this.service
+          .analyze(collection.id, result === "extra")
+          .subscribe((r) => {
+            if (r.isOk) this.ref.close(true);
+          });
       });
   }
 }

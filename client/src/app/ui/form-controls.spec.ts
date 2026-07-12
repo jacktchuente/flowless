@@ -58,4 +58,12 @@ describe("Flowless form controls", () => {
     checkbox.click();
     expect(fixture.componentInstance.enabled.value).toBeTrue();
   });
+  it("preselects the initial value on first render", () => {
+    // Régression : la valeur posée avant le premier rendu doit être
+    // sélectionnée même si les <option> n'existaient pas encore.
+    const rerendered = TestBed.createComponent(HostComponent);
+    rerendered.componentInstance.choice.setValue("b");
+    rerendered.detectChanges();
+    expect(rerendered.nativeElement.querySelector("select").value).toBe("1");
+  });
 });
