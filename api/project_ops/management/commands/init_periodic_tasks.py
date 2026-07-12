@@ -5,6 +5,14 @@ from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 PERIODIC_TASK_SPECS = (
     {
+        # Battement de coeur ecrit dans redis : prouve que beat planifie et que
+        # le worker execute. Consomme par le endpoint /api/health/.
+        "name": "Scheduler heartbeat",
+        "task": "project_ops.tasks.heartbeat",
+        "every": 1,
+        "period": IntervalSchedule.MINUTES,
+    },
+    {
         "name": "Analyze active media collections",
         "task": "media_source.tasks.analyze_active_media_collections",
         "every": 3,

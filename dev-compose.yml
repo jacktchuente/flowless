@@ -24,6 +24,14 @@ services:
         condition: service_healthy
     env_file:
       - .env.dev
+    volumes:
+      - ./volumes/api-medias:/usr/src/app/medias
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8000/api/health/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
   postgres:
     image: postgres
@@ -51,7 +59,7 @@ services:
       TZ: America/Toronto
       ETV_CONFIG_FOLDER: /config
       ETV_TRANSCODE_FOLDER: /transcode
-      FLOWLESS_API: "http://etv-api:8000"
+      FLOWLESS_API: "http://api:8000"
     volumes:
       - ./volumes/ersatztv/config:/config
       - ./volumes/ersatztv/transcode:/transcode

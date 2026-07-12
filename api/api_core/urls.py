@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.conf import settings
-from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, re_path
+
+from project_ops.views.media_views import media_serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,8 +17,8 @@ urlpatterns = [
 
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(
-        getattr(settings, "MEDIA_URL", "/medias/"),
-        document_root=settings.MEDIA_ROOT,
-    )
+# Les medias sont servis par Django (plus de nginx devant uvicorn).
+_media_prefix = settings.MEDIA_URL.lstrip("/")
+urlpatterns += [
+    re_path(rf"^{_media_prefix}(?P<path>.*)$", media_serve),
+]
