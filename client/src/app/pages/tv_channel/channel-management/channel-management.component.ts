@@ -152,7 +152,7 @@ export class ChannelManagementComponent {
         end: this.time(i.ends_at),
         title: i.media_item_title,
         sub: i.media_container_title,
-        category: natureToCategory(i.role),
+        category: natureToCategory(i.media_nature),
       }));
   }
   generateCatalog() {

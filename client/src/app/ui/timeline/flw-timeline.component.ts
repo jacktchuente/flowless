@@ -118,14 +118,19 @@ export class FlwTimelineComponent {
     return result;
   }
   top(b: TimelineBlock) {
-    return (
+    return Math.max(
+      0,
       ((this.minutes(b.start) - this.startHour * 60) / 60) * this.pxPerHour
     );
   }
   blockHeight(b: TimelineBlock) {
     let duration = this.minutes(b.end) - this.minutes(b.start);
     if (duration <= 0) duration += 1440;
-    return Math.max((duration / 60) * this.pxPerHour - 3, 16);
+    const availableHeight = Math.max(this.height - this.top(b), 0);
+    return Math.min(
+      Math.max((duration / 60) * this.pxPerHour - 3, 16),
+      availableHeight,
+    );
   }
   color(b: TimelineBlock) {
     return CATEGORY_COLOR[b.category] ?? CATEGORY_COLOR.filler;

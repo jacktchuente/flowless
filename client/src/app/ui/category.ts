@@ -64,9 +64,41 @@ export function natureToCategory(nature: unknown): CategoryKey {
         SHOW: "comedy",
         MUSIC: "music",
         SPORT: "sport",
+        "1": "fiction",
+        "2": "documentary",
+        "3": "music",
+        "4": "sport",
+        "5": "news",
+        "6": "comedy",
       } as Record<string, CategoryKey>
     )[key] ?? "filler"
   );
+}
+
+const NATURE_LABELS: Record<string, string> = {
+  "1": "Fiction",
+  "2": "Documentaire",
+  "3": "Musique",
+  "4": "Sport",
+  "5": "Information",
+  "6": "Divertissement",
+  "99": "Autre",
+};
+
+const CONTAINER_KIND_LABELS: Record<string, string> = {
+  "1": "Vidéo unitaire",
+  "2": "Série",
+  "3": "Album",
+  "4": "Clip musical",
+  "99": "Autre",
+};
+
+export function natureLabel(value: string | number): string {
+  return NATURE_LABELS[String(value)] ?? String(value);
+}
+
+export function containerKindLabel(value: string | number): string {
+  return CONTAINER_KIND_LABELS[String(value)] ?? String(value);
 }
 export function categoryLegend() {
   return (Object.keys(CATEGORY_COLOR) as CategoryKey[]).map((key) => ({

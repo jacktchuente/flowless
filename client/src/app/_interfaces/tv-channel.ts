@@ -44,6 +44,7 @@ export interface ScheduledMediaItem {
   media_item_description: string | null
   media_container_id: string | number
   media_container_title: string
+  media_nature: number | null
   block_id: string | number | null
   block_name: string
   flexible_selection_id?: string | number | null

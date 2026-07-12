@@ -5,7 +5,7 @@ import {
   Input,
   ViewChild,
 } from "@angular/core";
-import { NgFor } from "@angular/common";
+import { NgFor, NgIf } from "@angular/common";
 import {
   ControlValueAccessor,
   FormsModule,
@@ -18,8 +18,8 @@ export interface FlwTagOption {
 @Component({
   selector: "flw-tag-input",
   standalone: true,
-  imports: [NgFor, FormsModule],
-  template: `<div class="tag-input" [attr.data-variant]="variant">
+  imports: [NgFor, NgIf, FormsModule],
+  template: `<div class="tag-input" [attr.data-variant]="variant" [class.invalid]="invalidDraft">
     <span class="tag" [class]="variant" *ngFor="let value of values"
       ><span>{{ labelFor(value) }}</span
       ><button
@@ -34,6 +34,7 @@ export interface FlwTagOption {
       [disabled]="disabled"
       [(ngModel)]="draft"
       [attr.list]="listId"
+      (ngModelChange)="invalidDraft = false"
       (keydown.enter)="addDraft($event)"
       (blur)="onBlur()"
       placeholder="Ajouter…"
@@ -43,7 +44,8 @@ export interface FlwTagOption {
         [value]="option.label"
       ></option>
     </datalist>
-  </div>`,
+  </div><span class="tag-input-error" *ngIf="invalidDraft">Choisissez une valeur proposée.</span>`,
+  styles: [`.tag-input.invalid{border-color:var(--critical)}.tag-input-error{color:var(--critical);font-size:11.5px}`],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -60,6 +62,7 @@ export class FlwTagInputComponent implements ControlValueAccessor {
   values: Array<string | number> = [];
   draft = "";
   disabled = false;
+  invalidDraft = false;
   readonly listId = `flw-tags-${Math.random().toString(36).slice(2)}`;
   private change = (v: Array<string | number>) => {};
   touched = () => {};
@@ -80,14 +83,17 @@ export class FlwTagInputComponent implements ControlValueAccessor {
     const option = this.options.find(
       (o) => o.label.toLowerCase() === text.toLowerCase(),
     );
-    if (
+    const canAdd =
       (option || (this.freeText && text)) &&
-      !this.values.includes(option?.value ?? text)
-    ) {
+      !this.values.includes(option?.value ?? text);
+    if (canAdd) {
       this.values = [...this.values, option?.value ?? text];
       this.change(this.values);
+    } else if (text && !this.freeText) {
+      this.invalidDraft = true;
     }
-    this.draft = "";
+    if (canAdd) this.draft = "";
+    this.touched();
   }
   remove(value: string | number) {
     this.values = this.values.filter((v) => v !== value);

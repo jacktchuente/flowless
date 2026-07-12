@@ -25,7 +25,11 @@ import {
 } from "../../../ui/timeline/flw-timeline.component";
 import { TimeAgoPipe } from "../../../ui/pipes/time-ago.pipe";
 import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
-import { natureToCategory } from "../../../ui/category";
+import {
+  containerKindLabel,
+  natureLabel,
+  natureToCategory,
+} from "../../../ui/category";
 import { TvChannelDialogComponent } from "../tv-channel-dialog/tv-channel-dialog.component";
 @Component({
   selector: "app-channel-detail",
@@ -215,20 +219,23 @@ export class ChannelDetailComponent {
         end: this.time(i.ends_at),
         title: i.media_item_title,
         sub: i.media_container_title,
-        category: natureToCategory(i.role),
+        category: natureToCategory(i.media_nature),
       }));
   }
   blockTags(b: GridBlock) {
     return [
       ...b.allowed_categories,
-      ...b.allowed_natures,
-      ...b.allowed_container_kinds,
+      ...b.allowed_natures.map(natureLabel),
+      ...b.allowed_container_kinds.map(containerKindLabel),
     ].slice(0, 4);
   }
   shift(d: number) {
     const next = new Date(this.calendarDate);
     next.setDate(next.getDate() + d);
     this.calendarDate = next;
+  }
+  resetCalendarDay() {
+    this.calendarDate = new Date();
   }
   private sameDay(v: string) {
     const d = new Date(v);
