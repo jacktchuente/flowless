@@ -10,7 +10,11 @@ class GridNotEditableError(ValueError):
 
 
 def get_editable_grid_layout(tv_channel) -> GridLayout:
-    layout = tv_channel.gridlayout_set.filter(is_active=True).order_by("-created_at", "-id").first()
+    layout = (
+        tv_channel.gridlayout_set.filter(is_active=True)
+        .order_by("-created_at", "-id")
+        .first()
+    )
     if layout is None:
         raise GridNotEditableError("Channel has no active grid.")
     if layout.mode == GridLayoutMode.FLEXIBLE:
@@ -32,7 +36,14 @@ def _minutes(value):
 
 
 def compute_grid_warnings(grid_layout) -> list[str]:
-    blocks = list(grid_layout.gridblock_set.all().order_by("starts_at", "id"))
+    prefetched = getattr(grid_layout, "_prefetched_objects_cache", {}).get(
+        "gridblock_set"
+    )
+    blocks = (
+        sorted(prefetched, key=lambda block: (block.starts_at, block.id))
+        if prefetched is not None
+        else list(grid_layout.gridblock_set.all().order_by("starts_at", "id"))
+    )
     warnings = []
     for previous, current in zip(blocks, blocks[1:]):
         previous_end = _minutes(previous.ends_at)
@@ -62,6 +73,11 @@ def compute_grid_warnings(grid_layout) -> list[str]:
     }
     for block in blocks:
         for axis, vocabulary in complete_values.items():
-            if not getattr(block, f"allowed_{axis}") and set(getattr(block, f"forbidden_{axis}")) >= vocabulary:
-                warnings.append(f"Block {block.id} forbids every {axis.replace('_', ' ')} value.")
+            if (
+                not getattr(block, f"allowed_{axis}")
+                and set(getattr(block, f"forbidden_{axis}")) >= vocabulary
+            ):
+                warnings.append(
+                    f"Block {block.id} forbids every {axis.replace('_', ' ')} value."
+                )
     return warnings

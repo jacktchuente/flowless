@@ -1,13 +1,13 @@
 from datetime import timedelta
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Max, OuterRef, Prefetch, Q, Subquery
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from editorial_planning.models import EditorialFlowRun
 from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
 from media_source.models import MediaCollection, MediaSource
-from tv_channel.models import TvChannel
+from tv_channel.models import GridLayout, TvChannel
 from tv_channel.services.grid_editing import compute_grid_warnings
 
 
@@ -18,7 +18,27 @@ class DashboardOverviewView(APIView):
             days=getattr(settings, "DASHBOARD_STALE_SOURCE_DAYS", 7)
         )
         since = now - timedelta(hours=24)
-        channels = list(TvChannel.objects.select_related("catalog").all())
+        latest_report_id = (
+            PlayoutGenerationReport.objects.filter(
+                tv_playout__tv_channel_id=OuterRef("pk")
+            )
+            .order_by("-created_at", "-id")
+            .values("id")[:1]
+        )
+        active_grids = GridLayout.objects.filter(is_active=True).prefetch_related(
+            "gridblock_set"
+        )
+        channels = list(
+            TvChannel.objects.select_related("catalog")
+            .prefetch_related(
+                Prefetch(
+                    "gridlayout_set",
+                    queryset=active_grids,
+                    to_attr="dashboard_active_grids",
+                )
+            )
+            .annotate(dashboard_latest_report_id=Subquery(latest_report_id))
+        )
         enabled = [c for c in channels if c.is_enabled]
         active_playouts = {
             p.tv_channel_id: p
@@ -65,16 +85,19 @@ class DashboardOverviewView(APIView):
                         "next": self._item(nxt, False) if nxt else None,
                     }
                 )
-        reports = list(
-            PlayoutGenerationReport.objects.filter(tv_playout__tv_channel__in=channels)
-            .select_related("tv_playout__tv_channel")
-            .order_by("tv_playout__tv_channel_id", "-created_at", "-id")
+        latest_report_ids = [
+            channel.dashboard_latest_report_id
+            for channel in channels
+            if channel.dashboard_latest_report_id
+        ]
+        latest_reports = list(
+            PlayoutGenerationReport.objects.filter(
+                id__in=latest_report_ids
+            ).select_related("tv_playout__tv_channel")
         )
-        latest = {}
-        for report in reports:
-            latest.setdefault(report.tv_playout.tv_channel_id, report)
         alerts = []
-        for channel_id, report in latest.items():
+        for report in latest_reports:
+            channel_id = report.tv_playout.tv_channel_id
             for issue in report.issues or []:
                 if issue.get("severity") in ("error", "warning"):
                     alerts.append(
@@ -84,9 +107,8 @@ class DashboardOverviewView(APIView):
                             "object_type": "tv_channel",
                             "object_id": channel_id,
                             "object_name": report.tv_playout.tv_channel.name,
-                            "message": issue.get(
-                                "message", issue.get("code", "Problème de planning")
-                            ),
+                            "message": issue.get("message"),
+                            "message_params": {"code": issue.get("code")},
                             "occurred_at": report.created_at,
                         }
                     )
@@ -103,12 +125,13 @@ class DashboardOverviewView(APIView):
                     "object_type": "media_source",
                     "object_id": source.id,
                     "object_name": source.name,
-                    "message": "Cette source doit être resynchronisée.",
+                    "message": None,
+                    "message_params": {},
                     "occurred_at": source.analyzed_at or now,
                 }
             )
         for channel in channels:
-            grid = channel.gridlayout_set.filter(is_active=True).first()
+            grid = next(iter(channel.dashboard_active_grids), None)
             if grid:
                 for warning in compute_grid_warnings(grid):
                     alerts.append(
@@ -125,8 +148,14 @@ class DashboardOverviewView(APIView):
         alerts.sort(
             key=lambda a: (a["severity"] != "error", -a["occurred_at"].timestamp())
         )
+        recent_reports = list(
+            PlayoutGenerationReport.objects.filter(
+                tv_playout__tv_channel__in=channels,
+                created_at__gte=since,
+            ).select_related("tv_playout__tv_channel")
+        )
         recent = []
-        for report in [r for r in reports if r.created_at >= since]:
+        for report in recent_reports:
             errors = sum(1 for i in report.issues or [] if i.get("severity") == "error")
             recent.append(
                 {
@@ -163,7 +192,9 @@ class DashboardOverviewView(APIView):
                 }
             )
         recent.sort(key=lambda a: a["occurred_at"], reverse=True)
-        last = max((r.created_at for r in reports), default=None)
+        last = PlayoutGenerationReport.objects.aggregate(value=Max("created_at"))[
+            "value"
+        ]
         channels_with_alerts = len(
             {a["object_id"] for a in alerts if a["object_type"] == "tv_channel"}
         )

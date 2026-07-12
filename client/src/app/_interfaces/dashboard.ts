@@ -14,7 +14,8 @@ export interface DashboardAlert {
   object_type: "tv_channel" | "media_source";
   object_id: number;
   object_name: string;
-  message: string;
+  message: string | null;
+  message_params?: Record<string, unknown>;
   occurred_at: string;
 }
 export interface DashboardActivity {
