@@ -1,7 +1,7 @@
 import { Component, DestroyRef, inject } from "@angular/core";
 import { NgFor, NgIf } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { TranslateModule } from "@ngx-translate/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { MediaSource } from "@project-interfaces/media-source";
 import { MediaSourceService } from "@project-services/media-source.service";
 import { NotificationService } from "@project-shared/services/notification.service";
@@ -25,6 +25,7 @@ export class MediaSourceComponent {
     private service: MediaSourceService,
     private notification: NotificationService,
     private dialogs: FlwDialogService,
+    private translate: TranslateService,
   ) {
     service.listObject(null, true);
     service
@@ -47,10 +48,10 @@ export class MediaSourceComponent {
   }
   status(source: MediaSource) {
     if (source.analyze_status === 1)
-      return { kind: "info", label: "Synchronisation…" };
+      return { kind: "info", label: "MEDIA_SOURCE.STATUS_SYNCING" };
     if (this.isStale(source))
-      return { kind: "warning", label: "Synchro en retard" };
-    return { kind: "success", label: "Connectée" };
+      return { kind: "warning", label: "MEDIA_SOURCE.STATUS_STALE" };
+    return { kind: "success", label: "MEDIA_SOURCE.STATUS_CONNECTED" };
   }
   openCreateDialog() {
     this.dialogs.open(MediaSourceDialogComponent, { data: {} });
@@ -64,9 +65,11 @@ export class MediaSourceComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Supprimer la source",
-          message: `Supprimer définitivement « ${source.name} » ?`,
-          confirmLabel: "Supprimer",
+          title: this.translate.instant("MEDIA_SOURCE.DELETE_TITLE"),
+          message: this.translate.instant("MEDIA_SOURCE.CONFIRM_DELETE", {
+            name: source.name,
+          }),
+          confirmLabel: this.translate.instant("COMMON.DELETE"),
         },
       })
       .closed.subscribe((ok) => {

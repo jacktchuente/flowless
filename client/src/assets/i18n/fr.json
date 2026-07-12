@@ -149,7 +149,11 @@
     "ACTIVATE": "Activer",
     "DONE": "Terminé",
     "CANCEL": "Annuler",
-    "CONFIRM": "Confirmer"
+    "CONFIRM": "Confirmer",
+    "SAVE": "Enregistrer",
+    "APPLY": "Appliquer",
+    "TYPE": "Type",
+    "LOADING": "Chargement…"
   },
   "MEDIA_SOURCE": {
     "EYEBROW": "Sources",
@@ -162,7 +166,27 @@
     "EMPTY_HELP": "Ajoutez une source Jellyfin pour commencer la synchronisation des collections.",
     "NOTIFY_DELETE_FAILED": "Suppression impossible.",
     "NOTIFY_SYNC_FAILED": "Synchronisation des collections impossible.",
-    "NOTIFY_SYNC_STARTED": "Synchronisation des collections lancée en arrière-plan."
+    "NOTIFY_SYNC_STARTED": "Synchronisation des collections lancée en arrière-plan.",
+    "COLUMN_SOURCE": "Source",
+    "COLUMN_USERNAME": "Identifiant",
+    "STATUS_SYNCING": "Synchronisation…",
+    "STATUS_STALE": "Synchro en retard",
+    "STATUS_CONNECTED": "Connectée",
+    "STALE_NOTE": "{{count}} source(s) doivent être resynchronisées. La plus ancienne est en retard de {{days}} jours.",
+    "DELETE_TITLE": "Supprimer la source",
+    "CONFIRM_DELETE": "Supprimer définitivement « {{name}} » ?",
+    "DIALOG": {
+      "EDIT_TITLE": "Modifier la source",
+      "NEW_TITLE": "Nouvelle source",
+      "DESCRIPTION": "Connectez un serveur Jellyfin à la régie.",
+      "URL": "URL Jellyfin",
+      "PASSWORD": "Mot de passe",
+      "NAME_PLACEHOLDER": "Jellyfin principal",
+      "HINT": "Utilisez de préférence un compte Jellyfin dédié avec un accès en lecture seule.",
+      "SUBMIT": "Tester la connexion et enregistrer",
+      "SUBMITTING": "Vérification…",
+      "CONNECTION_FAILED": "La connexion à la source a échoué."
+    }
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",
@@ -182,7 +206,21 @@
     "NOTIFY_ANALYZE_STARTED": "Analyse de collection lancée en arrière-plan.",
     "FORCE_REANALYZE": "Oui, tout réanalyser",
     "ANALYZING_WARNING": "Une analyse semble déjà en cours pour cette collection. Si elle est restée bloquée (crash), seule la réanalyse forcée relancera le traitement.",
-    "IS_ANIME": "Anime"
+    "IS_ANIME": "Anime",
+    "COLUMN_COLLECTION": "Collection",
+    "ROLE": "Rôle éditorial",
+    "ACTIVE": "Active",
+    "DETAIL": {
+      "TITLE": "Collection — {{name}}",
+      "DESCRIPTION": "Ajustez les métadonnées utilisées par la programmation.",
+      "EXTERNAL_ID": "Identifiant externe",
+      "ROLE_LABEL": "Rôle de programmation",
+      "ROLE_HINT": "Détermine la place de cette collection dans la grille.",
+      "KIND": "Type de contenant",
+      "CLASSIFICATION": "Classification",
+      "IS_ANIME": "Considérer comme anime",
+      "ANALYZE_NOW": "Analyser maintenant"
+    }
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",
@@ -194,8 +232,8 @@
     "PAGE_SIZE": "Taille",
     "COLUMN_TITLE": "Titre",
     "COLUMN_ANALYZED_AT": "Analysé le",
-    "COLUMN_ITEM_COUNT": "Nb items",
-    "COLUMN_MISSING": "Missing",
+    "COLUMN_ITEM_COUNT": "Éléments",
+    "COLUMN_MISSING": "Manquants",
     "ANALYZE": "Analyser",
     "EMPTY_TITLE": "Aucun média disponible",
     "EMPTY_HELP": "Analysez d’abord une collection pour faire remonter les media containers.",
@@ -204,7 +242,43 @@
     "NOTIFY_ANALYZE_FAILED": "Analyse du média impossible.",
     "NOTIFY_ANALYZE_ALL_FAILED": "Analyse globale des médias impossible.",
     "NOTIFY_ANALYZE_ALL_STARTED": "Analyse globale des médias lancée en arrière-plan.",
-    "NOTIFY_ANALYZE_STARTED": "Analyse du média lancée en arrière-plan."
+    "NOTIFY_ANALYZE_STARTED": "Analyse du média lancée en arrière-plan.",
+    "SEARCH_PLACEHOLDER": "Rechercher un titre…",
+    "MORE_FILTERS": "Plus de filtres",
+    "CLEAR_FILTERS": "Tout effacer",
+    "NATURE": "Nature",
+    "STATUS_COMPLETE": "Complet",
+    "STATUS_ERROR": "En erreur",
+    "STATUS_ANALYZING": "Analyse…",
+    "STATUS_PENDING": "Analyse en cours",
+    "STATUS_PARTIAL": "Partiel",
+    "TOTAL_SUMMARY": "{{count}} titres au total · page {{page}} sur {{pages}}",
+    "ANALYZE_ALL_TITLE": "Analyser tous les médias",
+    "FILTERS": {
+      "TITLE": "Filtres avancés",
+      "DESCRIPTION": "Affinez la liste des médias.",
+      "STATUS": "Statut",
+      "CATEGORY": "Catégorie",
+      "NATURE": "Nature",
+      "TYPE": "Type",
+      "ANIME": "Anime",
+      "ANY_M": "Tous",
+      "ANY_F": "Toutes",
+      "ANIME_ONLY": "Anime",
+      "NOT_ANIME": "Non anime"
+    },
+    "DETAIL": {
+      "TITLE_FALLBACK": "Détail du média",
+      "EXTERNAL_ID": "Identifiant externe",
+      "ANALYZED_AT": "Analysé le",
+      "ITEMS": "Éléments",
+      "CATEGORIES": "Catégories",
+      "GENRES": "Genres",
+      "TAGS": "Tags",
+      "COUNTRIES": "Pays",
+      "AUDIO_LANGUAGES": "Langues audio",
+      "DURATIONS": "Durées"
+    }
   },
   "CHANNEL_DETAIL": {
     "BACK": "Retour aux chaînes",
@@ -416,6 +490,17 @@
       "APPLY": "Appliquer la sélection",
       "ADD": "Ajouter : {{value}}",
       "REMOVE": "Retirer : {{value}}"
+    },
+    "ROLES": {
+      "1": "Principal",
+      "2": "Bande-annonce",
+      "3": "Promo",
+      "4": "Publicité",
+      "5": "Jingle",
+      "6": "Identité",
+      "7": "Filler",
+      "8": "Message public",
+      "99": "Autre"
     }
   },
   "CHANNEL_DIALOGS": {

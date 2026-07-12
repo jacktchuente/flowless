@@ -1,47 +1,67 @@
-<flw-modal [title]="container?.title || 'Détail du média'" [wide]="true"
-  ><div class="empty" *ngIf="isLoading">Chargement…</div>
+<flw-modal
+  [title]="
+    container?.title || ('MEDIA_CONTAINER.DETAIL.TITLE_FALLBACK' | translate)
+  "
+  [wide]="true"
+  ><div class="empty" *ngIf="isLoading">
+    {{ "COMMON.LOADING" | translate }}
+  </div>
   <ng-container *ngIf="container as c"
     ><div class="kv">
       <div class="row">
-        <span class="k">Identifiant externe</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.EXTERNAL_ID" | translate
+        }}</span
         ><strong class="v mono">{{ c.external_id }}</strong>
       </div>
       <div class="row">
-        <span class="k">Analysé le</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.ANALYZED_AT" | translate
+        }}</span
         ><strong class="v mono">{{
-          c.analyzed_at ? (c.analyzed_at | date: "dd/MM/yyyy HH:mm") : "Jamais"
+          c.analyzed_at
+            ? (c.analyzed_at | date: "dd/MM/yyyy HH:mm")
+            : ("COMMON.NEVER" | translate)
         }}</strong>
       </div>
       <div class="row">
-        <span class="k">Éléments</span
+        <span class="k">{{ "MEDIA_CONTAINER.DETAIL.ITEMS" | translate }}</span
         ><strong class="v mono">{{ c.item_count ?? "—" }}</strong>
       </div>
       <div class="row">
-        <span class="k">Description</span
+        <span class="k">{{ "COMMON.DESCRIPTION" | translate }}</span
         ><strong class="v">{{ c.description || "—" }}</strong>
       </div>
       <div class="row">
-        <span class="k">Catégories</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.CATEGORIES" | translate
+        }}</span
         ><strong class="v">{{ format(c.categories) }}</strong>
       </div>
       <div class="row">
-        <span class="k">Genres</span
+        <span class="k">{{ "MEDIA_CONTAINER.DETAIL.GENRES" | translate }}</span
         ><strong class="v">{{ format(c.genres) }}</strong>
       </div>
       <div class="row">
-        <span class="k">Tags</span
+        <span class="k">{{ "MEDIA_CONTAINER.DETAIL.TAGS" | translate }}</span
         ><strong class="v">{{ format(c.tags) }}</strong>
       </div>
       <div class="row">
-        <span class="k">Pays</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.COUNTRIES" | translate
+        }}</span
         ><strong class="v">{{ format(c.countries) }}</strong>
       </div>
       <div class="row">
-        <span class="k">Langues audio</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.AUDIO_LANGUAGES" | translate
+        }}</span
         ><strong class="v">{{ format(c.audio_languages) }}</strong>
       </div>
       <div class="row">
-        <span class="k">Durées</span
+        <span class="k">{{
+          "MEDIA_CONTAINER.DETAIL.DURATIONS" | translate
+        }}</span
         ><strong class="v mono"
           >{{ c.duration_min_seconds ?? "—" }} –
           {{ c.duration_max_seconds ?? "—" }} s</strong
@@ -51,6 +71,8 @@
   >
   <div modal-footer>
     <span></span
-    ><button class="btn" type="button" (click)="ref.close()">Fermer</button>
+    ><button class="btn" type="button" (click)="ref.close()">
+      {{ "COMMON.CLOSE" | translate }}
+    </button>
   </div></flw-modal
 >

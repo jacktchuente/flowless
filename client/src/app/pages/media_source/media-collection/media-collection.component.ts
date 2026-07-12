@@ -1,7 +1,7 @@
 import { Component, DestroyRef, inject } from "@angular/core";
 import { DatePipe, NgFor, NgIf } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { TranslateModule } from "@ngx-translate/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { MediaCollection } from "@project-interfaces/media-collection";
 import { MediaCollectionService } from "@project-services/media-collection.service";
 import { NotificationService } from "@project-shared/services/notification.service";
@@ -32,6 +32,7 @@ export class MediaCollectionComponent {
     private service: MediaCollectionService,
     private dialogs: FlwDialogService,
     private notification: NotificationService,
+    private translate: TranslateService,
   ) {
     service.listObject(null, true);
     service
@@ -61,9 +62,11 @@ export class MediaCollectionComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Analyser la collection",
-          message: `Lancer l’analyse de « ${collection.name} » ?`,
-          confirmLabel: "Analyser",
+          title: this.translate.instant("MEDIA_COLLECTION.ANALYZE_COLLECTION"),
+          message: this.translate.instant("MEDIA_COLLECTION.CONFIRM_ANALYZE", {
+            name: collection.name,
+          }),
+          confirmLabel: this.translate.instant("MEDIA_COLLECTION.ANALYZE"),
         },
       })
       .closed.subscribe((ok) => {
@@ -105,33 +108,19 @@ export class MediaCollectionComponent {
     value: number | null,
     options: { value: number; label: string }[],
   ) {
-    return options.find((o) => o.value === value)?.label ?? "—";
+    const key = options.find((o) => o.value === value)?.label;
+    return key ? this.translate.instant(key) : "—";
   }
 }
-export const ROLES = [
-  { value: 1, label: "Principal" },
-  { value: 2, label: "Bande-annonce" },
-  { value: 3, label: "Promo" },
-  { value: 4, label: "Publicité" },
-  { value: 5, label: "Jingle" },
-  { value: 6, label: "Identité" },
-  { value: 7, label: "Filler" },
-  { value: 8, label: "Message public" },
-  { value: 99, label: "Autre" },
-];
-export const NATURES = [
-  { value: 1, label: "Fiction" },
-  { value: 2, label: "Documentaire" },
-  { value: 3, label: "Musique" },
-  { value: 4, label: "Sport" },
-  { value: 5, label: "Information" },
-  { value: 6, label: "Divertissement" },
-  { value: 99, label: "Autre" },
-];
-export const KINDS = [
-  { value: 1, label: "Vidéo unitaire" },
-  { value: 2, label: "Série" },
-  { value: 3, label: "Album" },
-  { value: 4, label: "Clip musical" },
-  { value: 99, label: "Autre" },
-];
+export const ROLES = [1, 2, 3, 4, 5, 6, 7, 8, 99].map((value) => ({
+  value,
+  label: `UI.ROLES.${value}`,
+}));
+export const NATURES = [1, 2, 3, 4, 5, 6, 99].map((value) => ({
+  value,
+  label: `UI.NATURES.${value}`,
+}));
+export const KINDS = [1, 2, 3, 4, 99].map((value) => ({
+  value,
+  label: `UI.CONTAINER_KINDS.${value}`,
+}));

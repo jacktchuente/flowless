@@ -16,11 +16,13 @@
       <flw-icon name="search" /><input
         type="search"
         [formControl]="search"
-        placeholder="Rechercher un titre…"
+        [placeholder]="'MEDIA_CONTAINER.SEARCH_PLACEHOLDER' | translate"
       />
     </div>
     <button class="btn" type="button" (click)="openFilters()">
-      <flw-icon name="filter" />Plus de filtres</button
+      <flw-icon name="filter" />{{
+        "MEDIA_CONTAINER.MORE_FILTERS" | translate
+      }}</button
     ><flw-select
       [value]="pageSize"
       [options]="pageSizeOptions"
@@ -33,7 +35,7 @@
       [label]="chip.label"
       (remove)="removeFilter(chip.key)"
     /><button class="btn ghost sm" (click)="resetFilters()">
-      Tout effacer
+      {{ "MEDIA_CONTAINER.CLEAR_FILTERS" | translate }}
     </button>
   </div>
   <section class="card">
@@ -41,13 +43,13 @@
       <table class="grid">
         <thead>
           <tr>
-            <th>Titre</th>
-            <th>Statut</th>
-            <th>Analysé le</th>
-            <th>Éléments</th>
-            <th>Nature</th>
-            <th>Type</th>
-            <th>Manquants</th>
+            <th>{{ "MEDIA_CONTAINER.COLUMN_TITLE" | translate }}</th>
+            <th>{{ "COMMON.STATUS_LABEL" | translate }}</th>
+            <th>{{ "MEDIA_CONTAINER.COLUMN_ANALYZED_AT" | translate }}</th>
+            <th>{{ "MEDIA_CONTAINER.COLUMN_ITEM_COUNT" | translate }}</th>
+            <th>{{ "MEDIA_CONTAINER.NATURE" | translate }}</th>
+            <th>{{ "COMMON.TYPE" | translate }}</th>
+            <th>{{ "MEDIA_CONTAINER.COLUMN_MISSING" | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -59,7 +61,8 @@
             <td class="cell-title">{{ container.title }}</td>
             <td>
               <span class="pill" [class]="status(container).kind"
-                ><span class="dot"></span>{{ status(container).label }}</span
+                ><span class="dot"></span
+                >{{ status(container).label | translate }}</span
               >
             </td>
             <td class="mono">
@@ -77,7 +80,10 @@
                 class="pill"
                 [class.critical]="container.is_missing"
                 [class.neutral]="!container.is_missing"
-                >{{ container.is_missing ? "Oui" : "Non" }}</span
+                >{{
+                  (container.is_missing ? "COMMON.YES" : "COMMON.NO")
+                    | translate
+                }}</span
               >
             </td>
             <td>
@@ -87,7 +93,7 @@
                 [disabled]="syncingIds.has(container.id.toString())"
                 (click)="analyze(container, $event)"
               >
-                Analyser
+                {{ "MEDIA_CONTAINER.ANALYZE" | translate }}
               </button>
             </td>
           </tr>
@@ -97,16 +103,17 @@
     <ng-template #empty
       ><div class="empty">
         {{
-          isLoading
-            ? "Chargement…"
-            : ("MEDIA_CONTAINER.EMPTY_TITLE" | translate)
+          (isLoading ? "COMMON.LOADING" : "MEDIA_CONTAINER.EMPTY_TITLE")
+            | translate
         }}
       </div></ng-template
     >
     <footer class="footer" *ngIf="totalCount">
-      <span
-        >{{ totalCount }} titres au total · page {{ currentPage }} sur
-        {{ totalPages }}</span
+      <span>{{
+        "MEDIA_CONTAINER.TOTAL_SUMMARY"
+          | translate
+            : { count: totalCount, page: currentPage, pages: totalPages }
+      }}</span
       ><flw-pagination
         [page]="currentPage"
         [pageCount]="totalPages"

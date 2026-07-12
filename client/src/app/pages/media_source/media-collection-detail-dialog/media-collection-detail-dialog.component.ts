@@ -1,6 +1,7 @@
 import { Component, Inject } from "@angular/core";
 import { ReactiveFormsModule, FormControl, FormGroup } from "@angular/forms";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { MediaCollection } from "@project-interfaces/media-collection";
 import { MediaCollectionService } from "@project-services/media-collection.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
@@ -15,6 +16,7 @@ import {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslateModule,
     FlwModalComponent,
     FlwSelectComponent,
     FlwSwitchComponent,
@@ -24,9 +26,9 @@ import {
 })
 export class MediaCollectionDetailDialogComponent {
   isSubmitting = false;
-  readonly roleOptions = [{ label: "—", value: null }, ...ROLES];
-  readonly natureOptions = [{ label: "—", value: null }, ...NATURES];
-  readonly kindOptions = [{ label: "—", value: null }, ...KINDS];
+  readonly roleOptions = this.optionsFor(ROLES);
+  readonly natureOptions = this.optionsFor(NATURES);
+  readonly kindOptions = this.optionsFor(KINDS);
   form = new FormGroup({
     programming_role: new FormControl(this.data.collection.programming_role),
     nature: new FormControl(this.data.collection.nature),
@@ -37,9 +39,19 @@ export class MediaCollectionDetailDialogComponent {
   });
   constructor(
     private service: MediaCollectionService,
+    private translate: TranslateService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA) public data: { collection: MediaCollection },
   ) {}
+  private optionsFor(options: { value: number; label: string }[]) {
+    return [
+      { label: "—", value: null as number | null },
+      ...options.map((o) => ({
+        value: o.value as number | null,
+        label: this.translate.instant(o.label),
+      })),
+    ];
+  }
   save() {
     this.isSubmitting = true;
     this.service

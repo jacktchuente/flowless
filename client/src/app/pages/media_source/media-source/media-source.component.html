@@ -16,12 +16,12 @@
       <table class="grid">
         <thead>
           <tr>
-            <th>Source</th>
-            <th>Type</th>
-            <th>Identifiant</th>
-            <th>Statut</th>
+            <th>{{ "MEDIA_SOURCE.COLUMN_SOURCE" | translate }}</th>
+            <th>{{ "COMMON.TYPE" | translate }}</th>
+            <th>{{ "MEDIA_SOURCE.COLUMN_USERNAME" | translate }}</th>
+            <th>{{ "COMMON.STATUS_LABEL" | translate }}</th>
             <th>{{ "MEDIA_SOURCE.LAST_SYNC" | translate }}</th>
-            <th>Actions</th>
+            <th>{{ "COMMON.ACTIONS" | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -36,7 +36,8 @@
             <td class="mono">{{ source.credentials.username || "—" }}</td>
             <td>
               <span class="pill" [class]="status(source).kind"
-                ><span class="dot"></span>{{ status(source).label }}</span
+                ><span class="dot"></span
+                >{{ status(source).label | translate }}</span
               >
             </td>
             <td class="mono">{{ source.analyzed_at | flwTimeAgo }}</td>
@@ -49,19 +50,21 @@
                 [disabled]="syncingIds.has(source.id.toString())"
                 (click)="syncCollections(source, $event)"
               >
-                <flw-icon name="sync" />Synchroniser</button
+                <flw-icon name="sync" />{{
+                  "MEDIA_SOURCE.SYNC" | translate
+                }}</button
               ><button
                 class="btn ghost icon-only"
                 type="button"
                 (click)="openEditDialog(source, $event)"
-                aria-label="Modifier"
+                [attr.aria-label]="'COMMON.EDIT' | translate"
               >
                 <flw-icon name="edit" /></button
               ><button
                 class="btn danger-ghost icon-only"
                 type="button"
                 (click)="deleteSource(source, $event)"
-                aria-label="Supprimer"
+                [attr.aria-label]="'COMMON.DELETE' | translate"
               >
                 <flw-icon name="trash" />
               </button>
@@ -78,9 +81,10 @@
     >
   </section>
   <aside class="tooltip-note amber" *ngIf="staleSources.length">
-    <flw-icon name="warning" /><span
-      >{{ staleSources.length }} source(s) doivent être resynchronisées. La plus
-      ancienne est en retard de {{ daysSince(staleSources[0]) }} jours.</span
-    >
+    <flw-icon name="warning" /><span>{{
+      "MEDIA_SOURCE.STALE_NOTE"
+        | translate
+          : { count: staleSources.length, days: daysSince(staleSources[0]) }
+    }}</span>
   </aside>
 </div>

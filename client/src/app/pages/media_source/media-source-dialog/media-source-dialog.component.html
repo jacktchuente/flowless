@@ -1,17 +1,22 @@
 <flw-modal
-  [title]="data.source ? 'Modifier la source' : 'Nouvelle source'"
-  description="Connectez un serveur Jellyfin à la régie."
+  [title]="
+    (data.source
+      ? 'MEDIA_SOURCE.DIALOG.EDIT_TITLE'
+      : 'MEDIA_SOURCE.DIALOG.NEW_TITLE'
+    ) | translate
+  "
+  [description]="'MEDIA_SOURCE.DIALOG.DESCRIPTION' | translate"
   ><form [formGroup]="form">
     <div class="field">
-      <label>Nom</label
+      <label>{{ "COMMON.NAME" | translate }}</label
       ><input
         type="text"
         formControlName="name"
-        placeholder="Jellyfin principal"
+        [placeholder]="'MEDIA_SOURCE.DIALOG.NAME_PLACEHOLDER' | translate"
       />
     </div>
     <div class="field">
-      <label>URL Jellyfin</label
+      <label>{{ "MEDIA_SOURCE.DIALOG.URL" | translate }}</label
       ><input
         type="url"
         formControlName="application_url"
@@ -20,19 +25,18 @@
     </div>
     <div class="field-row cols-2">
       <div class="field">
-        <label>Utilisateur</label
+        <label>{{ "COMMON.USERNAME" | translate }}</label
         ><input type="text" formControlName="username" />
       </div>
       <div class="field">
-        <label>Mot de passe</label
+        <label>{{ "MEDIA_SOURCE.DIALOG.PASSWORD" | translate }}</label
         ><input type="password" formControlName="password" />
       </div>
     </div>
   </form>
   <p class="tooltip-note amber" *ngIf="errorMessage">{{ errorMessage }}</p>
   <p class="tooltip-note">
-    Utilisez de préférence un compte Jellyfin dédié avec un accès en lecture
-    seule.
+    {{ "MEDIA_SOURCE.DIALOG.HINT" | translate }}
   </p>
   <div modal-footer>
     <span></span>
@@ -43,7 +47,7 @@
         (click)="ref.close(false)"
         [disabled]="isSubmitting"
       >
-        Annuler</button
+        {{ "COMMON.CANCEL" | translate }}</button
       ><button
         class="btn primary"
         type="button"
@@ -51,7 +55,10 @@
         [disabled]="isSubmitting"
       >
         {{
-          isSubmitting ? "Vérification…" : "Tester la connexion et enregistrer"
+          (isSubmitting
+            ? "MEDIA_SOURCE.DIALOG.SUBMITTING"
+            : "MEDIA_SOURCE.DIALOG.SUBMIT"
+          ) | translate
         }}
       </button>
     </div>

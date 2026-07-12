@@ -21,67 +21,68 @@ import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { MediaContainerDetailDialogComponent } from "../media-container-dialog/media-container-dialog.component";
 const STATUS = [
-  { value: "", label: "Tous" },
-  { value: "2", label: "Complet" },
-  { value: "4", label: "En erreur" },
-  { value: "1", label: "Analyse en cours" },
-  { value: "0", label: "Partiel" },
+  { value: "", label: "MEDIA_CONTAINER.FILTERS.ANY_M" },
+  { value: "2", label: "MEDIA_CONTAINER.STATUS_COMPLETE" },
+  { value: "4", label: "MEDIA_CONTAINER.STATUS_ERROR" },
+  { value: "1", label: "MEDIA_CONTAINER.STATUS_PENDING" },
+  { value: "0", label: "MEDIA_CONTAINER.STATUS_PARTIAL" },
 ];
 const NATURE = [
-  { value: "", label: "Toutes" },
-  { value: "1", label: "Fiction" },
-  { value: "2", label: "Documentaire" },
-  { value: "3", label: "Musique" },
-  { value: "4", label: "Sport" },
-  { value: "5", label: "Information" },
-  { value: "6", label: "Divertissement" },
-  { value: "99", label: "Autre" },
+  { value: "", label: "MEDIA_CONTAINER.FILTERS.ANY_F" },
+  ...["1", "2", "3", "4", "5", "6", "99"].map((value) => ({
+    value,
+    label: `UI.NATURES.${value}`,
+  })),
 ];
 const KIND = [
-  { value: "", label: "Tous" },
-  { value: "1", label: "Vidéo unitaire" },
-  { value: "2", label: "Série" },
-  { value: "3", label: "Album" },
-  { value: "4", label: "Clip musical" },
-  { value: "99", label: "Autre" },
+  { value: "", label: "MEDIA_CONTAINER.FILTERS.ANY_M" },
+  ...["1", "2", "3", "4", "99"].map((value) => ({
+    value,
+    label: `UI.CONTAINER_KINDS.${value}`,
+  })),
 ];
 @Component({
   standalone: true,
-  imports: [FormsModule, FlwModalComponent, FlwSelectComponent],
+  imports: [
+    FormsModule,
+    TranslateModule,
+    FlwModalComponent,
+    FlwSelectComponent,
+  ],
   template: `<flw-modal
-    title="Filtres avancés"
-    description="Affinez la liste des médias."
+    [title]="'MEDIA_CONTAINER.FILTERS.TITLE' | translate"
+    [description]="'MEDIA_CONTAINER.FILTERS.DESCRIPTION' | translate"
     ><div class="field-row cols-2">
       <div class="field">
-        <label>Statut</label
+        <label>{{ "MEDIA_CONTAINER.FILTERS.STATUS" | translate }}</label
         ><flw-select [(ngModel)]="draft.status" [options]="status" />
       </div>
       <div class="field">
-        <label>Catégorie</label
+        <label>{{ "MEDIA_CONTAINER.FILTERS.CATEGORY" | translate }}</label
         ><input [(ngModel)]="draft.category" type="text" />
       </div>
       <div class="field">
-        <label>Nature</label
+        <label>{{ "MEDIA_CONTAINER.FILTERS.NATURE" | translate }}</label
         ><flw-select [(ngModel)]="draft.nature" [options]="natures" />
       </div>
       <div class="field">
-        <label>Type</label
+        <label>{{ "MEDIA_CONTAINER.FILTERS.TYPE" | translate }}</label
         ><flw-select [(ngModel)]="draft.container_kind" [options]="kinds" />
       </div>
       <div class="field">
-        <label>Anime</label
+        <label>{{ "MEDIA_CONTAINER.FILTERS.ANIME" | translate }}</label
         ><flw-select [(ngModel)]="draft.is_anime" [options]="anime" />
       </div>
     </div>
     <div modal-footer>
       <button class="btn ghost" type="button" (click)="reset()">
-        Réinitialiser
+        {{ "COMMON.RESET" | translate }}
       </button>
       <div>
         <button class="btn ghost" type="button" (click)="ref.close()">
-          Annuler</button
+          {{ "COMMON.CANCEL" | translate }}</button
         ><button class="btn primary" type="button" (click)="ref.close(draft)">
-          Appliquer
+          {{ "COMMON.APPLY" | translate }}
         </button>
       </div>
     </div></flw-modal
@@ -89,18 +90,25 @@ const KIND = [
 })
 export class MediaFiltersDialog {
   draft = { ...this.data };
-  status = STATUS;
-  natures = NATURE;
-  kinds = KIND;
-  anime = [
-    { value: "", label: "Tous" },
-    { value: "1", label: "Anime" },
-    { value: "0", label: "Non anime" },
-  ];
+  status = this.translated(STATUS);
+  natures = this.translated(NATURE);
+  kinds = this.translated(KIND);
+  anime = this.translated([
+    { value: "", label: "MEDIA_CONTAINER.FILTERS.ANY_M" },
+    { value: "1", label: "MEDIA_CONTAINER.FILTERS.ANIME_ONLY" },
+    { value: "0", label: "MEDIA_CONTAINER.FILTERS.NOT_ANIME" },
+  ]);
   constructor(
+    private translate: TranslateService,
     @Inject(DIALOG_DATA) public data: any,
     public ref: DialogRef<any>,
   ) {}
+  private translated(options: { value: string; label: string }[]) {
+    return options.map((o) => ({
+      ...o,
+      label: this.translate.instant(o.label),
+    }));
+  }
   reset() {
     this.draft = {
       status: "",
@@ -172,17 +180,17 @@ export class MediaContainerComponent {
   }
   get chips() {
     const labels: any = {
-      status: "Statut",
-      category: "Catégorie",
-      nature: "Nature",
-      container_kind: "Type",
-      is_anime: "Anime",
+      status: "MEDIA_CONTAINER.FILTERS.STATUS",
+      category: "MEDIA_CONTAINER.FILTERS.CATEGORY",
+      nature: "MEDIA_CONTAINER.FILTERS.NATURE",
+      container_kind: "MEDIA_CONTAINER.FILTERS.TYPE",
+      is_anime: "MEDIA_CONTAINER.FILTERS.ANIME",
     };
     return Object.entries(this.filters)
       .filter(([, v]) => v !== "")
       .map(([key, value]) => ({
         key,
-        label: `${labels[key]} : ${this.optionLabel(key, value)}`,
+        label: `${this.translate.instant(labels[key])} : ${this.optionLabel(key, value)}`,
       }));
   }
   loadPage(page: number) {
@@ -252,11 +260,11 @@ export class MediaContainerComponent {
     this.dialogs
       .open(FlwConfirmComponent, {
         data: {
-          title: "Analyser tous les médias",
+          title: this.translate.instant("MEDIA_CONTAINER.ANALYZE_ALL_TITLE"),
           message: this.translate.instant(
             "MEDIA_CONTAINER.CONFIRM_ANALYZE_ALL",
           ),
-          confirmLabel: "Analyser tout",
+          confirmLabel: this.translate.instant("MEDIA_CONTAINER.ANALYZE_ALL"),
         },
       })
       .closed.subscribe((ok) => {
@@ -275,25 +283,36 @@ export class MediaContainerComponent {
       });
   }
   status(c: MediaContainerListItem) {
-    if (c.analyze_status === 2) return { kind: "success", label: "Complet" };
-    if (c.analyze_status === 4) return { kind: "critical", label: "En erreur" };
-    if (c.analyze_status === 1) return { kind: "info", label: "Analyse…" };
-    return { kind: "warning", label: "Partiel" };
+    if (c.analyze_status === 2)
+      return { kind: "success", label: "MEDIA_CONTAINER.STATUS_COMPLETE" };
+    if (c.analyze_status === 4)
+      return { kind: "critical", label: "MEDIA_CONTAINER.STATUS_ERROR" };
+    if (c.analyze_status === 1)
+      return { kind: "info", label: "MEDIA_CONTAINER.STATUS_ANALYZING" };
+    return { kind: "warning", label: "MEDIA_CONTAINER.STATUS_PARTIAL" };
   }
   nature(c: MediaContainerListItem) {
-    return NATURE.find((o) => o.value === String(c.nature ?? ""))?.label ?? "—";
+    return this.findLabel(NATURE, String(c.nature ?? ""));
   }
   kind(c: MediaContainerListItem) {
-    return (
-      KIND.find((o) => o.value === String(c.container_kind ?? ""))?.label ?? "—"
-    );
+    return this.findLabel(KIND, String(c.container_kind ?? ""));
+  }
+  private findLabel(
+    options: { value: string; label: string }[],
+    value: string,
+  ) {
+    const key = value === "" ? null : options.find((o) => o.value === value);
+    return key ? this.translate.instant(key.label) : "—";
   }
   private optionLabel(key: string, v: string) {
-    if (key === "status") return STATUS.find((o) => o.value === v)?.label ?? v;
-    if (key === "nature") return NATURE.find((o) => o.value === v)?.label ?? v;
-    if (key === "container_kind")
-      return KIND.find((o) => o.value === v)?.label ?? v;
-    if (key === "is_anime") return v === "1" ? "Oui" : "Non";
+    if (key === "status") {
+      const option = STATUS.find((o) => o.value === v);
+      return option ? this.translate.instant(option.label) : v;
+    }
+    if (key === "nature") return this.findLabel(NATURE, v);
+    if (key === "container_kind") return this.findLabel(KIND, v);
+    if (key === "is_anime")
+      return this.translate.instant(v === "1" ? "COMMON.YES" : "COMMON.NO");
     return v;
   }
   private params(page: number) {

@@ -11,13 +11,13 @@
       <table class="grid">
         <thead>
           <tr>
-            <th>Collection</th>
-            <th>Source</th>
-            <th>Rôle éditorial</th>
-            <th>Nature</th>
-            <th>Type</th>
-            <th>Active</th>
-            <th>Dernière analyse</th>
+            <th>{{ "MEDIA_COLLECTION.COLUMN_COLLECTION" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.SOURCE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.ROLE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.NATURE" | translate }}</th>
+            <th>{{ "COMMON.TYPE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.ACTIVE" | translate }}</th>
+            <th>{{ "MEDIA_COLLECTION.LAST_ANALYSIS" | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -64,7 +64,9 @@
                 "
                 (click)="analyze(collection, $event)"
               >
-                <flw-icon name="sync" />Analyser
+                <flw-icon name="sync" />{{
+                  "MEDIA_COLLECTION.ANALYZE" | translate
+                }}
               </button>
             </td>
           </tr>

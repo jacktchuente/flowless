@@ -1,12 +1,13 @@
 import { Component, Inject } from "@angular/core";
 import { DatePipe, NgIf } from "@angular/common";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { TranslateModule } from "@ngx-translate/core";
 import { MediaContainerDetail } from "@project-interfaces/media-container";
 import { MediaContainerService } from "@project-services/media-container.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 @Component({
   standalone: true,
-  imports: [DatePipe, NgIf, FlwModalComponent],
+  imports: [DatePipe, NgIf, TranslateModule, FlwModalComponent],
   templateUrl: "./media-container-dialog.component.html",
   styleUrl: "./media-container-dialog.component.css",
 })

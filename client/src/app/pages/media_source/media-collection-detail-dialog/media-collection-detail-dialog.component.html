@@ -1,58 +1,62 @@
 <flw-modal
-  [title]="'Collection — ' + data.collection.name"
-  description="Ajustez les métadonnées utilisées par la programmation."
+  [title]="
+    'MEDIA_COLLECTION.DETAIL.TITLE' | translate: { name: data.collection.name }
+  "
+  [description]="'MEDIA_COLLECTION.DETAIL.DESCRIPTION' | translate"
   ><div class="kv">
     <div class="row">
-      <span class="k">Source</span
+      <span class="k">{{ "MEDIA_COLLECTION.SOURCE" | translate }}</span
       ><strong class="v">{{ data.collection.media_source_name }}</strong>
     </div>
     <div class="row">
-      <span class="k">Identifiant externe</span
+      <span class="k">{{
+        "MEDIA_COLLECTION.DETAIL.EXTERNAL_ID" | translate
+      }}</span
       ><strong class="v mono">{{ data.collection.external_id }}</strong>
     </div>
   </div>
   <form [formGroup]="form">
     <div class="field-row cols-2">
       <div class="field">
-        <label>Rôle de programmation</label
+        <label>{{ "MEDIA_COLLECTION.DETAIL.ROLE_LABEL" | translate }}</label
         ><flw-select
           formControlName="programming_role"
           [options]="roleOptions"
-        /><span class="hint"
-          >Détermine la place de cette collection dans la grille.</span
-        >
+        /><span class="hint">{{
+          "MEDIA_COLLECTION.DETAIL.ROLE_HINT" | translate
+        }}</span>
       </div>
       <div class="field">
-        <label>Nature</label
+        <label>{{ "MEDIA_COLLECTION.NATURE" | translate }}</label
         ><flw-select formControlName="nature" [options]="natureOptions" />
       </div>
       <div class="field">
-        <label>Type de contenant</label
+        <label>{{ "MEDIA_COLLECTION.DETAIL.KIND" | translate }}</label
         ><flw-select formControlName="container_kind" [options]="kindOptions" />
       </div>
       <div class="field">
-        <label>Classification</label
+        <label>{{ "MEDIA_COLLECTION.DETAIL.CLASSIFICATION" | translate }}</label
         ><flw-switch
           formControlName="is_anime"
-          label="Considérer comme anime"
+          [label]="'MEDIA_COLLECTION.DETAIL.IS_ANIME' | translate"
         />
       </div>
     </div>
   </form>
   <div modal-footer>
     <button class="btn danger-ghost" type="button" (click)="analyze()">
-      Analyser maintenant
+      {{ "MEDIA_COLLECTION.DETAIL.ANALYZE_NOW" | translate }}
     </button>
     <div class="actions">
       <button class="btn ghost" type="button" (click)="ref.close(false)">
-        Annuler</button
+        {{ "COMMON.CANCEL" | translate }}</button
       ><button
         class="btn primary"
         type="button"
         (click)="save()"
         [disabled]="isSubmitting"
       >
-        Enregistrer
+        {{ "COMMON.SAVE" | translate }}
       </button>
     </div>
   </div></flw-modal

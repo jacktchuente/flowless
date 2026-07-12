@@ -149,7 +149,11 @@
     "ACTIVATE": "Activate",
     "DONE": "Done",
     "CANCEL": "Cancel",
-    "CONFIRM": "Confirm"
+    "CONFIRM": "Confirm",
+    "SAVE": "Save",
+    "APPLY": "Apply",
+    "TYPE": "Type",
+    "LOADING": "Loading…"
   },
   "MEDIA_SOURCE": {
     "EYEBROW": "Sources",
@@ -162,7 +166,27 @@
     "EMPTY_HELP": "Add a Jellyfin source to start collection synchronization.",
     "NOTIFY_DELETE_FAILED": "Delete failed.",
     "NOTIFY_SYNC_FAILED": "Collection synchronization failed.",
-    "NOTIFY_SYNC_STARTED": "Collection synchronization started in background."
+    "NOTIFY_SYNC_STARTED": "Collection synchronization started in background.",
+    "COLUMN_SOURCE": "Source",
+    "COLUMN_USERNAME": "Username",
+    "STATUS_SYNCING": "Syncing…",
+    "STATUS_STALE": "Sync overdue",
+    "STATUS_CONNECTED": "Connected",
+    "STALE_NOTE": "{{count}} source(s) need to be resynced. The oldest is {{days}} days overdue.",
+    "DELETE_TITLE": "Delete source",
+    "CONFIRM_DELETE": "Permanently delete “{{name}}”?",
+    "DIALOG": {
+      "EDIT_TITLE": "Edit source",
+      "NEW_TITLE": "New source",
+      "DESCRIPTION": "Connect a Jellyfin server to the control room.",
+      "URL": "Jellyfin URL",
+      "PASSWORD": "Password",
+      "NAME_PLACEHOLDER": "Main Jellyfin",
+      "HINT": "Prefer a dedicated Jellyfin account with read-only access.",
+      "SUBMIT": "Test connection and save",
+      "SUBMITTING": "Verifying…",
+      "CONNECTION_FAILED": "Connection to the source failed."
+    }
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",
@@ -182,7 +206,21 @@
     "NOTIFY_ANALYZE_STARTED": "Collection analysis started in background.",
     "FORCE_REANALYZE": "Yes, re-analyze everything",
     "ANALYZING_WARNING": "An analysis already seems to be running for this collection. If it got stuck (crash), only a forced re-analysis will restart the processing.",
-    "IS_ANIME": "Anime"
+    "IS_ANIME": "Anime",
+    "COLUMN_COLLECTION": "Collection",
+    "ROLE": "Editorial role",
+    "ACTIVE": "Active",
+    "DETAIL": {
+      "TITLE": "Collection — {{name}}",
+      "DESCRIPTION": "Adjust the metadata used for programming.",
+      "EXTERNAL_ID": "External ID",
+      "ROLE_LABEL": "Programming role",
+      "ROLE_HINT": "Determines where this collection fits in the grid.",
+      "KIND": "Container kind",
+      "CLASSIFICATION": "Classification",
+      "IS_ANIME": "Treat as anime",
+      "ANALYZE_NOW": "Analyze now"
+    }
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",
@@ -194,7 +232,7 @@
     "PAGE_SIZE": "Page size",
     "COLUMN_TITLE": "Title",
     "COLUMN_ANALYZED_AT": "Analyzed at",
-    "COLUMN_ITEM_COUNT": "Item count",
+    "COLUMN_ITEM_COUNT": "Items",
     "COLUMN_MISSING": "Missing",
     "ANALYZE": "Analyze",
     "EMPTY_TITLE": "No media available",
@@ -204,7 +242,43 @@
     "NOTIFY_ANALYZE_FAILED": "Media analysis failed.",
     "NOTIFY_ANALYZE_ALL_FAILED": "Global media analysis failed.",
     "NOTIFY_ANALYZE_ALL_STARTED": "Global media analysis started in background.",
-    "NOTIFY_ANALYZE_STARTED": "Media analysis started in background."
+    "NOTIFY_ANALYZE_STARTED": "Media analysis started in background.",
+    "SEARCH_PLACEHOLDER": "Search a title…",
+    "MORE_FILTERS": "More filters",
+    "CLEAR_FILTERS": "Clear all",
+    "NATURE": "Nature",
+    "STATUS_COMPLETE": "Complete",
+    "STATUS_ERROR": "Error",
+    "STATUS_ANALYZING": "Analyzing…",
+    "STATUS_PENDING": "Analyzing",
+    "STATUS_PARTIAL": "Partial",
+    "TOTAL_SUMMARY": "{{count}} titles in total · page {{page}} of {{pages}}",
+    "ANALYZE_ALL_TITLE": "Analyze all media",
+    "FILTERS": {
+      "TITLE": "Advanced filters",
+      "DESCRIPTION": "Narrow down the media list.",
+      "STATUS": "Status",
+      "CATEGORY": "Category",
+      "NATURE": "Nature",
+      "TYPE": "Type",
+      "ANIME": "Anime",
+      "ANY_M": "All",
+      "ANY_F": "All",
+      "ANIME_ONLY": "Anime",
+      "NOT_ANIME": "Not anime"
+    },
+    "DETAIL": {
+      "TITLE_FALLBACK": "Media detail",
+      "EXTERNAL_ID": "External ID",
+      "ANALYZED_AT": "Analyzed at",
+      "ITEMS": "Items",
+      "CATEGORIES": "Categories",
+      "GENRES": "Genres",
+      "TAGS": "Tags",
+      "COUNTRIES": "Countries",
+      "AUDIO_LANGUAGES": "Audio languages",
+      "DURATIONS": "Durations"
+    }
   },
   "CHANNEL_DETAIL": {
     "BACK": "Back to channels",
@@ -416,6 +490,17 @@
       "APPLY": "Apply selection",
       "ADD": "Add: {{value}}",
       "REMOVE": "Remove: {{value}}"
+    },
+    "ROLES": {
+      "1": "Main",
+      "2": "Trailer",
+      "3": "Promo",
+      "4": "Ad",
+      "5": "Bumper",
+      "6": "Ident",
+      "7": "Filler",
+      "8": "PSA",
+      "99": "Other"
     }
   },
   "CHANNEL_DIALOGS": {

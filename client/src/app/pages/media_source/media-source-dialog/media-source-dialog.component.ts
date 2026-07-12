@@ -7,6 +7,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import {
   MediaSource,
   MediaSourcePayload,
@@ -15,7 +16,7 @@ import { MediaSourceService } from "@project-services/media-source.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 @Component({
   standalone: true,
-  imports: [NgIf, ReactiveFormsModule, FlwModalComponent],
+  imports: [NgIf, ReactiveFormsModule, TranslateModule, FlwModalComponent],
   templateUrl: "./media-source-dialog.component.html",
   styleUrl: "./media-source-dialog.component.css",
 })
@@ -40,6 +41,7 @@ export class MediaSourceDialogComponent {
   });
   constructor(
     private service: MediaSourceService,
+    private translate: TranslateService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA) public data: { source?: MediaSource },
   ) {}
@@ -85,7 +87,7 @@ export class MediaSourceDialogComponent {
       e?.error?.credentials?.[0] ??
       e?.error?.detail ??
       e?.message ??
-      "La connexion à la source a échoué."
+      this.translate.instant("MEDIA_SOURCE.DIALOG.CONNECTION_FAILED")
     );
   }
 }
