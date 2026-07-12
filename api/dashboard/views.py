@@ -107,7 +107,7 @@ class DashboardOverviewView(APIView):
                             "object_type": "tv_channel",
                             "object_id": channel_id,
                             "object_name": report.tv_playout.tv_channel.name,
-                            "message": issue.get("message"),
+                            "message": None,
                             "message_params": {"code": issue.get("code")},
                             "occurred_at": report.created_at,
                         }
@@ -141,7 +141,8 @@ class DashboardOverviewView(APIView):
                             "object_type": "tv_channel",
                             "object_id": channel.id,
                             "object_name": channel.name,
-                            "message": warning,
+                            "message": None,
+                            "message_params": {"warning": warning},
                             "occurred_at": grid.created_at,
                         }
                     )

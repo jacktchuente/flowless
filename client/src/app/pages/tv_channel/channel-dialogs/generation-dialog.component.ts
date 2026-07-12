@@ -145,10 +145,7 @@ export class GenerationDialogComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
-        if (this.state === "running") {
-          this.state = "done";
-          if (this.timeout) clearTimeout(this.timeout);
-        }
+        if (this.state === "running") this.checkChannelState();
       });
   }
 
@@ -165,11 +162,13 @@ export class GenerationDialogComponent {
     });
   }
   get steps() {
-    return this.data.kind === "blueprint"
-      ? ["READ_COLLECTIONS", "BUILD_BLOCKS", "CHECK_RULES", "WRITE_GRID"]
-      : ["READ_RULES", "SELECT_MEDIA", "RESOLVE", "WRITE_PLAYOUT"].map((step) =>
-          this.translate.instant(`CHANNEL_DIALOGS.GENERATION.STEPS.${step}`),
-        );
+    const steps =
+      this.data.kind === "blueprint"
+        ? ["READ_COLLECTIONS", "BUILD_BLOCKS", "CHECK_RULES", "WRITE_GRID"]
+        : ["READ_RULES", "SELECT_MEDIA", "RESOLVE", "WRITE_PLAYOUT"];
+    return steps.map((step) =>
+      this.translate.instant(`CHANNEL_DIALOGS.GENERATION.STEPS.${step}`),
+    );
   }
 
   start() {
@@ -194,5 +193,23 @@ export class GenerationDialogComponent {
       },
       15 * 60 * 1000,
     );
+  }
+
+  private checkChannelState() {
+    this.service.getDetail(this.data.channelId).subscribe((response) => {
+      if (!response.isOk || this.state !== "running") return;
+      const status = String(
+        (response.body as { analyze_status?: unknown }).analyze_status ?? "",
+      ).toUpperCase();
+      if (["1", "ANALYZING", "RUNNING"].includes(status)) return;
+      this.state =
+        status === "4" ||
+        status === "5" ||
+        status.includes("ERROR") ||
+        status.includes("CANCEL")
+          ? "error"
+          : "done";
+      if (this.timeout) clearTimeout(this.timeout);
+    });
   }
 }

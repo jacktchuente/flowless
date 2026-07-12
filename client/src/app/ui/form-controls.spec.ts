@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { FlwSelectComponent } from "./select/flw-select.component";
 import { FlwSwitchComponent } from "./switch/flw-switch.component";
 import { FlwTagInputComponent } from "./tag-input/flw-tag-input.component";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
@@ -32,7 +33,7 @@ describe("Flowless form controls", () => {
   let fixture: ComponentFixture<HostComponent>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HostComponent],
+      imports: [HostComponent, TranslateModule.forRoot()],
     }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
