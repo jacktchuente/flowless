@@ -26,6 +26,7 @@ export interface FlwSelectOption {
       <option
         *ngFor="let option of options; let i = index"
         [value]="i"
+        [selected]="option.value === value"
         [disabled]="option.disabled"
       >
         {{ option.label }}
