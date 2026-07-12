@@ -1,11 +1,5 @@
 export type CategoryKey =
-  | "fiction"
-  | "documentary"
-  | "news"
-  | "comedy"
-  | "music"
-  | "sport"
-  | "filler";
+  "fiction" | "documentary" | "news" | "comedy" | "music" | "sport" | "filler";
 export const CATEGORY_COLOR: Record<
   CategoryKey,
   { fg: string; bg: string; sw: string; label: string }
