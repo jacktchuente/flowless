@@ -1,1 +1,9 @@
-form{display:flex;flex-direction:column;gap:14px}.actions{display:flex;gap:8px}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}

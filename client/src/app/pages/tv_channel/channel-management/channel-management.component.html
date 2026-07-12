@@ -1,1 +1,123 @@
-<header class="topline"><div><span class="eyebrow">{{'CHANNELS.EYEBROW'|translate}}</span><h1>{{'CHANNELS.TITLE'|translate}}</h1><p class="sub">{{'CHANNELS.SUBTITLE'|translate}}</p></div><div class="topline-actions"><button class="btn" (click)="openCatalog()"><flw-icon name="plus"/>Nouveau catalogue</button><button class="btn primary" [disabled]="!selectedCatalogId" (click)="openChannel()"><flw-icon name="plus"/>Nouvelle chaîne</button></div></header><div class="content"><section class="card setup"><div class="field"><label>Catalogue</label><flw-select [value]="selectedCatalogId" [options]="catalogOptions" (valueChange)="onCatalog($event)"/></div><div class="setup-actions"><button class="btn ghost" (click)="openCatalog(selectedCatalog)">Éditer le catalogue</button><button class="btn" (click)="generateCatalog()"><flw-icon name="sync"/>Générer les chaînes</button></div><hr class="divider"><flw-segmented [value]="mode" [options]="modeOptions" (valueChange)="mode=$any($event)"/><p>{{mode==='classic'?'Pilotez les règles fixes et comparez-les au planning réel.':'Regroupez les médias en segments et créez des chaînes flexibles.'}}</p></section><ng-container *ngIf="mode==='classic'"><section class="card toolbar"><flw-segmented [options]="dayOptions" [value]="0" (valueChange)="setDay($event)"/><strong class="mono">{{calendarDate|date:'dd/MM/yyyy'}}</strong><div class="legend"><span class="item" *ngFor="let cat of legend"><i class="sw" [style.background]="cat.sw"></i>{{cat.label}}</span></div><flw-segmented [options]="viewOptions" [value]="calendarViewMode" (valueChange)="calendarViewMode=$any($event)"/></section><div class="channel-cards"><article class="card channel" *ngFor="let channel of channels"><header><div><h2>{{channel.name}}</h2><span class="pill" [class]="status(channel).kind"><span class="dot"></span>{{status(channel).label}}</span></div><flw-menu><button (click)="openDetail(channel)">Ouvrir la fiche</button><button (click)="openChannel(channel)">Modifier</button><button *ngIf="!isFlexible(channel)" (click)="generateBlueprint(channel)">Générer le plan</button><button (click)="generatePlayout(channel)">Générer le planning</button><hr><button (click)="push(channel)">Publier vers ErsatzTV</button><hr><button class="danger" (click)="remove(channel)">Supprimer</button></flw-menu></header><flw-timeline [blocks]="timeline(channel)" [pxPerHour]="52" [style.height.px]="420"/></article><div class="empty card" *ngIf="!channels.length">Aucune chaîne dans ce catalogue.</div></div></ng-container><section class="card flexible" *ngIf="mode==='flexible'"><div><span class="section-label">Planification flexible</span><h2>Construire des chaînes à partir de vos collections</h2><p>Analysez la cohésion de votre catalogue, révisez les segments puis promouvez les meilleurs candidats.</p></div><a class="btn primary" routerLink="/app/editorial-planning" [queryParams]="{catalog:selectedCatalogId}">Ouvrir la planification flexible</a></section></div>
+<header class="topline">
+  <div>
+    <span class="eyebrow">{{ "CHANNELS.EYEBROW" | translate }}</span>
+    <h1>{{ "CHANNELS.TITLE" | translate }}</h1>
+    <p class="sub">{{ "CHANNELS.SUBTITLE" | translate }}</p>
+  </div>
+  <div class="topline-actions">
+    <button class="btn" (click)="openCatalog()">
+      <flw-icon name="plus" />Nouveau catalogue</button
+    ><button
+      class="btn primary"
+      [disabled]="!selectedCatalogId"
+      (click)="openChannel()"
+    >
+      <flw-icon name="plus" />Nouvelle chaîne
+    </button>
+  </div>
+</header>
+<div class="content">
+  <section class="card setup">
+    <div class="field">
+      <label>Catalogue</label
+      ><flw-select
+        [value]="selectedCatalogId"
+        [options]="catalogOptions"
+        (valueChange)="onCatalog($event)"
+      />
+    </div>
+    <div class="setup-actions">
+      <button class="btn ghost" (click)="openCatalog(selectedCatalog)">
+        Éditer le catalogue</button
+      ><button class="btn" (click)="generateCatalog()">
+        <flw-icon name="sync" />Générer les chaînes
+      </button>
+    </div>
+    <hr class="divider" />
+    <flw-segmented
+      [value]="mode"
+      [options]="modeOptions"
+      (valueChange)="mode = $any($event)"
+    />
+    <p>
+      {{
+        mode === "classic"
+          ? "Pilotez les règles fixes et comparez-les au planning réel."
+          : "Regroupez les médias en segments et créez des chaînes flexibles."
+      }}
+    </p>
+  </section>
+  <ng-container *ngIf="mode === 'classic'"
+    ><section class="card toolbar">
+      <flw-segmented
+        [options]="dayOptions"
+        [value]="0"
+        (valueChange)="setDay($event)"
+      /><strong class="mono">{{ calendarDate | date: "dd/MM/yyyy" }}</strong>
+      <div class="legend">
+        <span class="item" *ngFor="let cat of legend"
+          ><i class="sw" [style.background]="cat.sw"></i>{{ cat.label }}</span
+        >
+      </div>
+      <flw-segmented
+        [options]="viewOptions"
+        [value]="calendarViewMode"
+        (valueChange)="calendarViewMode = $any($event)"
+      />
+    </section>
+    <div class="channel-cards">
+      <article class="card channel" *ngFor="let channel of channels">
+        <header>
+          <div>
+            <h2>{{ channel.name }}</h2>
+            <span class="pill" [class]="status(channel).kind"
+              ><span class="dot"></span>{{ status(channel).label }}</span
+            >
+          </div>
+          <flw-menu
+            ><button (click)="openDetail(channel)">Ouvrir la fiche</button
+            ><button (click)="openChannel(channel)">Modifier</button
+            ><button
+              *ngIf="!isFlexible(channel)"
+              (click)="generateBlueprint(channel)"
+            >
+              Générer le plan</button
+            ><button (click)="generatePlayout(channel)">
+              Générer le planning
+            </button>
+            <hr />
+            <button (click)="push(channel)">Publier vers ErsatzTV</button>
+            <hr />
+            <button class="danger" (click)="remove(channel)">
+              Supprimer
+            </button></flw-menu
+          >
+        </header>
+        <flw-timeline
+          [blocks]="timeline(channel)"
+          [pxPerHour]="52"
+          [style.height.px]="420"
+        />
+      </article>
+      <div class="empty card" *ngIf="!channels.length">
+        Aucune chaîne dans ce catalogue.
+      </div>
+    </div></ng-container
+  >
+  <section class="card flexible" *ngIf="mode === 'flexible'">
+    <div>
+      <span class="section-label">Planification flexible</span>
+      <h2>Construire des chaînes à partir de vos collections</h2>
+      <p>
+        Analysez la cohésion de votre catalogue, révisez les segments puis
+        promouvez les meilleurs candidats.
+      </p>
+    </div>
+    <a
+      class="btn primary"
+      routerLink="/app/editorial-planning"
+      [queryParams]="{ catalog: selectedCatalogId }"
+      >Ouvrir la planification flexible</a
+    >
+  </section>
+</div>

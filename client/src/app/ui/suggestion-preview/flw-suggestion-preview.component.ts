@@ -1,6 +1,87 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {NgFor} from '@angular/common';
-export interface SuggestionChange {key:string;label:string;kind:'add'|'remove'|'replace';from?:unknown;to?:unknown}
-@Component({selector:'flw-suggestion-preview',standalone:true,imports:[NgFor,FormsModule],template:`<section class="suggestion"><p class="section-label">Modifications suggérées</p><label *ngFor="let change of changes"><input type="checkbox" [(ngModel)]="selected[change.key]"><span><strong>{{change.label}}</strong><small>{{summary(change)}}</small></span></label><div class="actions"><button class="btn ghost sm" type="button" (click)="dismiss.emit()">Ignorer</button><button class="btn primary sm" type="button" (click)="apply.emit(chosen)">Appliquer la sélection</button></div></section>`,styles:[`.suggestion{padding:14px;border:1px solid var(--signal-line);background:var(--signal-soft);border-radius:var(--radius-m);display:grid;gap:10px}.suggestion label{display:flex;gap:9px;align-items:flex-start}.suggestion small{display:block;color:var(--slate-500)}.actions{display:flex;justify-content:flex-end;gap:8px}`]})
-export class FlwSuggestionPreviewComponent implements OnChanges {@Input() changes:SuggestionChange[]=[];@Output() apply=new EventEmitter<SuggestionChange[]>();@Output() dismiss=new EventEmitter<void>();selected:Record<string,boolean>={};ngOnChanges(){this.selected=Object.fromEntries(this.changes.map(c=>[c.key,true]))}get chosen(){return this.changes.filter(c=>this.selected[c.key])}summary(c:SuggestionChange){if(c.kind==='add')return`Ajouter : ${this.format(c.to)}`;if(c.kind==='remove')return`Retirer : ${this.format(c.from)}`;return`${this.format(c.from)} → ${this.format(c.to)}`}private format(v:unknown){return Array.isArray(v)?v.join(', '):String(v??'—')}}
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { NgFor } from "@angular/common";
+export interface SuggestionChange {
+  key: string;
+  label: string;
+  kind: "add" | "remove" | "replace";
+  from?: unknown;
+  to?: unknown;
+}
+@Component({
+  selector: "flw-suggestion-preview",
+  standalone: true,
+  imports: [NgFor, FormsModule],
+  template: `<section class="suggestion">
+    <p class="section-label">Modifications suggérées</p>
+    <label *ngFor="let change of changes"
+      ><input type="checkbox" [(ngModel)]="selected[change.key]" /><span
+        ><strong>{{ change.label }}</strong
+        ><small>{{ summary(change) }}</small></span
+      ></label
+    >
+    <div class="actions">
+      <button class="btn ghost sm" type="button" (click)="dismiss.emit()">
+        Ignorer</button
+      ><button
+        class="btn primary sm"
+        type="button"
+        (click)="apply.emit(chosen)"
+      >
+        Appliquer la sélection
+      </button>
+    </div>
+  </section>`,
+  styles: [
+    `
+      .suggestion {
+        padding: 14px;
+        border: 1px solid var(--signal-line);
+        background: var(--signal-soft);
+        border-radius: var(--radius-m);
+        display: grid;
+        gap: 10px;
+      }
+      .suggestion label {
+        display: flex;
+        gap: 9px;
+        align-items: flex-start;
+      }
+      .suggestion small {
+        display: block;
+        color: var(--slate-500);
+      }
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+    `,
+  ],
+})
+export class FlwSuggestionPreviewComponent implements OnChanges {
+  @Input() changes: SuggestionChange[] = [];
+  @Output() apply = new EventEmitter<SuggestionChange[]>();
+  @Output() dismiss = new EventEmitter<void>();
+  selected: Record<string, boolean> = {};
+  ngOnChanges() {
+    this.selected = Object.fromEntries(this.changes.map((c) => [c.key, true]));
+  }
+  get chosen() {
+    return this.changes.filter((c) => this.selected[c.key]);
+  }
+  summary(c: SuggestionChange) {
+    if (c.kind === "add") return `Ajouter : ${this.format(c.to)}`;
+    if (c.kind === "remove") return `Retirer : ${this.format(c.from)}`;
+    return `${this.format(c.from)} → ${this.format(c.to)}`;
+  }
+  private format(v: unknown) {
+    return Array.isArray(v) ? v.join(", ") : String(v ?? "—");
+  }
+}

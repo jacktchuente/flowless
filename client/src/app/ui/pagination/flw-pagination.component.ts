@@ -1,4 +1,41 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgFor} from '@angular/common';
-@Component({selector:'flw-pagination',standalone:true,imports:[NgFor],template:`<div class="segmented" aria-label="Pagination"><button type="button" [disabled]="page<=1" (click)="go(page-1)">‹</button><button type="button" *ngFor="let p of visiblePages" [class.active]="p===page" (click)="go(p)">{{p}}</button><button type="button" [disabled]="page>=pageCount" (click)="go(page+1)">›</button></div>`})
-export class FlwPaginationComponent {@Input() page=1;@Input() pageCount=1;@Output() pageChange=new EventEmitter<number>();get visiblePages(){const start=Math.max(1,Math.min(this.page-2,this.pageCount-4));return Array.from({length:Math.min(5,this.pageCount)},(_,i)=>start+i)}go(p:number){if(p>=1&&p<=this.pageCount&&p!==this.page)this.pageChange.emit(p)}}
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { NgFor } from "@angular/common";
+@Component({
+  selector: "flw-pagination",
+  standalone: true,
+  imports: [NgFor],
+  template: `<div class="segmented" aria-label="Pagination">
+    <button type="button" [disabled]="page <= 1" (click)="go(page - 1)">
+      ‹</button
+    ><button
+      type="button"
+      *ngFor="let p of visiblePages"
+      [class.active]="p === page"
+      (click)="go(p)"
+    >
+      {{ p }}</button
+    ><button
+      type="button"
+      [disabled]="page >= pageCount"
+      (click)="go(page + 1)"
+    >
+      ›
+    </button>
+  </div>`,
+})
+export class FlwPaginationComponent {
+  @Input() page = 1;
+  @Input() pageCount = 1;
+  @Output() pageChange = new EventEmitter<number>();
+  get visiblePages() {
+    const start = Math.max(1, Math.min(this.page - 2, this.pageCount - 4));
+    return Array.from(
+      { length: Math.min(5, this.pageCount) },
+      (_, i) => start + i,
+    );
+  }
+  go(p: number) {
+    if (p >= 1 && p <= this.pageCount && p !== this.page)
+      this.pageChange.emit(p);
+  }
+}

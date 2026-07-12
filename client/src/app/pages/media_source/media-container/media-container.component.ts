@@ -1,24 +1,307 @@
-import {Component,DestroyRef,Inject,inject} from '@angular/core';
-import {DatePipe,NgFor,NgIf} from '@angular/common';
-import {FormControl,FormsModule,ReactiveFormsModule} from '@angular/forms';
-import {DIALOG_DATA,DialogRef} from '@angular/cdk/dialog';
-import {debounceTime,filter} from 'rxjs';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {TranslateModule,TranslateService} from '@ngx-translate/core';
-import {WebsocketService} from '@kwyxyz/ngx-request';
-import {MediaContainerListItem,PaginatedResponse} from '@project-interfaces/media-container';
-import {MediaContainerService} from '@project-services/media-container.service';
-import {NotificationService} from '@project-shared/services/notification.service';
-import {FlwDialogService} from '../../../ui/dialog.service';
-import {FlwIconComponent} from '../../../ui/icon/flw-icon.component';
-import {FlwChipFilterComponent} from '../../../ui/chip-filter/flw-chip-filter.component';
-import {FlwSelectComponent} from '../../../ui/select/flw-select.component';
-import {FlwPaginationComponent} from '../../../ui/pagination/flw-pagination.component';
-import {FlwConfirmComponent} from '../../../ui/confirm/flw-confirm.component';
-import {FlwModalComponent} from '../../../ui/modal/flw-modal.component';
-import {MediaContainerDetailDialogComponent} from '../media-container-dialog/media-container-dialog.component';
-const STATUS=[{value:'',label:'Tous'},{value:'2',label:'Complet'},{value:'4',label:'En erreur'},{value:'1',label:'Analyse en cours'},{value:'0',label:'Partiel'}];const NATURE=[{value:'',label:'Toutes'},{value:'1',label:'Fiction'},{value:'2',label:'Documentaire'},{value:'3',label:'Musique'},{value:'4',label:'Sport'},{value:'5',label:'Information'},{value:'6',label:'Divertissement'},{value:'99',label:'Autre'}];const KIND=[{value:'',label:'Tous'},{value:'1',label:'Vidéo unitaire'},{value:'2',label:'Série'},{value:'3',label:'Album'},{value:'4',label:'Clip musical'},{value:'99',label:'Autre'}];
-@Component({standalone:true,imports:[FormsModule,FlwModalComponent,FlwSelectComponent],template:`<flw-modal title="Filtres avancés" description="Affinez la liste des médias."><div class="field-row cols-2"><div class="field"><label>Statut</label><flw-select [(ngModel)]="draft.status" [options]="status"/></div><div class="field"><label>Catégorie</label><input [(ngModel)]="draft.category" type="text"></div><div class="field"><label>Nature</label><flw-select [(ngModel)]="draft.nature" [options]="natures"/></div><div class="field"><label>Type</label><flw-select [(ngModel)]="draft.container_kind" [options]="kinds"/></div><div class="field"><label>Anime</label><flw-select [(ngModel)]="draft.is_anime" [options]="anime"/></div></div><div modal-footer><button class="btn ghost" type="button" (click)="reset()">Réinitialiser</button><div><button class="btn ghost" type="button" (click)="ref.close()">Annuler</button><button class="btn primary" type="button" (click)="ref.close(draft)">Appliquer</button></div></div></flw-modal>`})
-export class MediaFiltersDialog {draft={...this.data};status=STATUS;natures=NATURE;kinds=KIND;anime=[{value:'',label:'Tous'},{value:'1',label:'Anime'},{value:'0',label:'Non anime'}];constructor(@Inject(DIALOG_DATA)public data:any,public ref:DialogRef<any>){}reset(){this.draft={status:'',category:'',nature:'',container_kind:'',is_anime:''}}}
-@Component({selector:'app-media-container',standalone:true,imports:[DatePipe,NgFor,NgIf,ReactiveFormsModule,TranslateModule,FlwIconComponent,FlwChipFilterComponent,FlwSelectComponent,FlwPaginationComponent],templateUrl:'./media-container.component.html',styleUrl:'./media-container.component.css'})
-export class MediaContainerComponent {private destroyRef=inject(DestroyRef);search=new FormControl('',{nonNullable:true});containers:MediaContainerListItem[]=[];filters={status:'',category:'',nature:'',container_kind:'',is_anime:''};currentPage=1;pageSize=10;totalCount=0;isLoading=false;syncingIds=new Set<string>();pageSizeOptions=[{value:10,label:'10 / page'},{value:25,label:'25 / page'},{value:50,label:'50 / page'}];constructor(private service:MediaContainerService,private notification:NotificationService,private dialogs:FlwDialogService,ws:WebsocketService,private translate:TranslateService){this.loadPage(1);this.search.valueChanges.pipe(debounceTime(300),takeUntilDestroyed(this.destroyRef)).subscribe(()=>this.loadPage(1));ws.crudEvent.pipe(filter((e:any)=>e.type?.toLowerCase?.()==='mediacontainer'),takeUntilDestroyed(this.destroyRef)).subscribe(()=>this.loadPage(this.currentPage))}get totalPages(){return Math.max(1,Math.ceil(this.totalCount/this.pageSize))}get chips(){const labels:any={status:'Statut',category:'Catégorie',nature:'Nature',container_kind:'Type',is_anime:'Anime'};return Object.entries(this.filters).filter(([,v])=>v!=='').map(([key,value])=>({key,label:`${labels[key]} : ${this.optionLabel(key,value)}`}))}loadPage(page:number){if(page<1)return;this.isLoading=true;this.service.listPage(this.params(page)).subscribe(r=>{this.isLoading=false;if(!r.isOk){this.notification.notify('MEDIA_CONTAINER.NOTIFY_LOAD_FAILED');return}const p=r.body as PaginatedResponse<MediaContainerListItem>;this.currentPage=page;this.totalCount=p.count;this.containers=p.results})}openFilters(){this.dialogs.open(MediaFiltersDialog,{data:{...this.filters}}).closed.subscribe(v=>{if(v){this.filters=v;this.loadPage(1)}})}removeFilter(key:string){(this.filters as any)[key]='';this.loadPage(1)}resetFilters(){this.filters={status:'',category:'',nature:'',container_kind:'',is_anime:''};this.loadPage(1)}pageSizeChange(v:unknown){this.pageSize=Number(v);this.loadPage(1)}openDetail(c:MediaContainerListItem){this.dialogs.open(MediaContainerDetailDialogComponent,{data:{containerId:c.id}})}analyze(c:MediaContainerListItem,e?:Event){e?.stopPropagation();const id=String(c.id);if(this.syncingIds.has(id))return;this.syncingIds.add(id);this.service.analyze(c.id).subscribe(r=>{this.syncingIds.delete(id);if(!r.isOk){this.notification.notify('MEDIA_CONTAINER.NOTIFY_ANALYZE_FAILED');return}c.analyze_status=1;this.notification.notify('MEDIA_CONTAINER.NOTIFY_ANALYZE_STARTED')})}analyzeAll(){this.dialogs.open(FlwConfirmComponent,{data:{title:'Analyser tous les médias',message:this.translate.instant('MEDIA_CONTAINER.CONFIRM_ANALYZE_ALL'),confirmLabel:'Analyser tout'}}).closed.subscribe(ok=>{if(ok)this.service.analyzeAll().subscribe(r=>{if(r.isOk){this.containers.forEach(c=>c.analyze_status=1);this.notification.notify('MEDIA_CONTAINER.NOTIFY_ANALYZE_ALL_STARTED')}else this.notification.notify('MEDIA_CONTAINER.NOTIFY_ANALYZE_ALL_FAILED')})})}status(c:MediaContainerListItem){if(c.analyze_status===2)return{kind:'success',label:'Complet'};if(c.analyze_status===4)return{kind:'critical',label:'En erreur'};if(c.analyze_status===1)return{kind:'info',label:'Analyse…'};return{kind:'warning',label:'Partiel'}}nature(c:MediaContainerListItem){return NATURE.find(o=>o.value===String(c.nature??''))?.label??'—'}kind(c:MediaContainerListItem){return KIND.find(o=>o.value===String(c.container_kind??''))?.label??'—'}private optionLabel(key:string,v:string){if(key==='status')return STATUS.find(o=>o.value===v)?.label??v;if(key==='nature')return NATURE.find(o=>o.value===v)?.label??v;if(key==='container_kind')return KIND.find(o=>o.value===v)?.label??v;if(key==='is_anime')return v==='1'?'Oui':'Non';return v}private params(page:number){const p:any={page,page_size:this.pageSize};if(this.search.value.trim())p.title=this.search.value.trim();Object.entries(this.filters).forEach(([k,v])=>{if(v!=='')p[k]=v});return p}}
+import { Component, DestroyRef, Inject, inject } from "@angular/core";
+import { DatePipe, NgFor, NgIf } from "@angular/common";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { debounceTime, filter } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import { WebsocketService } from "@kwyxyz/ngx-request";
+import {
+  MediaContainerListItem,
+  PaginatedResponse,
+} from "@project-interfaces/media-container";
+import { MediaContainerService } from "@project-services/media-container.service";
+import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { FlwChipFilterComponent } from "../../../ui/chip-filter/flw-chip-filter.component";
+import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
+import { FlwPaginationComponent } from "../../../ui/pagination/flw-pagination.component";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
+import { MediaContainerDetailDialogComponent } from "../media-container-dialog/media-container-dialog.component";
+const STATUS = [
+  { value: "", label: "Tous" },
+  { value: "2", label: "Complet" },
+  { value: "4", label: "En erreur" },
+  { value: "1", label: "Analyse en cours" },
+  { value: "0", label: "Partiel" },
+];
+const NATURE = [
+  { value: "", label: "Toutes" },
+  { value: "1", label: "Fiction" },
+  { value: "2", label: "Documentaire" },
+  { value: "3", label: "Musique" },
+  { value: "4", label: "Sport" },
+  { value: "5", label: "Information" },
+  { value: "6", label: "Divertissement" },
+  { value: "99", label: "Autre" },
+];
+const KIND = [
+  { value: "", label: "Tous" },
+  { value: "1", label: "Vidéo unitaire" },
+  { value: "2", label: "Série" },
+  { value: "3", label: "Album" },
+  { value: "4", label: "Clip musical" },
+  { value: "99", label: "Autre" },
+];
+@Component({
+  standalone: true,
+  imports: [FormsModule, FlwModalComponent, FlwSelectComponent],
+  template: `<flw-modal
+    title="Filtres avancés"
+    description="Affinez la liste des médias."
+    ><div class="field-row cols-2">
+      <div class="field">
+        <label>Statut</label
+        ><flw-select [(ngModel)]="draft.status" [options]="status" />
+      </div>
+      <div class="field">
+        <label>Catégorie</label
+        ><input [(ngModel)]="draft.category" type="text" />
+      </div>
+      <div class="field">
+        <label>Nature</label
+        ><flw-select [(ngModel)]="draft.nature" [options]="natures" />
+      </div>
+      <div class="field">
+        <label>Type</label
+        ><flw-select [(ngModel)]="draft.container_kind" [options]="kinds" />
+      </div>
+      <div class="field">
+        <label>Anime</label
+        ><flw-select [(ngModel)]="draft.is_anime" [options]="anime" />
+      </div>
+    </div>
+    <div modal-footer>
+      <button class="btn ghost" type="button" (click)="reset()">
+        Réinitialiser
+      </button>
+      <div>
+        <button class="btn ghost" type="button" (click)="ref.close()">
+          Annuler</button
+        ><button class="btn primary" type="button" (click)="ref.close(draft)">
+          Appliquer
+        </button>
+      </div>
+    </div></flw-modal
+  >`,
+})
+export class MediaFiltersDialog {
+  draft = { ...this.data };
+  status = STATUS;
+  natures = NATURE;
+  kinds = KIND;
+  anime = [
+    { value: "", label: "Tous" },
+    { value: "1", label: "Anime" },
+    { value: "0", label: "Non anime" },
+  ];
+  constructor(
+    @Inject(DIALOG_DATA) public data: any,
+    public ref: DialogRef<any>,
+  ) {}
+  reset() {
+    this.draft = {
+      status: "",
+      category: "",
+      nature: "",
+      container_kind: "",
+      is_anime: "",
+    };
+  }
+}
+@Component({
+  selector: "app-media-container",
+  standalone: true,
+  imports: [
+    DatePipe,
+    NgFor,
+    NgIf,
+    ReactiveFormsModule,
+    TranslateModule,
+    FlwIconComponent,
+    FlwChipFilterComponent,
+    FlwSelectComponent,
+    FlwPaginationComponent,
+  ],
+  templateUrl: "./media-container.component.html",
+  styleUrl: "./media-container.component.css",
+})
+export class MediaContainerComponent {
+  private destroyRef = inject(DestroyRef);
+  search = new FormControl("", { nonNullable: true });
+  containers: MediaContainerListItem[] = [];
+  filters = {
+    status: "",
+    category: "",
+    nature: "",
+    container_kind: "",
+    is_anime: "",
+  };
+  currentPage = 1;
+  pageSize = 10;
+  totalCount = 0;
+  isLoading = false;
+  syncingIds = new Set<string>();
+  pageSizeOptions = [
+    { value: 10, label: "10 / page" },
+    { value: 25, label: "25 / page" },
+    { value: 50, label: "50 / page" },
+  ];
+  constructor(
+    private service: MediaContainerService,
+    private notification: NotificationService,
+    private dialogs: FlwDialogService,
+    ws: WebsocketService,
+    private translate: TranslateService,
+  ) {
+    this.loadPage(1);
+    this.search.valueChanges
+      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadPage(1));
+    ws.crudEvent
+      .pipe(
+        filter((e: any) => e.type?.toLowerCase?.() === "mediacontainer"),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.loadPage(this.currentPage));
+  }
+  get totalPages() {
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+  }
+  get chips() {
+    const labels: any = {
+      status: "Statut",
+      category: "Catégorie",
+      nature: "Nature",
+      container_kind: "Type",
+      is_anime: "Anime",
+    };
+    return Object.entries(this.filters)
+      .filter(([, v]) => v !== "")
+      .map(([key, value]) => ({
+        key,
+        label: `${labels[key]} : ${this.optionLabel(key, value)}`,
+      }));
+  }
+  loadPage(page: number) {
+    if (page < 1) return;
+    this.isLoading = true;
+    this.service.listPage(this.params(page)).subscribe((r) => {
+      this.isLoading = false;
+      if (!r.isOk) {
+        this.notification.notify("MEDIA_CONTAINER.NOTIFY_LOAD_FAILED");
+        return;
+      }
+      const p = r.body as PaginatedResponse<MediaContainerListItem>;
+      this.currentPage = page;
+      this.totalCount = p.count;
+      this.containers = p.results;
+    });
+  }
+  openFilters() {
+    this.dialogs
+      .open(MediaFiltersDialog, { data: { ...this.filters } })
+      .closed.subscribe((v) => {
+        if (v) {
+          this.filters = v;
+          this.loadPage(1);
+        }
+      });
+  }
+  removeFilter(key: string) {
+    (this.filters as any)[key] = "";
+    this.loadPage(1);
+  }
+  resetFilters() {
+    this.filters = {
+      status: "",
+      category: "",
+      nature: "",
+      container_kind: "",
+      is_anime: "",
+    };
+    this.loadPage(1);
+  }
+  pageSizeChange(v: unknown) {
+    this.pageSize = Number(v);
+    this.loadPage(1);
+  }
+  openDetail(c: MediaContainerListItem) {
+    this.dialogs.open(MediaContainerDetailDialogComponent, {
+      data: { containerId: c.id },
+    });
+  }
+  analyze(c: MediaContainerListItem, e?: Event) {
+    e?.stopPropagation();
+    const id = String(c.id);
+    if (this.syncingIds.has(id)) return;
+    this.syncingIds.add(id);
+    this.service.analyze(c.id).subscribe((r) => {
+      this.syncingIds.delete(id);
+      if (!r.isOk) {
+        this.notification.notify("MEDIA_CONTAINER.NOTIFY_ANALYZE_FAILED");
+        return;
+      }
+      c.analyze_status = 1;
+      this.notification.notify("MEDIA_CONTAINER.NOTIFY_ANALYZE_STARTED");
+    });
+  }
+  analyzeAll() {
+    this.dialogs
+      .open(FlwConfirmComponent, {
+        data: {
+          title: "Analyser tous les médias",
+          message: this.translate.instant(
+            "MEDIA_CONTAINER.CONFIRM_ANALYZE_ALL",
+          ),
+          confirmLabel: "Analyser tout",
+        },
+      })
+      .closed.subscribe((ok) => {
+        if (ok)
+          this.service.analyzeAll().subscribe((r) => {
+            if (r.isOk) {
+              this.containers.forEach((c) => (c.analyze_status = 1));
+              this.notification.notify(
+                "MEDIA_CONTAINER.NOTIFY_ANALYZE_ALL_STARTED",
+              );
+            } else
+              this.notification.notify(
+                "MEDIA_CONTAINER.NOTIFY_ANALYZE_ALL_FAILED",
+              );
+          });
+      });
+  }
+  status(c: MediaContainerListItem) {
+    if (c.analyze_status === 2) return { kind: "success", label: "Complet" };
+    if (c.analyze_status === 4) return { kind: "critical", label: "En erreur" };
+    if (c.analyze_status === 1) return { kind: "info", label: "Analyse…" };
+    return { kind: "warning", label: "Partiel" };
+  }
+  nature(c: MediaContainerListItem) {
+    return NATURE.find((o) => o.value === String(c.nature ?? ""))?.label ?? "—";
+  }
+  kind(c: MediaContainerListItem) {
+    return (
+      KIND.find((o) => o.value === String(c.container_kind ?? ""))?.label ?? "—"
+    );
+  }
+  private optionLabel(key: string, v: string) {
+    if (key === "status") return STATUS.find((o) => o.value === v)?.label ?? v;
+    if (key === "nature") return NATURE.find((o) => o.value === v)?.label ?? v;
+    if (key === "container_kind")
+      return KIND.find((o) => o.value === v)?.label ?? v;
+    if (key === "is_anime") return v === "1" ? "Oui" : "Non";
+    return v;
+  }
+  private params(page: number) {
+    const p: any = { page, page_size: this.pageSize };
+    if (this.search.value.trim()) p.title = this.search.value.trim();
+    Object.entries(this.filters).forEach(([k, v]) => {
+      if (v !== "") p[k] = v;
+    });
+    return p;
+  }
+}

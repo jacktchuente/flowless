@@ -1,1 +1,125 @@
-<header class="topline"><div><span class="eyebrow">Régie</span><h1>Vue d'ensemble</h1><p class="sub">Voici l’état actuel de vos chaînes et des traitements prioritaires.</p></div><a class="btn primary" routerLink="/app/channels"><flw-icon name="plus"/>Nouvelle chaîne</a></header><div class="content" *ngIf="data as d;else loading"><section class="stats"><div class="card stat"><span class="n">{{d.stats.channels_on_air}}/{{d.stats.channels_enabled}}</span><span class="l">Chaînes à l’antenne</span></div><div class="card stat" [class.alert]="d.stats.open_alerts"><span class="n">{{d.stats.open_alerts}}</span><span class="l">Alertes · {{d.stats.channels_with_alerts}} chaînes</span></div><div class="card stat"><span class="n">{{d.stats.sources_stale}}/{{d.stats.sources_total}}</span><span class="l">Sources à resynchroniser</span></div><div class="card stat"><span class="n mono">{{minutes(d.stats.last_generation_at)}}</span><span class="l">Minutes depuis la génération</span></div></section><div class="columns"><section class="card"><div class="card-head"><h2>À traiter en priorité</h2><span class="pill critical" *ngIf="d.alerts.length">{{d.alerts.length}}</span></div><div class="list"><a *ngFor="let alert of d.alerts" [routerLink]="alert.object_type==='tv_channel'?['/app/channels',alert.object_id]:['/app/sources']"><span class="pill" [class.critical]="alert.severity==='error'" [class.warning]="alert.severity==='warning'">{{alert.severity==='error'?'Erreur':'Alerte'}}</span><span><strong>{{alert.object_name}}</strong><small>{{alert.message}}</small></span><time class="mono">{{alert.occurred_at|flwTimeAgo}}</time></a><div class="empty" *ngIf="!d.alerts.length">Aucune alerte ouverte.</div></div></section><section class="card"><div class="card-head"><h2>Activité récente</h2></div><div class="list"><div *ngFor="let item of d.recent_activity"><span class="pill" [class.success]="item.status==='success'" [class.critical]="item.status==='error'" [class.info]="item.status==='info'">{{item.status==='success'?'OK':item.status==='error'?'Échec':'Info'}}</span><span><strong>{{activity(item)}}</strong></span><time class="mono">{{item.occurred_at|flwTimeAgo}}</time></div><div class="empty" *ngIf="!d.recent_activity.length">Aucune activité récente.</div></div></section></div><section class="card"><div class="card-head"><div><h2>Chaînes à l’antenne</h2><p class="desc">Programme actuel et suivant.</p></div><a routerLink="/app/channels">Voir toutes les chaînes</a></div><div class="air"><article *ngFor="let channel of d.on_air"><header><strong>{{channel.name}}</strong><span class="pill live"><span class="dot"></span>Direct</span></header><h3>{{channel.current.title}}</h3><p class="mono">{{channel.current.starts_at|date:'HH:mm'}} – {{channel.current.ends_at|date:'HH:mm'}}</p><small *ngIf="channel.next">Suivant — {{channel.next.title}} à {{channel.next.starts_at|date:'HH:mm'}}</small></article><div class="empty" *ngIf="!d.on_air.length">Aucune chaîne n’émet actuellement.</div></div></section></div><ng-template #loading><div class="content"><div class="card empty">Chargement de la régie…</div></div></ng-template>
+<header class="topline">
+  <div>
+    <span class="eyebrow">Régie</span>
+    <h1>Vue d'ensemble</h1>
+    <p class="sub">
+      Voici l’état actuel de vos chaînes et des traitements prioritaires.
+    </p>
+  </div>
+  <a class="btn primary" routerLink="/app/channels"
+    ><flw-icon name="plus" />Nouvelle chaîne</a
+  >
+</header>
+<div class="content" *ngIf="data as d; else loading">
+  <section class="stats">
+    <div class="card stat">
+      <span class="n"
+        >{{ d.stats.channels_on_air }}/{{ d.stats.channels_enabled }}</span
+      ><span class="l">Chaînes à l’antenne</span>
+    </div>
+    <div class="card stat" [class.alert]="d.stats.open_alerts">
+      <span class="n">{{ d.stats.open_alerts }}</span
+      ><span class="l"
+        >Alertes · {{ d.stats.channels_with_alerts }} chaînes</span
+      >
+    </div>
+    <div class="card stat">
+      <span class="n"
+        >{{ d.stats.sources_stale }}/{{ d.stats.sources_total }}</span
+      ><span class="l">Sources à resynchroniser</span>
+    </div>
+    <div class="card stat">
+      <span class="n mono">{{ minutes(d.stats.last_generation_at) }}</span
+      ><span class="l">Minutes depuis la génération</span>
+    </div>
+  </section>
+  <div class="columns">
+    <section class="card">
+      <div class="card-head">
+        <h2>À traiter en priorité</h2>
+        <span class="pill critical" *ngIf="d.alerts.length">{{
+          d.alerts.length
+        }}</span>
+      </div>
+      <div class="list">
+        <a
+          *ngFor="let alert of d.alerts"
+          [routerLink]="
+            alert.object_type === 'tv_channel'
+              ? ['/app/channels', alert.object_id]
+              : ['/app/sources']
+          "
+          ><span
+            class="pill"
+            [class.critical]="alert.severity === 'error'"
+            [class.warning]="alert.severity === 'warning'"
+            >{{ alert.severity === "error" ? "Erreur" : "Alerte" }}</span
+          ><span
+            ><strong>{{ alert.object_name }}</strong
+            ><small>{{ alert.message }}</small></span
+          ><time class="mono">{{ alert.occurred_at | flwTimeAgo }}</time></a
+        >
+        <div class="empty" *ngIf="!d.alerts.length">Aucune alerte ouverte.</div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Activité récente</h2></div>
+      <div class="list">
+        <div *ngFor="let item of d.recent_activity">
+          <span
+            class="pill"
+            [class.success]="item.status === 'success'"
+            [class.critical]="item.status === 'error'"
+            [class.info]="item.status === 'info'"
+            >{{
+              item.status === "success"
+                ? "OK"
+                : item.status === "error"
+                  ? "Échec"
+                  : "Info"
+            }}</span
+          ><span
+            ><strong>{{ activity(item) }}</strong></span
+          ><time class="mono">{{ item.occurred_at | flwTimeAgo }}</time>
+        </div>
+        <div class="empty" *ngIf="!d.recent_activity.length">
+          Aucune activité récente.
+        </div>
+      </div>
+    </section>
+  </div>
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Chaînes à l’antenne</h2>
+        <p class="desc">Programme actuel et suivant.</p>
+      </div>
+      <a routerLink="/app/channels">Voir toutes les chaînes</a>
+    </div>
+    <div class="air">
+      <article *ngFor="let channel of d.on_air">
+        <header>
+          <strong>{{ channel.name }}</strong
+          ><span class="pill live"><span class="dot"></span>Direct</span>
+        </header>
+        <h3>{{ channel.current.title }}</h3>
+        <p class="mono">
+          {{ channel.current.starts_at | date: "HH:mm" }} –
+          {{ channel.current.ends_at | date: "HH:mm" }}
+        </p>
+        <small *ngIf="channel.next"
+          >Suivant — {{ channel.next.title }} à
+          {{ channel.next.starts_at | date: "HH:mm" }}</small
+        >
+      </article>
+      <div class="empty" *ngIf="!d.on_air.length">
+        Aucune chaîne n’émet actuellement.
+      </div>
+    </div>
+  </section>
+</div>
+<ng-template #loading
+  ><div class="content">
+    <div class="card empty">Chargement de la régie…</div>
+  </div></ng-template
+>

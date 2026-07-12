@@ -1,1 +1,117 @@
-<header class="topline"><div><span class="eyebrow">{{'MEDIA_CONTAINER.EYEBROW'|translate}}</span><h1>{{'MEDIA_CONTAINER.TITLE'|translate}}</h1><p class="sub">{{'MEDIA_CONTAINER.SUBTITLE'|translate}}</p></div><div class="topline-actions"><button class="btn primary" type="button" (click)="analyzeAll()"><flw-icon name="sync"/>{{'MEDIA_CONTAINER.ANALYZE_ALL'|translate}}</button></div></header><div class="content"><section class="card toolbar"><div class="search field"><flw-icon name="search"/><input type="search" [formControl]="search" placeholder="Rechercher un titre…"></div><button class="btn" type="button" (click)="openFilters()"><flw-icon name="filter"/>Plus de filtres</button><flw-select [value]="pageSize" [options]="pageSizeOptions" (valueChange)="pageSizeChange($event)"/></section><div class="chips" *ngIf="chips.length"><flw-chip-filter *ngFor="let chip of chips" [label]="chip.label" (remove)="removeFilter(chip.key)"/><button class="btn ghost sm" (click)="resetFilters()">Tout effacer</button></div><section class="card"><div class="table-wrap" *ngIf="containers.length;else empty"><table class="grid"><thead><tr><th>Titre</th><th>Statut</th><th>Analysé le</th><th>Éléments</th><th>Nature</th><th>Type</th><th>Manquants</th><th></th></tr></thead><tbody><tr *ngFor="let container of containers" (click)="openDetail(container)"><td class="cell-title">{{container.title}}</td><td><span class="pill" [class]="status(container).kind"><span class="dot"></span>{{status(container).label}}</span></td><td class="mono">{{container.analyzed_at?(container.analyzed_at|date:'dd/MM HH:mm'):'—'}}</td><td class="mono">{{container.item_count??'—'}}</td><td>{{nature(container)}}</td><td>{{kind(container)}}</td><td><span class="pill" [class.critical]="container.is_missing" [class.neutral]="!container.is_missing">{{container.is_missing?'Oui':'Non'}}</span></td><td><button class="btn ghost sm" type="button" [disabled]="syncingIds.has(container.id.toString())" (click)="analyze(container,$event)">Analyser</button></td></tr></tbody></table></div><ng-template #empty><div class="empty">{{isLoading?'Chargement…':('MEDIA_CONTAINER.EMPTY_TITLE'|translate)}}</div></ng-template><footer class="footer" *ngIf="totalCount"><span>{{totalCount}} titres au total · page {{currentPage}} sur {{totalPages}}</span><flw-pagination [page]="currentPage" [pageCount]="totalPages" (pageChange)="loadPage($event)"/></footer></section></div>
+<header class="topline">
+  <div>
+    <span class="eyebrow">{{ "MEDIA_CONTAINER.EYEBROW" | translate }}</span>
+    <h1>{{ "MEDIA_CONTAINER.TITLE" | translate }}</h1>
+    <p class="sub">{{ "MEDIA_CONTAINER.SUBTITLE" | translate }}</p>
+  </div>
+  <div class="topline-actions">
+    <button class="btn primary" type="button" (click)="analyzeAll()">
+      <flw-icon name="sync" />{{ "MEDIA_CONTAINER.ANALYZE_ALL" | translate }}
+    </button>
+  </div>
+</header>
+<div class="content">
+  <section class="card toolbar">
+    <div class="search field">
+      <flw-icon name="search" /><input
+        type="search"
+        [formControl]="search"
+        placeholder="Rechercher un titre…"
+      />
+    </div>
+    <button class="btn" type="button" (click)="openFilters()">
+      <flw-icon name="filter" />Plus de filtres</button
+    ><flw-select
+      [value]="pageSize"
+      [options]="pageSizeOptions"
+      (valueChange)="pageSizeChange($event)"
+    />
+  </section>
+  <div class="chips" *ngIf="chips.length">
+    <flw-chip-filter
+      *ngFor="let chip of chips"
+      [label]="chip.label"
+      (remove)="removeFilter(chip.key)"
+    /><button class="btn ghost sm" (click)="resetFilters()">
+      Tout effacer
+    </button>
+  </div>
+  <section class="card">
+    <div class="table-wrap" *ngIf="containers.length; else empty">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Statut</th>
+            <th>Analysé le</th>
+            <th>Éléments</th>
+            <th>Nature</th>
+            <th>Type</th>
+            <th>Manquants</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let container of containers"
+            (click)="openDetail(container)"
+          >
+            <td class="cell-title">{{ container.title }}</td>
+            <td>
+              <span class="pill" [class]="status(container).kind"
+                ><span class="dot"></span>{{ status(container).label }}</span
+              >
+            </td>
+            <td class="mono">
+              {{
+                container.analyzed_at
+                  ? (container.analyzed_at | date: "dd/MM HH:mm")
+                  : "—"
+              }}
+            </td>
+            <td class="mono">{{ container.item_count ?? "—" }}</td>
+            <td>{{ nature(container) }}</td>
+            <td>{{ kind(container) }}</td>
+            <td>
+              <span
+                class="pill"
+                [class.critical]="container.is_missing"
+                [class.neutral]="!container.is_missing"
+                >{{ container.is_missing ? "Oui" : "Non" }}</span
+              >
+            </td>
+            <td>
+              <button
+                class="btn ghost sm"
+                type="button"
+                [disabled]="syncingIds.has(container.id.toString())"
+                (click)="analyze(container, $event)"
+              >
+                Analyser
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #empty
+      ><div class="empty">
+        {{
+          isLoading
+            ? "Chargement…"
+            : ("MEDIA_CONTAINER.EMPTY_TITLE" | translate)
+        }}
+      </div></ng-template
+    >
+    <footer class="footer" *ngIf="totalCount">
+      <span
+        >{{ totalCount }} titres au total · page {{ currentPage }} sur
+        {{ totalPages }}</span
+      ><flw-pagination
+        [page]="currentPage"
+        [pageCount]="totalPages"
+        (pageChange)="loadPage($event)"
+      />
+    </footer>
+  </section>
+</div>

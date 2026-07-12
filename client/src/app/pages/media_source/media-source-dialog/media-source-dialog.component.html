@@ -1,1 +1,59 @@
-<flw-modal [title]="data.source?'Modifier la source':'Nouvelle source'" description="Connectez un serveur Jellyfin à la régie."><form [formGroup]="form"><div class="field"><label>Nom</label><input type="text" formControlName="name" placeholder="Jellyfin principal"></div><div class="field"><label>URL Jellyfin</label><input type="url" formControlName="application_url" placeholder="https://jellyfin.example.com"></div><div class="field-row cols-2"><div class="field"><label>Utilisateur</label><input type="text" formControlName="username"></div><div class="field"><label>Mot de passe</label><input type="password" formControlName="password"></div></div></form><p class="tooltip-note amber" *ngIf="errorMessage">{{errorMessage}}</p><p class="tooltip-note">Utilisez de préférence un compte Jellyfin dédié avec un accès en lecture seule.</p><div modal-footer><span></span><div class="actions"><button class="btn ghost" type="button" (click)="ref.close(false)" [disabled]="isSubmitting">Annuler</button><button class="btn primary" type="button" (click)="save()" [disabled]="isSubmitting">{{isSubmitting?'Vérification…':'Tester la connexion et enregistrer'}}</button></div></div></flw-modal>
+<flw-modal
+  [title]="data.source ? 'Modifier la source' : 'Nouvelle source'"
+  description="Connectez un serveur Jellyfin à la régie."
+  ><form [formGroup]="form">
+    <div class="field">
+      <label>Nom</label
+      ><input
+        type="text"
+        formControlName="name"
+        placeholder="Jellyfin principal"
+      />
+    </div>
+    <div class="field">
+      <label>URL Jellyfin</label
+      ><input
+        type="url"
+        formControlName="application_url"
+        placeholder="https://jellyfin.example.com"
+      />
+    </div>
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>Utilisateur</label
+        ><input type="text" formControlName="username" />
+      </div>
+      <div class="field">
+        <label>Mot de passe</label
+        ><input type="password" formControlName="password" />
+      </div>
+    </div>
+  </form>
+  <p class="tooltip-note amber" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="tooltip-note">
+    Utilisez de préférence un compte Jellyfin dédié avec un accès en lecture
+    seule.
+  </p>
+  <div modal-footer>
+    <span></span>
+    <div class="actions">
+      <button
+        class="btn ghost"
+        type="button"
+        (click)="ref.close(false)"
+        [disabled]="isSubmitting"
+      >
+        Annuler</button
+      ><button
+        class="btn primary"
+        type="button"
+        (click)="save()"
+        [disabled]="isSubmitting"
+      >
+        {{
+          isSubmitting ? "Vérification…" : "Tester la connexion et enregistrer"
+        }}
+      </button>
+    </div>
+  </div></flw-modal
+>

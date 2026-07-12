@@ -1,15 +1,171 @@
 <div class="content detail" *ngIf="channel as c; else loading">
   <a class="back" routerLink="/app/channels">← {{ c.catalog_name }}</a>
   <section class="card hero">
-    <div class="logo"><img *ngIf="c.logo" [src]="c.logo" [alt]="c.name"><span *ngIf="!c.logo">{{c.name.charAt(0)}}</span><button class="btn icon-only" (click)="file.click()"><flw-icon name="edit"/></button><input #file hidden type="file" accept="image/*" (change)="upload($event)"></div>
-    <div class="identity"><div><h1>{{c.name}}</h1><span class="pill" [class]="status().kind"><span class="dot"></span>{{status().label}}</span></div><p>{{c.description||'Aucune description.'}}</p><div class="tags"><span class="pill neutral">{{c.catalog_name}}</span><span class="pill success">{{c.is_enabled?'Actif':'Inactif'}}</span><span class="pill info">{{isFlexible?'Flexible':'Grille classique'}}</span></div></div>
-    <div class="hero-actions"><button class="btn" (click)="edit()">Modifier</button><button class="btn" [disabled]="isFlexible" (click)="generateBlueprint()">Générer le plan</button><button class="btn primary" (click)="generatePlayout()">Générer le planning</button><button class="btn ghost" (click)="push()">Publier vers ErsatzTV</button></div>
+    <div class="logo">
+      <img *ngIf="c.logo" [src]="c.logo" [alt]="c.name" /><span
+        *ngIf="!c.logo"
+        >{{ c.name.charAt(0) }}</span
+      ><button class="btn icon-only" (click)="file.click()">
+        <flw-icon name="edit" /></button
+      ><input
+        #file
+        hidden
+        type="file"
+        accept="image/*"
+        (change)="upload($event)"
+      />
+    </div>
+    <div class="identity">
+      <div>
+        <h1>{{ c.name }}</h1>
+        <span class="pill" [class]="status().kind"
+          ><span class="dot"></span>{{ status().label }}</span
+        >
+      </div>
+      <p>{{ c.description || "Aucune description." }}</p>
+      <div class="tags">
+        <span class="pill neutral">{{ c.catalog_name }}</span
+        ><span class="pill success">{{
+          c.is_enabled ? "Actif" : "Inactif"
+        }}</span
+        ><span class="pill info">{{
+          isFlexible ? "Flexible" : "Grille classique"
+        }}</span>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn" (click)="edit()">Modifier</button
+      ><button
+        class="btn"
+        [disabled]="isFlexible"
+        (click)="generateBlueprint()"
+      >
+        Générer le plan</button
+      ><button class="btn primary" (click)="generatePlayout()">
+        Générer le planning</button
+      ><button class="btn ghost" (click)="push()">Publier vers ErsatzTV</button>
+    </div>
   </section>
   <div class="summary">
-    <section class="card"><div class="card-head"><h2>Paramètres techniques</h2></div><div class="card-body kv"><div class="row"><span class="k">Catalogue</span><strong class="v">{{c.catalog_name}}</strong></div><div class="row"><span class="k">Playout externe</span><strong class="v mono">{{c.external_playout_id||'—'}}</strong></div><div class="row"><span class="k">Planning actif</span><strong class="v mono">{{c.active_playout_id||'—'}}</strong></div><div class="row"><span class="k">Dernière mise à jour</span><strong class="v">{{c.updated_at|flwTimeAgo}}</strong></div><div class="row"><span class="k">Éléments programmés</span><strong class="v mono">{{c.active_schedule_items.length}}</strong></div></div></section>
-    <section class="card"><div class="card-head"><h2>Ligne éditoriale</h2></div><div class="card-body kv" *ngIf="c.editorial_line_data as line"><div class="row"><span class="k">Fenêtre horaire</span><strong class="v mono">{{line.start_at.slice(0,5)}} → {{line.end_at.slice(0,5)}}</strong></div><div class="row"><span class="k">Filler autorisé</span><strong class="v">{{line.allow_filler?'Oui':'Non'}}</strong></div><div class="tags"><span class="tag allow" *ngFor="let tag of line.allowed_categories">{{tag}}</span><span class="tag prefer" *ngFor="let tag of line.preferred_categories">{{tag}}</span><span class="tag forbid" *ngFor="let tag of line.forbidden_categories">{{tag}}</span></div></div><div class="empty" *ngIf="!c.editorial_line_data">Aucune ligne éditoriale.</div></section>
+    <section class="card">
+      <div class="card-head"><h2>Paramètres techniques</h2></div>
+      <div class="card-body kv">
+        <div class="row">
+          <span class="k">Catalogue</span
+          ><strong class="v">{{ c.catalog_name }}</strong>
+        </div>
+        <div class="row">
+          <span class="k">Playout externe</span
+          ><strong class="v mono">{{ c.external_playout_id || "—" }}</strong>
+        </div>
+        <div class="row">
+          <span class="k">Planning actif</span
+          ><strong class="v mono">{{ c.active_playout_id || "—" }}</strong>
+        </div>
+        <div class="row">
+          <span class="k">Dernière mise à jour</span
+          ><strong class="v">{{ c.updated_at | flwTimeAgo }}</strong>
+        </div>
+        <div class="row">
+          <span class="k">Éléments programmés</span
+          ><strong class="v mono">{{ c.active_schedule_items.length }}</strong>
+        </div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Ligne éditoriale</h2></div>
+      <div class="card-body kv" *ngIf="c.editorial_line_data as line">
+        <div class="row">
+          <span class="k">Fenêtre horaire</span
+          ><strong class="v mono"
+            >{{ line.start_at.slice(0, 5) }} →
+            {{ line.end_at.slice(0, 5) }}</strong
+          >
+        </div>
+        <div class="row">
+          <span class="k">Filler autorisé</span
+          ><strong class="v">{{ line.allow_filler ? "Oui" : "Non" }}</strong>
+        </div>
+        <div class="tags">
+          <span class="tag allow" *ngFor="let tag of line.allowed_categories">{{
+            tag
+          }}</span
+          ><span
+            class="tag prefer"
+            *ngFor="let tag of line.preferred_categories"
+            >{{ tag }}</span
+          ><span
+            class="tag forbid"
+            *ngFor="let tag of line.forbidden_categories"
+            >{{ tag }}</span
+          >
+        </div>
+      </div>
+      <div class="empty" *ngIf="!c.editorial_line_data">
+        Aucune ligne éditoriale.
+      </div>
+    </section>
   </div>
-  <section class="card" *ngIf="!isFlexible"><div class="card-head"><div><h2>Grille éditoriale</h2><p class="desc">Blocs de programmation de la version active.</p></div><button class="btn" (click)="newVersion()">Nouvelle version</button></div><div class="blocks"><div class="block-row" *ngFor="let block of c.grid_data?.blocks"><strong class="mono">{{block.starts_at.slice(0,5)}} – {{block.ends_at.slice(0,5)}}</strong><div class="tags"><span class="tag allow" *ngFor="let tag of blockTags(block)">{{tag}}</span></div><span>Priorité {{block.priority}} · {{block.min_items}}–{{block.max_items}} titres</span></div><div class="gap" *ngFor="let warning of gridWarnings"><flw-icon name="warning"/>{{warning}}</div></div></section>
-  <section class="card timelines"><div class="card-head"><div><h2>Grille & planning</h2><p class="desc mono">{{calendarDate|date:'dd/MM/yyyy'}}</p></div><div><button class="btn ghost" (click)="shift(-1)">Veille</button><button class="btn ghost" (click)="calendarDate=calendarDate">Aujourd'hui</button><button class="btn ghost" (click)="shift(1)">Lendemain</button></div></div><div class="timeline-grid"><div *ngIf="!isFlexible"><span class="section-label">Grille</span><flw-timeline [blocks]="gridBlocks()" [pxPerHour]="52"/></div><div><span class="section-label">Planning</span><flw-timeline [blocks]="scheduleBlocks()" [pxPerHour]="52"/></div></div></section>
+  <section class="card" *ngIf="!isFlexible">
+    <div class="card-head">
+      <div>
+        <h2>Grille éditoriale</h2>
+        <p class="desc">Blocs de programmation de la version active.</p>
+      </div>
+      <button class="btn" (click)="newVersion()">Nouvelle version</button>
+    </div>
+    <div class="blocks">
+      <div class="block-row" *ngFor="let block of c.grid_data?.blocks">
+        <strong class="mono"
+          >{{ block.starts_at.slice(0, 5) }} –
+          {{ block.ends_at.slice(0, 5) }}</strong
+        >
+        <div class="tags">
+          <span class="tag allow" *ngFor="let tag of blockTags(block)">{{
+            tag
+          }}</span>
+        </div>
+        <span
+          >Priorité {{ block.priority }} · {{ block.min_items }}–{{
+            block.max_items
+          }}
+          titres</span
+        >
+      </div>
+      <div class="gap" *ngFor="let warning of gridWarnings">
+        <flw-icon name="warning" />{{ warning }}
+      </div>
+    </div>
+  </section>
+  <section class="card timelines">
+    <div class="card-head">
+      <div>
+        <h2>Grille & planning</h2>
+        <p class="desc mono">{{ calendarDate | date: "dd/MM/yyyy" }}</p>
+      </div>
+      <div>
+        <button class="btn ghost" (click)="shift(-1)">Veille</button
+        ><button class="btn ghost" (click)="calendarDate = calendarDate">
+          Aujourd'hui</button
+        ><button class="btn ghost" (click)="shift(1)">Lendemain</button>
+      </div>
+    </div>
+    <div class="timeline-grid">
+      <div *ngIf="!isFlexible">
+        <span class="section-label">Grille</span
+        ><flw-timeline [blocks]="gridBlocks()" [pxPerHour]="52" />
+      </div>
+      <div>
+        <span class="section-label">Planning</span
+        ><flw-timeline [blocks]="scheduleBlocks()" [pxPerHour]="52" />
+      </div>
+    </div>
+  </section>
 </div>
-<ng-template #loading><div class="content"><div class="card empty">{{isLoading?'Chargement…':'Chaîne introuvable'}}</div></div></ng-template>
+<ng-template #loading
+  ><div class="content">
+    <div class="card empty">
+      {{ isLoading ? "Chargement…" : "Chaîne introuvable" }}
+    </div>
+  </div></ng-template
+>

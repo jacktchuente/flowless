@@ -1,1 +1,86 @@
-<header class="topline"><div><span class="eyebrow">{{'MEDIA_SOURCE.EYEBROW'|translate}}</span><h1>{{'MEDIA_SOURCE.TITLE'|translate}}</h1><p class="sub">{{'MEDIA_SOURCE.SUBTITLE'|translate}}</p></div><div class="topline-actions"><button class="btn primary" type="button" (click)="openCreateDialog()"><flw-icon name="plus"/>{{'MEDIA_SOURCE.ADD'|translate}}</button></div></header><div class="content"><section class="card"><div class="table-wrap" *ngIf="sources.length;else empty"><table class="grid"><thead><tr><th>Source</th><th>Type</th><th>Identifiant</th><th>Statut</th><th>{{'MEDIA_SOURCE.LAST_SYNC'|translate}}</th><th>Actions</th></tr></thead><tbody><tr *ngFor="let source of sources"><td><div class="cell-title">{{source.name}}</div><div class="cell-sub">{{source.credentials.application_url}}</div></td><td>Jellyfin</td><td class="mono">{{source.credentials.username||'—'}}</td><td><span class="pill" [class]="status(source).kind"><span class="dot"></span>{{status(source).label}}</span></td><td class="mono">{{source.analyzed_at|flwTimeAgo}}</td><td class="actions"><button class="btn sm" [class.primary]="isStale(source)" [class.ghost]="!isStale(source)" type="button" [disabled]="syncingIds.has(source.id.toString())" (click)="syncCollections(source,$event)"><flw-icon name="sync"/>Synchroniser</button><button class="btn ghost icon-only" type="button" (click)="openEditDialog(source,$event)" aria-label="Modifier"><flw-icon name="edit"/></button><button class="btn danger-ghost icon-only" type="button" (click)="deleteSource(source,$event)" aria-label="Supprimer"><flw-icon name="trash"/></button></td></tr></tbody></table></div><ng-template #empty><div class="empty"><h3>{{'MEDIA_SOURCE.EMPTY_TITLE'|translate}}</h3><p>{{'MEDIA_SOURCE.EMPTY_HELP'|translate}}</p></div></ng-template></section><aside class="tooltip-note amber" *ngIf="staleSources.length"><flw-icon name="warning"/><span>{{staleSources.length}} source(s) doivent être resynchronisées. La plus ancienne est en retard de {{daysSince(staleSources[0])}} jours.</span></aside></div>
+<header class="topline">
+  <div>
+    <span class="eyebrow">{{ "MEDIA_SOURCE.EYEBROW" | translate }}</span>
+    <h1>{{ "MEDIA_SOURCE.TITLE" | translate }}</h1>
+    <p class="sub">{{ "MEDIA_SOURCE.SUBTITLE" | translate }}</p>
+  </div>
+  <div class="topline-actions">
+    <button class="btn primary" type="button" (click)="openCreateDialog()">
+      <flw-icon name="plus" />{{ "MEDIA_SOURCE.ADD" | translate }}
+    </button>
+  </div>
+</header>
+<div class="content">
+  <section class="card">
+    <div class="table-wrap" *ngIf="sources.length; else empty">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Type</th>
+            <th>Identifiant</th>
+            <th>Statut</th>
+            <th>{{ "MEDIA_SOURCE.LAST_SYNC" | translate }}</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let source of sources">
+            <td>
+              <div class="cell-title">{{ source.name }}</div>
+              <div class="cell-sub">
+                {{ source.credentials.application_url }}
+              </div>
+            </td>
+            <td>Jellyfin</td>
+            <td class="mono">{{ source.credentials.username || "—" }}</td>
+            <td>
+              <span class="pill" [class]="status(source).kind"
+                ><span class="dot"></span>{{ status(source).label }}</span
+              >
+            </td>
+            <td class="mono">{{ source.analyzed_at | flwTimeAgo }}</td>
+            <td class="actions">
+              <button
+                class="btn sm"
+                [class.primary]="isStale(source)"
+                [class.ghost]="!isStale(source)"
+                type="button"
+                [disabled]="syncingIds.has(source.id.toString())"
+                (click)="syncCollections(source, $event)"
+              >
+                <flw-icon name="sync" />Synchroniser</button
+              ><button
+                class="btn ghost icon-only"
+                type="button"
+                (click)="openEditDialog(source, $event)"
+                aria-label="Modifier"
+              >
+                <flw-icon name="edit" /></button
+              ><button
+                class="btn danger-ghost icon-only"
+                type="button"
+                (click)="deleteSource(source, $event)"
+                aria-label="Supprimer"
+              >
+                <flw-icon name="trash" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #empty
+      ><div class="empty">
+        <h3>{{ "MEDIA_SOURCE.EMPTY_TITLE" | translate }}</h3>
+        <p>{{ "MEDIA_SOURCE.EMPTY_HELP" | translate }}</p>
+      </div></ng-template
+    >
+  </section>
+  <aside class="tooltip-note amber" *ngIf="staleSources.length">
+    <flw-icon name="warning" /><span
+      >{{ staleSources.length }} source(s) doivent être resynchronisées. La plus
+      ancienne est en retard de {{ daysSince(staleSources[0]) }} jours.</span
+    >
+  </aside>
+</div>

@@ -1,1 +1,7 @@
-<aside class="demo-alert" *ngIf="showAlert"><span>Ce site est en phase de test. Ne partagez aucune information sensible.</span><button type="button" (click)="showAlert=false">✕</button></aside><router-outlet/>
+<aside class="demo-alert" *ngIf="showAlert">
+  <span
+    >Ce site est en phase de test. Ne partagez aucune information
+    sensible.</span
+  ><button type="button" (click)="showAlert = false">✕</button>
+</aside>
+<router-outlet />

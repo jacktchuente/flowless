@@ -1,3 +1,29 @@
-import {Component,Inject} from '@angular/core';import {DatePipe,NgIf} from '@angular/common';import {DIALOG_DATA,DialogRef} from '@angular/cdk/dialog';import {MediaContainerDetail} from '@project-interfaces/media-container';import {MediaContainerService} from '@project-services/media-container.service';import {FlwModalComponent} from '../../../ui/modal/flw-modal.component';
-@Component({standalone:true,imports:[DatePipe,NgIf,FlwModalComponent],templateUrl:'./media-container-dialog.component.html',styleUrl:'./media-container-dialog.component.css'})
-export class MediaContainerDetailDialogComponent {container:MediaContainerDetail|null=null;isLoading=true;constructor(service:MediaContainerService,public ref:DialogRef<void>,@Inject(DIALOG_DATA)public data:{containerId:string|number}){service.getDetail(data.containerId).subscribe(r=>{this.isLoading=false;if(r.isOk)this.container=r.body as MediaContainerDetail})}format(values:string[]|null|undefined){return values?.length?values.join(', '):'—'}}
+import { Component, Inject } from "@angular/core";
+import { DatePipe, NgIf } from "@angular/common";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { MediaContainerDetail } from "@project-interfaces/media-container";
+import { MediaContainerService } from "@project-services/media-container.service";
+import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
+@Component({
+  standalone: true,
+  imports: [DatePipe, NgIf, FlwModalComponent],
+  templateUrl: "./media-container-dialog.component.html",
+  styleUrl: "./media-container-dialog.component.css",
+})
+export class MediaContainerDetailDialogComponent {
+  container: MediaContainerDetail | null = null;
+  isLoading = true;
+  constructor(
+    service: MediaContainerService,
+    public ref: DialogRef<void>,
+    @Inject(DIALOG_DATA) public data: { containerId: string | number },
+  ) {
+    service.getDetail(data.containerId).subscribe((r) => {
+      this.isLoading = false;
+      if (r.isOk) this.container = r.body as MediaContainerDetail;
+    });
+  }
+  format(values: string[] | null | undefined) {
+    return values?.length ? values.join(", ") : "—";
+  }
+}

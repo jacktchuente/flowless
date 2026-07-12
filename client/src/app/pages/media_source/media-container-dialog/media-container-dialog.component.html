@@ -1,1 +1,56 @@
-<flw-modal [title]="container?.title||'Détail du média'" [wide]="true"><div class="empty" *ngIf="isLoading">Chargement…</div><ng-container *ngIf="container as c"><div class="kv"><div class="row"><span class="k">Identifiant externe</span><strong class="v mono">{{c.external_id}}</strong></div><div class="row"><span class="k">Analysé le</span><strong class="v mono">{{c.analyzed_at?(c.analyzed_at|date:'dd/MM/yyyy HH:mm'):'Jamais'}}</strong></div><div class="row"><span class="k">Éléments</span><strong class="v mono">{{c.item_count??'—'}}</strong></div><div class="row"><span class="k">Description</span><strong class="v">{{c.description||'—'}}</strong></div><div class="row"><span class="k">Catégories</span><strong class="v">{{format(c.categories)}}</strong></div><div class="row"><span class="k">Genres</span><strong class="v">{{format(c.genres)}}</strong></div><div class="row"><span class="k">Tags</span><strong class="v">{{format(c.tags)}}</strong></div><div class="row"><span class="k">Pays</span><strong class="v">{{format(c.countries)}}</strong></div><div class="row"><span class="k">Langues audio</span><strong class="v">{{format(c.audio_languages)}}</strong></div><div class="row"><span class="k">Durées</span><strong class="v mono">{{c.duration_min_seconds??'—'}} – {{c.duration_max_seconds??'—'}} s</strong></div></div></ng-container><div modal-footer><span></span><button class="btn" type="button" (click)="ref.close()">Fermer</button></div></flw-modal>
+<flw-modal [title]="container?.title || 'Détail du média'" [wide]="true"
+  ><div class="empty" *ngIf="isLoading">Chargement…</div>
+  <ng-container *ngIf="container as c"
+    ><div class="kv">
+      <div class="row">
+        <span class="k">Identifiant externe</span
+        ><strong class="v mono">{{ c.external_id }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Analysé le</span
+        ><strong class="v mono">{{
+          c.analyzed_at ? (c.analyzed_at | date: "dd/MM/yyyy HH:mm") : "Jamais"
+        }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Éléments</span
+        ><strong class="v mono">{{ c.item_count ?? "—" }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Description</span
+        ><strong class="v">{{ c.description || "—" }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Catégories</span
+        ><strong class="v">{{ format(c.categories) }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Genres</span
+        ><strong class="v">{{ format(c.genres) }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Tags</span
+        ><strong class="v">{{ format(c.tags) }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Pays</span
+        ><strong class="v">{{ format(c.countries) }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Langues audio</span
+        ><strong class="v">{{ format(c.audio_languages) }}</strong>
+      </div>
+      <div class="row">
+        <span class="k">Durées</span
+        ><strong class="v mono"
+          >{{ c.duration_min_seconds ?? "—" }} –
+          {{ c.duration_max_seconds ?? "—" }} s</strong
+        >
+      </div>
+    </div></ng-container
+  >
+  <div modal-footer>
+    <span></span
+    ><button class="btn" type="button" (click)="ref.close()">Fermer</button>
+  </div></flw-modal
+>

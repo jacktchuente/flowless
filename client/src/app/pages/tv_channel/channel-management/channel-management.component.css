@@ -1,1 +1,77 @@
-.setup{padding:18px 22px;display:grid;grid-template-columns:minmax(220px,1fr) auto;align-items:end;gap:14px}.setup .divider,.setup>p,.setup>flw-segmented{grid-column:1/-1}.setup-actions{display:flex;gap:8px}.toolbar{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}.channel-cards{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;overflow-x:auto}.channel{padding:16px;min-width:220px}.channel header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}.channel h2{font-size:16px;margin-bottom:6px}.channel flw-timeline{display:block}.flexible{padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px}.flexible h2{margin:4px 0}.flexible p{color:var(--slate-500)}@media(max-width:1300px){.channel-cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.setup{grid-template-columns:1fr}.toolbar,.flexible{align-items:flex-start;flex-direction:column}.channel-cards{grid-template-columns:1fr}}
+.setup {
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+.setup .divider,
+.setup > p,
+.setup > flw-segmented {
+  grid-column: 1/-1;
+}
+.setup-actions {
+  display: flex;
+  gap: 8px;
+}
+.toolbar {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.channel-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 14px;
+  overflow-x: auto;
+}
+.channel {
+  padding: 16px;
+  min-width: 220px;
+}
+.channel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.channel h2 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.channel flw-timeline {
+  display: block;
+}
+.flexible {
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.flexible h2 {
+  margin: 4px 0;
+}
+.flexible p {
+  color: var(--slate-500);
+}
+@media (max-width: 1300px) {
+  .channel-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .setup {
+    grid-template-columns: 1fr;
+  }
+  .toolbar,
+  .flexible {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .channel-cards {
+    grid-template-columns: 1fr;
+  }
+}

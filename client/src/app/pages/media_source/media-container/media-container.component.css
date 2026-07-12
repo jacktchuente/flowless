@@ -1,1 +1,38 @@
-.toolbar{padding:14px 18px;display:flex;align-items:center;gap:10px}.search{position:relative;flex:1}.search flw-icon{position:absolute;left:12px;top:10px;color:var(--slate-400)}.search input{padding-left:36px;width:100%}.chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.footer{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--slate-100);color:var(--slate-500);font-size:12px}tbody tr{cursor:pointer}
+.toolbar {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.search {
+  position: relative;
+  flex: 1;
+}
+.search flw-icon {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  color: var(--slate-400);
+}
+.search input {
+  padding-left: 36px;
+  width: 100%;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-top: 1px solid var(--slate-100);
+  color: var(--slate-500);
+  font-size: 12px;
+}
+tbody tr {
+  cursor: pointer;
+}

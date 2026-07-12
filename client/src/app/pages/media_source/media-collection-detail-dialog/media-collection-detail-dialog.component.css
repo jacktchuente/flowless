@@ -1,1 +1,7 @@
-form{display:block}.actions{display:flex;gap:8px}
+form {
+  display: block;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}

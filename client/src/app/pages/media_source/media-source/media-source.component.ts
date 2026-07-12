@@ -1,14 +1,95 @@
-import {Component,DestroyRef,inject} from '@angular/core';
-import {NgFor,NgIf} from '@angular/common';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {TranslateModule} from '@ngx-translate/core';
-import {MediaSource} from '@project-interfaces/media-source';
-import {MediaSourceService} from '@project-services/media-source.service';
-import {NotificationService} from '@project-shared/services/notification.service';
-import {FlwDialogService} from '../../../ui/dialog.service';
-import {FlwIconComponent} from '../../../ui/icon/flw-icon.component';
-import {TimeAgoPipe} from '../../../ui/pipes/time-ago.pipe';
-import {FlwConfirmComponent} from '../../../ui/confirm/flw-confirm.component';
-import {MediaSourceDialogComponent} from '../media-source-dialog/media-source-dialog.component';
-@Component({selector:'app-media-source',standalone:true,imports:[NgFor,NgIf,TranslateModule,FlwIconComponent,TimeAgoPipe],templateUrl:'./media-source.component.html',styleUrl:'./media-source.component.css'})
-export class MediaSourceComponent {private destroyRef=inject(DestroyRef);sources:MediaSource[]=[];readonly syncingIds=new Set<string>();constructor(private service:MediaSourceService,private notification:NotificationService,private dialogs:FlwDialogService){service.listObject(null,true);service.getObjectBehaviorSubject().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v=>this.sources=v)}get staleSources(){return this.sources.filter(s=>this.isStale(s))}daysSince(source:MediaSource){return source.analyzed_at?Math.floor((Date.now()-new Date(source.analyzed_at).getTime())/86400000):Infinity}isStale(source:MediaSource){return !source.analyzed_at||this.daysSince(source)>7}status(source:MediaSource){if(source.analyze_status===1)return{kind:'info',label:'Synchronisation…'};if(this.isStale(source))return{kind:'warning',label:'Synchro en retard'};return{kind:'success',label:'Connectée'}}openCreateDialog(){this.dialogs.open(MediaSourceDialogComponent,{data:{}})}openEditDialog(source:MediaSource,e?:Event){e?.stopPropagation();this.dialogs.open(MediaSourceDialogComponent,{data:{source}})}deleteSource(source:MediaSource,e?:Event){e?.stopPropagation();this.dialogs.open(FlwConfirmComponent,{data:{title:'Supprimer la source',message:`Supprimer définitivement « ${source.name} » ?`,confirmLabel:'Supprimer'}}).closed.subscribe(ok=>{if(ok)this.service.deleteObject(String(source.id)).subscribe(r=>{if(!r.isOk)this.notification.notify('MEDIA_SOURCE.NOTIFY_DELETE_FAILED')})})}syncCollections(source:MediaSource,e?:Event){e?.stopPropagation();const id=String(source.id);if(this.syncingIds.has(id))return;this.syncingIds.add(id);this.service.syncCollections(source.id).subscribe(r=>{this.syncingIds.delete(id);if(!r.isOk){this.notification.notify('MEDIA_SOURCE.NOTIFY_SYNC_FAILED');return}source.analyze_status=1;this.notification.notify('MEDIA_SOURCE.NOTIFY_SYNC_STARTED')})}}
+import { Component, DestroyRef, inject } from "@angular/core";
+import { NgFor, NgIf } from "@angular/common";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { TranslateModule } from "@ngx-translate/core";
+import { MediaSource } from "@project-interfaces/media-source";
+import { MediaSourceService } from "@project-services/media-source.service";
+import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { TimeAgoPipe } from "../../../ui/pipes/time-ago.pipe";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import { MediaSourceDialogComponent } from "../media-source-dialog/media-source-dialog.component";
+@Component({
+  selector: "app-media-source",
+  standalone: true,
+  imports: [NgFor, NgIf, TranslateModule, FlwIconComponent, TimeAgoPipe],
+  templateUrl: "./media-source.component.html",
+  styleUrl: "./media-source.component.css",
+})
+export class MediaSourceComponent {
+  private destroyRef = inject(DestroyRef);
+  sources: MediaSource[] = [];
+  readonly syncingIds = new Set<string>();
+  constructor(
+    private service: MediaSourceService,
+    private notification: NotificationService,
+    private dialogs: FlwDialogService,
+  ) {
+    service.listObject(null, true);
+    service
+      .getObjectBehaviorSubject()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => (this.sources = v));
+  }
+  get staleSources() {
+    return this.sources.filter((s) => this.isStale(s));
+  }
+  daysSince(source: MediaSource) {
+    return source.analyzed_at
+      ? Math.floor(
+          (Date.now() - new Date(source.analyzed_at).getTime()) / 86400000,
+        )
+      : Infinity;
+  }
+  isStale(source: MediaSource) {
+    return !source.analyzed_at || this.daysSince(source) > 7;
+  }
+  status(source: MediaSource) {
+    if (source.analyze_status === 1)
+      return { kind: "info", label: "Synchronisation…" };
+    if (this.isStale(source))
+      return { kind: "warning", label: "Synchro en retard" };
+    return { kind: "success", label: "Connectée" };
+  }
+  openCreateDialog() {
+    this.dialogs.open(MediaSourceDialogComponent, { data: {} });
+  }
+  openEditDialog(source: MediaSource, e?: Event) {
+    e?.stopPropagation();
+    this.dialogs.open(MediaSourceDialogComponent, { data: { source } });
+  }
+  deleteSource(source: MediaSource, e?: Event) {
+    e?.stopPropagation();
+    this.dialogs
+      .open(FlwConfirmComponent, {
+        data: {
+          title: "Supprimer la source",
+          message: `Supprimer définitivement « ${source.name} » ?`,
+          confirmLabel: "Supprimer",
+        },
+      })
+      .closed.subscribe((ok) => {
+        if (ok)
+          this.service.deleteObject(String(source.id)).subscribe((r) => {
+            if (!r.isOk)
+              this.notification.notify("MEDIA_SOURCE.NOTIFY_DELETE_FAILED");
+          });
+      });
+  }
+  syncCollections(source: MediaSource, e?: Event) {
+    e?.stopPropagation();
+    const id = String(source.id);
+    if (this.syncingIds.has(id)) return;
+    this.syncingIds.add(id);
+    this.service.syncCollections(source.id).subscribe((r) => {
+      this.syncingIds.delete(id);
+      if (!r.isOk) {
+        this.notification.notify("MEDIA_SOURCE.NOTIFY_SYNC_FAILED");
+        return;
+      }
+      source.analyze_status = 1;
+      this.notification.notify("MEDIA_SOURCE.NOTIFY_SYNC_STARTED");
+    });
+  }
+}

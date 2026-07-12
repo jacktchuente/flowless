@@ -1,1 +1,10 @@
-.kv .row{align-items:flex-start}.kv .k{min-width:150px}.kv .v{text-align:right;max-width:70%}
+.kv .row {
+  align-items: flex-start;
+}
+.kv .k {
+  min-width: 150px;
+}
+.kv .v {
+  text-align: right;
+  max-width: 70%;
+}

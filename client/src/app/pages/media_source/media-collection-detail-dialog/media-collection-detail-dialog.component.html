@@ -1,1 +1,59 @@
-<flw-modal [title]="'Collection — '+data.collection.name" description="Ajustez les métadonnées utilisées par la programmation."><div class="kv"><div class="row"><span class="k">Source</span><strong class="v">{{data.collection.media_source_name}}</strong></div><div class="row"><span class="k">Identifiant externe</span><strong class="v mono">{{data.collection.external_id}}</strong></div></div><form [formGroup]="form"><div class="field-row cols-2"><div class="field"><label>Rôle de programmation</label><flw-select formControlName="programming_role" [options]="roleOptions"/><span class="hint">Détermine la place de cette collection dans la grille.</span></div><div class="field"><label>Nature</label><flw-select formControlName="nature" [options]="natureOptions"/></div><div class="field"><label>Type de contenant</label><flw-select formControlName="container_kind" [options]="kindOptions"/></div><div class="field"><label>Classification</label><flw-switch formControlName="is_anime" label="Considérer comme anime"/></div></div></form><div modal-footer><button class="btn danger-ghost" type="button" (click)="analyze()">Analyser maintenant</button><div class="actions"><button class="btn ghost" type="button" (click)="ref.close(false)">Annuler</button><button class="btn primary" type="button" (click)="save()" [disabled]="isSubmitting">Enregistrer</button></div></div></flw-modal>
+<flw-modal
+  [title]="'Collection — ' + data.collection.name"
+  description="Ajustez les métadonnées utilisées par la programmation."
+  ><div class="kv">
+    <div class="row">
+      <span class="k">Source</span
+      ><strong class="v">{{ data.collection.media_source_name }}</strong>
+    </div>
+    <div class="row">
+      <span class="k">Identifiant externe</span
+      ><strong class="v mono">{{ data.collection.external_id }}</strong>
+    </div>
+  </div>
+  <form [formGroup]="form">
+    <div class="field-row cols-2">
+      <div class="field">
+        <label>Rôle de programmation</label
+        ><flw-select
+          formControlName="programming_role"
+          [options]="roleOptions"
+        /><span class="hint"
+          >Détermine la place de cette collection dans la grille.</span
+        >
+      </div>
+      <div class="field">
+        <label>Nature</label
+        ><flw-select formControlName="nature" [options]="natureOptions" />
+      </div>
+      <div class="field">
+        <label>Type de contenant</label
+        ><flw-select formControlName="container_kind" [options]="kindOptions" />
+      </div>
+      <div class="field">
+        <label>Classification</label
+        ><flw-switch
+          formControlName="is_anime"
+          label="Considérer comme anime"
+        />
+      </div>
+    </div>
+  </form>
+  <div modal-footer>
+    <button class="btn danger-ghost" type="button" (click)="analyze()">
+      Analyser maintenant
+    </button>
+    <div class="actions">
+      <button class="btn ghost" type="button" (click)="ref.close(false)">
+        Annuler</button
+      ><button
+        class="btn primary"
+        type="button"
+        (click)="save()"
+        [disabled]="isSubmitting"
+      >
+        Enregistrer
+      </button>
+    </div>
+  </div></flw-modal
+>
