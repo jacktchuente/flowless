@@ -30,22 +30,28 @@
       </div>
     </div>
     <div class="hero-actions">
-      <button class="btn" (click)="edit()">
-        {{ "COMMON.EDIT" | translate }}</button
-      ><button class="btn" (click)="openReports()">
-        {{ "CHANNEL_DETAIL.GENERATION_REPORTS" | translate }}
-        <span class="pill critical" *ngIf="reportIssueCount">{{
-          reportIssueCount
-        }}</span></button
-      ><button
-        class="btn"
+      <div class="edit-row">
+        <button class="btn sm" (click)="edit()">
+          {{ "COMMON.EDIT" | translate }}</button
+        ><button
+          class="btn sm icon-only ghost report-btn"
+          (click)="openReports()"
+          [title]="'CHANNEL_DETAIL.GENERATION_REPORTS' | translate"
+          [attr.aria-label]="'CHANNEL_DETAIL.GENERATION_REPORTS' | translate"
+        >
+          <flw-icon name="report" />
+          <span class="badge" *ngIf="reportCount">{{ reportCount }}</span>
+        </button>
+      </div>
+      <button
+        class="btn sm"
         [disabled]="isFlexible"
         (click)="generateBlueprint()"
       >
         {{ "CHANNELS.GENERATE_BLUEPRINT" | translate }}</button
-      ><button class="btn primary" (click)="generatePlayout()">
+      ><button class="btn sm primary" (click)="generatePlayout()">
         {{ "CHANNELS.GENERATE_PLAYOUT" | translate }}</button
-      ><button class="btn ghost" (click)="push()">
+      ><button class="btn sm ghost" (click)="push()">
         {{ "CHANNELS.PUSH_ETV" | translate }}
       </button>
     </div>
@@ -88,10 +94,10 @@
       <div class="card-head">
         <h2>{{ "CHANNEL_DETAIL.EDITORIAL_LINE" | translate }}</h2>
         <div>
-          <button class="btn ghost sm" (click)="openResetRules()">
-            {{ "COMMON.RESET" | translate }}</button
-          ><button class="btn sm" (click)="openEditorialLine()">
-            {{ "COMMON.EDIT" | translate }}
+          <button class="btn sm ghost" (click)="openEditorialLine()">
+            {{ "COMMON.EDIT" | translate }}</button
+          ><button class="btn sm danger-ghost" (click)="openResetRules()">
+            {{ "COMMON.RESET" | translate }}
           </button>
         </div>
       </div>
@@ -109,18 +115,15 @@
             (line.allow_filler ? "COMMON.YES" : "COMMON.NO") | translate
           }}</strong>
         </div>
-        <div class="tags">
-          <span class="tag allow" *ngFor="let tag of line.allowed_categories">{{
-            tag
-          }}</span
-          ><span
-            class="tag prefer"
-            *ngFor="let tag of line.preferred_categories"
-            >{{ tag }}</span
-          ><span
-            class="tag forbid"
-            *ngFor="let tag of line.forbidden_categories"
-            >{{ tag }}</span
+        <div class="row" *ngFor="let rule of lineRules(line)">
+          <span class="k">{{ rule.label | translate }}</span
+          ><span class="v tags"
+            ><span
+              class="tag"
+              [ngClass]="rule.kind"
+              *ngFor="let tag of rule.tags"
+              >{{ tag }}</span
+            ></span
           >
         </div>
       </div>
@@ -148,32 +151,43 @@
       </div>
     </div>
     <div class="blocks">
-      <button
-        type="button"
-        class="block-row"
-        *ngFor="let block of c.grid_data?.blocks"
-        (click)="openBlock(block)"
-      >
-        <strong class="mono"
-          >{{ block.starts_at.slice(0, 5) }} –
-          {{ block.ends_at.slice(0, 5) }}</strong
+      <ng-container *ngFor="let row of gridRows">
+        <button
+          type="button"
+          class="block-row"
+          *ngIf="row.block as block"
+          (click)="openBlock(block)"
         >
-        <div class="tags">
-          <span class="tag allow" *ngFor="let tag of blockTags(block)">{{
-            tag
+          <strong class="mono"
+            >{{ block.starts_at.slice(0, 5) }} –
+            {{ block.ends_at.slice(0, 5) }}</strong
+          >
+          <div class="tags">
+            <span class="tag allow" *ngFor="let tag of blockTags(block)">{{
+              tag
+            }}</span>
+          </div>
+          <span>{{
+            "CHANNEL_DETAIL.BLOCK_SUMMARY"
+              | translate
+                : {
+                    priority: block.priority,
+                    min: block.min_items,
+                    max: block.max_items,
+                  }
           }}</span>
+        </button>
+        <div class="gap" *ngIf="row.gap as gap">
+          <span class="mono">{{ gap.starts_at }}–{{ gap.ends_at }}</span
+          ><span class="gap-label">{{
+            "CHANNEL_DETAIL.UNCOVERED_SLOT" | translate
+          }}</span
+          ><button class="btn sm" (click)="openBlock(null, gap)">
+            {{ "CHANNEL_DETAIL.ADD_BLOCK_HERE" | translate }}
+          </button>
         </div>
-        <span>{{
-          "CHANNEL_DETAIL.BLOCK_SUMMARY"
-            | translate
-              : {
-                  priority: block.priority,
-                  min: block.min_items,
-                  max: block.max_items,
-                }
-        }}</span>
-      </button>
-      <div class="gap" *ngFor="let warning of gridWarnings">
+      </ng-container>
+      <div class="gap" *ngFor="let warning of otherWarnings">
         <flw-icon name="warning" />{{ warning }}
       </div>
     </div>
@@ -182,16 +196,15 @@
     <div class="card-head">
       <div>
         <h2>{{ "CHANNEL_DETAIL.GRID_AND_SCHEDULE" | translate }}</h2>
-        <p class="desc mono">{{ calendarDate | date: "dd/MM/yyyy" }}</p>
       </div>
-      <div>
-        <button class="btn ghost" (click)="shift(-1)">
-          {{ "CHANNELS.PREVIOUS_DAY" | translate }}</button
-        ><button class="btn ghost" (click)="resetCalendarDay()">
-          {{ "CHANNELS.TODAY" | translate }}</button
-        ><button class="btn ghost" (click)="shift(1)">
-          {{ "CHANNELS.NEXT_DAY" | translate }}
-        </button>
+      <div class="group">
+        <flw-segmented
+          [options]="dayOptions"
+          [value]="dayOffset"
+          (valueChange)="setDay($event)"
+        /><strong class="mono day">{{
+          calendarDate | date: "d MMMM y"
+        }}</strong>
       </div>
     </div>
     <div class="timeline-grid">

@@ -189,7 +189,7 @@ export class GridBlockDialogComponent {
     post_filler_policy: null,
     post_filler_policy_name: null,
   };
-  source = this.data.block ?? this.empty;
+  source = this.data.block ?? { ...this.empty, ...(this.data.defaults ?? {}) };
   options = ruleOptions(this.data.formOptions, (key, params) =>
     this.translate.instant(key, params),
   );
@@ -261,6 +261,7 @@ export class GridBlockDialogComponent {
       channelName: string;
       gridLayoutId: string | number;
       block: GridBlock | null;
+      defaults?: { starts_at: string; ends_at: string };
       formOptions: FormOptions;
     },
   ) {

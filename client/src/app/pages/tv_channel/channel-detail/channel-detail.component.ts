@@ -5,14 +5,16 @@ import {
   ViewChild,
   inject,
 } from "@angular/core";
-import { DatePipe, NgFor, NgIf } from "@angular/common";
+import { DatePipe, NgClass, NgFor, NgIf } from "@angular/common";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { filter } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { WebsocketService } from "@kwyxyz/ngx-request";
 import {
+  EditorialLineData,
   GridBlock,
   FormOptions,
+  PlayoutGenerationReport,
   ScheduledMediaItem,
   TvChannel,
 } from "@project-interfaces/tv-channel";
@@ -20,6 +22,7 @@ import { TvChannelService } from "@project-services/tv-channel.service";
 import { NotificationService } from "@project-shared/services/notification.service";
 import { FlwDialogService } from "../../../ui/dialog.service";
 import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { FlwSegmentedComponent } from "../../../ui/segmented/flw-segmented.component";
 import {
   FlwTimelineComponent,
   TimelineBlock,
@@ -46,10 +49,12 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
   standalone: true,
   imports: [
     DatePipe,
+    NgClass,
     NgFor,
     NgIf,
     RouterLink,
     FlwIconComponent,
+    FlwSegmentedComponent,
     FlwTimelineComponent,
     TimeAgoPipe,
     TranslateModule,
@@ -63,8 +68,11 @@ export class ChannelDetailComponent {
   channel: TvChannel | null = null;
   isLoading = true;
   calendarDate = new Date();
+  dayOffset = 0;
   gridWarnings: string[] = [];
   formOptions: FormOptions | null = null;
+  reportCount = 0;
+  dayOptions: Array<{ label: string; value: number }> = [];
   constructor(
     route: ActivatedRoute,
     private router: Router,
@@ -87,13 +95,82 @@ export class ChannelDetailComponent {
       .subscribe((e: any) => {
         if (String(e.id) === String(this.channel?.id)) this.load(String(e.id));
       });
+    this.dayOptions = [
+      { label: this.translate.instant("CHANNELS.PREVIOUS_DAY"), value: -1 },
+      { label: this.translate.instant("CHANNELS.TODAY"), value: 0 },
+      { label: this.translate.instant("CHANNELS.NEXT_DAY"), value: 1 },
+    ];
   }
   get isFlexible() {
     return this.channel?.grid_data?.mode === 2;
   }
-  get reportIssueCount() {
-    const c = this.channel?.latest_generation_report?.issue_counts;
-    return (c?.error ?? 0) + (c?.warning ?? 0);
+  get gridRows(): Array<{
+    block?: GridBlock;
+    gap?: { starts_at: string; ends_at: string };
+  }> {
+    const blocks = [...(this.channel?.grid_data?.blocks ?? [])].sort((a, b) =>
+      a.starts_at.localeCompare(b.starts_at),
+    );
+    const rows: Array<{
+      block?: GridBlock;
+      gap?: { starts_at: string; ends_at: string };
+    }> = [];
+    blocks.forEach((block, index) => {
+      rows.push({ block });
+      const next = blocks[index + 1];
+      if (next && block.ends_at.slice(0, 5) < next.starts_at.slice(0, 5))
+        rows.push({
+          gap: {
+            starts_at: block.ends_at.slice(0, 5),
+            ends_at: next.starts_at.slice(0, 5),
+          },
+        });
+    });
+    return rows;
+  }
+  get otherWarnings() {
+    // Les trous entre blocs sont déjà rendus en lignes riches intercalées.
+    return this.gridWarnings.filter((w) => !w.startsWith("Gap between blocks"));
+  }
+  lineRules(line: EditorialLineData) {
+    const tags = (
+      categories: string[],
+      natures: Array<string | number>,
+      kinds: Array<string | number>,
+    ) => [
+      ...categories,
+      ...natures.map((v) => this.translate.instant(natureLabel(v))),
+      ...kinds.map((v) => this.translate.instant(containerKindLabel(v))),
+    ];
+    return [
+      {
+        label: "CHANNEL_DETAIL.ALLOWED",
+        kind: "allow",
+        tags: tags(
+          line.allowed_categories,
+          line.allowed_natures,
+          line.allowed_container_kinds,
+        ),
+      },
+      {
+        label: "CHANNEL_DETAIL.PREFERRED",
+        kind: "prefer",
+        tags: tags(
+          line.preferred_categories,
+          line.preferred_natures,
+          line.preferred_container_kinds,
+        ),
+      },
+      {
+        label: "CHANNEL_DETAIL.FORBIDDEN",
+        kind: "forbid",
+        tags: tags(
+          line.forbidden_categories,
+          line.forbidden_natures,
+          line.forbidden_container_kinds,
+        ),
+      },
+    ].filter((rule) => rule.tags.length);
   }
   status() {
     const c = this.channel?.latest_generation_report?.issue_counts;
@@ -128,6 +205,11 @@ export class ChannelDetailComponent {
         .subscribe(
           (w) => (this.gridWarnings = w.isOk ? (w.body as any).warnings : []),
         );
+      this.service.getGenerationReports(id).subscribe((r2) => {
+        const reports = r2.body as PlayoutGenerationReport[] | null;
+        this.reportCount =
+          r2.isOk && Array.isArray(reports) ? reports.length : 0;
+      });
     });
   }
   edit() {
@@ -277,7 +359,10 @@ export class ChannelDetailComponent {
         }),
     );
   }
-  openBlock(block: GridBlock | null) {
+  openBlock(
+    block: GridBlock | null,
+    defaults?: { starts_at: string; ends_at: string },
+  ) {
     if (!this.channel?.grid_data) return;
     this.withFormOptions((options) =>
       this.dialogs
@@ -287,6 +372,7 @@ export class ChannelDetailComponent {
             channelName: this.channel!.name,
             gridLayoutId: this.channel!.grid_data!.id,
             block,
+            defaults,
             formOptions: options,
           },
         })
@@ -353,13 +439,11 @@ export class ChannelDetailComponent {
       ),
     ].slice(0, 4);
   }
-  shift(d: number) {
-    const next = new Date(this.calendarDate);
-    next.setDate(next.getDate() + d);
+  setDay(offset: unknown) {
+    this.dayOffset = Number(offset);
+    const next = new Date();
+    next.setDate(next.getDate() + this.dayOffset);
     this.calendarDate = next;
-  }
-  resetCalendarDay() {
-    this.calendarDate = new Date();
   }
   private sameDay(v: string) {
     const d = new Date(v);

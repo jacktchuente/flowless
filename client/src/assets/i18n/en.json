@@ -332,7 +332,12 @@
     "GENERATE_LOGO_LOCAL": "Local GPU (ComfyUI)",
     "GENERATE_LOGO_CLOUD": "Cloud (OpenAI)",
     "NOTIFY_LOGO_GENERATION_STARTED": "Logo generation started.",
-    "NOTIFY_LOGO_GENERATION_FAILED": "Logo generation failed to start."
+    "NOTIFY_LOGO_GENERATION_FAILED": "Logo generation failed to start.",
+    "ALLOWED": "Allowed",
+    "PREFERRED": "Preferred",
+    "FORBIDDEN": "Forbidden",
+    "UNCOVERED_SLOT": "No block covers this slot",
+    "ADD_BLOCK_HERE": "Add a block here"
   },
   "MANUAL_EDIT": {
     "EDIT_EDITORIAL_LINE": "Edit editorial line",
