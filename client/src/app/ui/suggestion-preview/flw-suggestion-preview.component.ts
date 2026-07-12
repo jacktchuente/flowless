@@ -7,6 +7,7 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { NgFor } from "@angular/common";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 export interface SuggestionChange {
   key: string;
   label: string;
@@ -17,9 +18,9 @@ export interface SuggestionChange {
 @Component({
   selector: "flw-suggestion-preview",
   standalone: true,
-  imports: [NgFor, FormsModule],
+  imports: [NgFor, FormsModule, TranslateModule],
   template: `<section class="suggestion">
-    <p class="section-label">Modifications suggérées</p>
+    <p class="section-label">{{ "UI.SUGGESTION.TITLE" | translate }}</p>
     <label *ngFor="let change of changes"
       ><input type="checkbox" [(ngModel)]="selected[change.key]" /><span
         ><strong>{{ change.label }}</strong
@@ -28,13 +29,13 @@ export interface SuggestionChange {
     >
     <div class="actions">
       <button class="btn ghost sm" type="button" (click)="dismiss.emit()">
-        Ignorer</button
+        {{ "UI.SUGGESTION.DISMISS" | translate }}</button
       ><button
         class="btn primary sm"
         type="button"
         (click)="apply.emit(chosen)"
       >
-        Appliquer la sélection
+        {{ "UI.SUGGESTION.APPLY" | translate }}
       </button>
     </div>
   </section>`,
@@ -66,6 +67,7 @@ export interface SuggestionChange {
   ],
 })
 export class FlwSuggestionPreviewComponent implements OnChanges {
+  constructor(private translate: TranslateService) {}
   @Input() changes: SuggestionChange[] = [];
   @Output() apply = new EventEmitter<SuggestionChange[]>();
   @Output() dismiss = new EventEmitter<void>();
@@ -77,8 +79,14 @@ export class FlwSuggestionPreviewComponent implements OnChanges {
     return this.changes.filter((c) => this.selected[c.key]);
   }
   summary(c: SuggestionChange) {
-    if (c.kind === "add") return `Ajouter : ${this.format(c.to)}`;
-    if (c.kind === "remove") return `Retirer : ${this.format(c.from)}`;
+    if (c.kind === "add")
+      return this.translate.instant("UI.SUGGESTION.ADD", {
+        value: this.format(c.to),
+      });
+    if (c.kind === "remove")
+      return this.translate.instant("UI.SUGGESTION.REMOVE", {
+        value: this.format(c.from),
+      });
     return `${this.format(c.from)} → ${this.format(c.to)}`;
   }
   private format(v: unknown) {

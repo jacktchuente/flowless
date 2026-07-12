@@ -49,19 +49,9 @@ export class ChannelManagementComponent {
   calendarViewMode: "grid" | "schedule" = "grid";
   mode: "classic" | "flexible" = "classic";
   legend = categoryLegend();
-  modeOptions = [
-    { label: "Grille classique", value: "classic" },
-    { label: "Planification flexible", value: "flexible" },
-  ];
-  dayOptions = [
-    { label: "Veille", value: -1 },
-    { label: "Aujourd'hui", value: 0 },
-    { label: "Lendemain", value: 1 },
-  ];
-  viewOptions = [
-    { label: "Grille", value: "grid" },
-    { label: "Planning", value: "schedule" },
-  ];
+  modeOptions: Array<{ label: string; value: string }> = [];
+  dayOptions: Array<{ label: string; value: number }> = [];
+  viewOptions: Array<{ label: string; value: string }> = [];
   constructor(
     private catalogsService: CatalogService,
     private channelsService: TvChannelService,
@@ -70,6 +60,22 @@ export class ChannelManagementComponent {
     private router: Router,
     private translate: TranslateService,
   ) {
+    this.modeOptions = [
+      { label: this.translate.instant("CHANNELS.GRID"), value: "classic" },
+      {
+        label: this.translate.instant("NAV.EDITORIAL_PLANNING"),
+        value: "flexible",
+      },
+    ];
+    this.dayOptions = [
+      { label: this.translate.instant("CHANNELS.PREVIOUS_DAY"), value: -1 },
+      { label: this.translate.instant("CHANNELS.TODAY"), value: 0 },
+      { label: this.translate.instant("CHANNELS.NEXT_DAY"), value: 1 },
+    ];
+    this.viewOptions = [
+      { label: this.translate.instant("CHANNELS.GRID"), value: "grid" },
+      { label: this.translate.instant("CHANNELS.SCHEDULE"), value: "schedule" },
+    ];
     catalogsService
       .getObjectBehaviorSubject()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -132,10 +138,23 @@ export class ChannelManagementComponent {
   status(c: TvChannel) {
     const counts = c.latest_generation_report?.issue_counts;
     if ((counts?.error ?? 0) > 0)
-      return { kind: "critical", label: `${counts!.error} erreurs` };
+      return {
+        kind: "critical",
+        label: this.translate.instant("CHANNELS.ERRORS", {
+          count: counts!.error,
+        }),
+      };
     if ((counts?.warning ?? 0) > 0)
-      return { kind: "warning", label: `${counts!.warning} alertes` };
-    return { kind: "success", label: "À jour" };
+      return {
+        kind: "warning",
+        label: this.translate.instant("CHANNELS.WARNINGS", {
+          count: counts!.warning,
+        }),
+      };
+    return {
+      kind: "success",
+      label: this.translate.instant("CHANNELS.UP_TO_DATE"),
+    };
   }
   timeline(c: TvChannel): TimelineBlock[] {
     if (this.calendarViewMode === "grid")

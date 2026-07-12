@@ -40,6 +40,7 @@ import { ScheduleDetailDialogComponent } from "../channel-dialogs/schedule-detai
 import { GridSettingsDialogComponent } from "../channel-dialogs/grid-settings-dialog.component";
 import { EditorialLineDialogComponent } from "../channel-dialogs/editorial-line-dialog.component";
 import { GridBlockDialogComponent } from "../channel-dialogs/grid-block-dialog.component";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
   selector: "app-channel-detail",
   standalone: true,
@@ -51,6 +52,7 @@ import { GridBlockDialogComponent } from "../channel-dialogs/grid-block-dialog.c
     FlwIconComponent,
     FlwTimelineComponent,
     TimeAgoPipe,
+    TranslateModule,
   ],
   templateUrl: "./channel-detail.component.html",
   styleUrl: "./channel-detail.component.css",
@@ -70,6 +72,7 @@ export class ChannelDetailComponent {
     ws: WebsocketService,
     private notification: NotificationService,
     private dialogs: FlwDialogService,
+    private translate: TranslateService,
   ) {
     route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((p) => {
       const id = p.get("channelId");
@@ -95,10 +98,21 @@ export class ChannelDetailComponent {
   status() {
     const c = this.channel?.latest_generation_report?.issue_counts;
     if ((c?.error ?? 0) > 0)
-      return { kind: "critical", label: `${c!.error} erreurs` };
+      return {
+        kind: "critical",
+        label: this.translate.instant("CHANNELS.ERRORS", { count: c!.error }),
+      };
     if ((c?.warning ?? 0) > 0)
-      return { kind: "warning", label: `${c!.warning} alertes` };
-    return { kind: "success", label: "À jour" };
+      return {
+        kind: "warning",
+        label: this.translate.instant("CHANNELS.WARNINGS", {
+          count: c!.warning,
+        }),
+      };
+    return {
+      kind: "success",
+      label: this.translate.instant("CHANNELS.UP_TO_DATE"),
+    };
   }
   load(id: string) {
     this.isLoading = true;

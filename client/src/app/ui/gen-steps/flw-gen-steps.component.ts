@@ -6,6 +6,7 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { NgFor } from "@angular/common";
+import { TranslateService } from "@ngx-translate/core";
 @Component({
   selector: "flw-gen-steps",
   standalone: true,
@@ -32,6 +33,7 @@ import { NgFor } from "@angular/common";
   ],
 })
 export class FlwGenStepsComponent implements OnChanges, OnDestroy {
+  constructor(private translate: TranslateService) {}
   @Input() steps: string[] = [];
   @Input() state: "idle" | "running" | "done" | "error" = "idle";
   index = -1;
@@ -42,8 +44,10 @@ export class FlwGenStepsComponent implements OnChanges, OnDestroy {
     return Math.round(((this.index + 1) / this.steps.length) * 100);
   }
   get status() {
-    if (this.state === "done") return "Terminé";
-    if (this.state === "error") return "Échec";
+    if (this.state === "done")
+      return this.translate.instant("UI.GEN_STEPS.DONE");
+    if (this.state === "error")
+      return this.translate.instant("UI.GEN_STEPS.ERROR");
     return this.index >= 0 ? this.steps[this.index] : "";
   }
   isDone(i: number) {

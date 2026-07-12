@@ -6,20 +6,20 @@
   </div>
   <div class="topline-actions">
     <button class="btn" (click)="openCatalog()">
-      <flw-icon name="plus" />Nouveau catalogue</button
+      <flw-icon name="plus" />{{ "CHANNELS.NEW_CATALOG" | translate }}</button
     ><button
       class="btn primary"
       [disabled]="!selectedCatalogId"
       (click)="openChannel()"
     >
-      <flw-icon name="plus" />Nouvelle chaîne
+      <flw-icon name="plus" />{{ "CHANNELS.NEW_CHANNEL" | translate }}
     </button>
   </div>
 </header>
 <div class="content">
   <section class="card setup">
     <div class="field">
-      <label>Catalogue</label
+      <label>{{ "CHANNELS.CATALOG_LABEL" | translate }}</label
       ><flw-select
         [value]="selectedCatalogId"
         [options]="catalogOptions"
@@ -28,9 +28,9 @@
     </div>
     <div class="setup-actions">
       <button class="btn ghost" (click)="openCatalog(selectedCatalog)">
-        Éditer le catalogue</button
+        {{ "CHANNELS.EDIT_CATALOG" | translate }}</button
       ><button class="btn" (click)="generateCatalog()">
-        <flw-icon name="sync" />Générer les chaînes
+        <flw-icon name="sync" />{{ "CHANNELS.GENERATE_CHANNELS" | translate }}
       </button>
     </div>
     <hr class="divider" />
@@ -42,8 +42,8 @@
     <p>
       {{
         mode === "classic"
-          ? "Pilotez les règles fixes et comparez-les au planning réel."
-          : "Regroupez les médias en segments et créez des chaînes flexibles."
+          ? ("CHANNELS.CLASSIC_HELP" | translate)
+          : ("CHANNELS.FLEXIBLE_HELP" | translate)
       }}
     </p>
   </section>
@@ -75,21 +75,25 @@
             >
           </div>
           <flw-menu
-            ><button (click)="openDetail(channel)">Ouvrir la fiche</button
-            ><button (click)="openChannel(channel)">Modifier</button
+            ><button (click)="openDetail(channel)">
+              {{ "CHANNELS.OPEN_DETAIL" | translate }}</button
+            ><button (click)="openChannel(channel)">
+              {{ "COMMON.EDIT" | translate }}</button
             ><button
               *ngIf="!isFlexible(channel)"
               (click)="generateBlueprint(channel)"
             >
-              Générer le plan</button
+              {{ "CHANNELS.GENERATE_BLUEPRINT" | translate }}</button
             ><button (click)="generatePlayout(channel)">
-              Générer le planning
+              {{ "CHANNELS.GENERATE_PLAYOUT" | translate }}
             </button>
             <hr />
-            <button (click)="push(channel)">Publier vers ErsatzTV</button>
+            <button (click)="push(channel)">
+              {{ "CHANNELS.PUSH_ETV" | translate }}
+            </button>
             <hr />
             <button class="danger" (click)="remove(channel)">
-              Supprimer
+              {{ "COMMON.DELETE" | translate }}
             </button></flw-menu
           >
         </header>
@@ -100,24 +104,23 @@
         />
       </article>
       <div class="empty card" *ngIf="!channels.length">
-        Aucune chaîne dans ce catalogue.
+        {{ "CHANNELS.NO_CHANNEL_HELP" | translate }}
       </div>
     </div></ng-container
   >
   <section class="card flexible" *ngIf="mode === 'flexible'">
     <div>
-      <span class="section-label">Planification flexible</span>
-      <h2>Construire des chaînes à partir de vos collections</h2>
-      <p>
-        Analysez la cohésion de votre catalogue, révisez les segments puis
-        promouvez les meilleurs candidats.
-      </p>
+      <span class="section-label">{{
+        "CHANNELS.FLEXIBLE_TITLE" | translate
+      }}</span>
+      <h2>{{ "CHANNELS.FLEXIBLE_BUILD" | translate }}</h2>
+      <p>{{ "CHANNELS.FLEXIBLE_DESC" | translate }}</p>
     </div>
     <a
       class="btn primary"
       routerLink="/app/editorial-planning"
       [queryParams]="{ catalog: selectedCatalogId }"
-      >Ouvrir la planification flexible</a
+      >{{ "CHANNELS.FLEXIBLE_OPEN" | translate }}</a
     >
   </section>
 </div>

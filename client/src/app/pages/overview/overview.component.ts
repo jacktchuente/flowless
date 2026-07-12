@@ -10,16 +10,28 @@ import {
 import { DashboardService } from "../../_services/dashboard.service";
 import { TimeAgoPipe } from "../../ui/pipes/time-ago.pipe";
 import { FlwIconComponent } from "../../ui/icon/flw-icon.component";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
   standalone: true,
-  imports: [DatePipe, NgFor, NgIf, RouterLink, TimeAgoPipe, FlwIconComponent],
+  imports: [
+    DatePipe,
+    NgFor,
+    NgIf,
+    RouterLink,
+    TimeAgoPipe,
+    FlwIconComponent,
+    TranslateModule,
+  ],
   templateUrl: "./overview.component.html",
   styleUrl: "./overview.component.css",
 })
 export class OverviewComponent {
   private destroyRef = inject(DestroyRef);
   data: DashboardOverview | null = null;
-  constructor(private service: DashboardService) {
+  constructor(
+    private service: DashboardService,
+    private translate: TranslateService,
+  ) {
     interval(60000)
       .pipe(
         startWith(0),
@@ -40,13 +52,22 @@ export class OverviewComponent {
       : "—";
   }
   activity(a: DashboardActivity) {
-    const p = a.label_params as any;
-    if (a.kind === "playout_generated")
-      return `Planning de ${p.channel} généré pour ${p.days} jour(s)`;
-    if (a.kind === "playout_failed")
-      return `Échec de génération pour ${p.channel}`;
-    if (a.kind === "collection_analyzed")
-      return `Collection ${p.collection} analysée`;
-    return `Analyse éditoriale de ${p.catalog}`;
+    return this.translate.instant(
+      `OVERVIEW.ACTIVITY.${a.kind.toUpperCase()}`,
+      a.label_params,
+    );
+  }
+  alertMessage(alert: {
+    kind: string;
+    message: string | null;
+    message_params?: Record<string, unknown>;
+  }) {
+    return (
+      alert.message ||
+      this.translate.instant(
+        `OVERVIEW.ALERTS.${alert.kind.toUpperCase()}`,
+        alert.message_params,
+      )
+    );
   }
 }

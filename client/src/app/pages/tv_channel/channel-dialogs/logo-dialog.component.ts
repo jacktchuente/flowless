@@ -7,14 +7,15 @@ import {
 } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
-  imports: [NgIf, FlwModalComponent, FlwIconComponent],
+  imports: [NgIf, FlwModalComponent, FlwIconComponent, TranslateModule],
   template: `
     <flw-modal
-      title="Logo de la chaîne"
-      description="Importez une image ou lancez une génération."
+      [title]="'CHANNEL_DIALOGS.LOGO.TITLE' | translate"
+      [description]="'CHANNEL_DIALOGS.LOGO.DESC' | translate"
     >
       <div class="preview">
         <img
@@ -25,13 +26,19 @@ import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
       </div>
       <div class="choices">
         <button class="choice" type="button" (click)="file.click()">
-          <flw-icon name="upload" /><strong>Importer un fichier</strong>
+          <flw-icon name="upload" /><strong>{{
+            "CHANNEL_DIALOGS.LOGO.UPLOAD" | translate
+          }}</strong>
         </button>
         <button class="choice" type="button" (click)="generate('comfyui')">
-          <flw-icon name="image" /><strong>Générer localement</strong>
+          <flw-icon name="image" /><strong>{{
+            "CHANNEL_DIALOGS.LOGO.LOCAL" | translate
+          }}</strong>
         </button>
         <button class="choice" type="button" (click)="generate('openai')">
-          <flw-icon name="image" /><strong>Générer avec l’IA</strong>
+          <flw-icon name="image" /><strong>{{
+            "CHANNEL_DIALOGS.LOGO.CLOUD" | translate
+          }}</strong>
         </button>
       </div>
       <input
@@ -42,13 +49,15 @@ import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
         (change)="upload($event)"
       />
       <p class="tooltip-note">
-        Le prompt utilisé reste disponible après la génération.
+        {{ "CHANNEL_DIALOGS.LOGO.HINT" | translate }}
       </p>
       <div modal-footer>
         <button class="btn ghost" type="button" (click)="downloadPrompt()">
-          <flw-icon name="download" />Télécharger le prompt</button
+          <flw-icon name="download" />{{
+            "CHANNEL_DIALOGS.LOGO.DOWNLOAD" | translate
+          }}</button
         ><button class="btn" type="button" (click)="ref.close(changed)">
-          Fermer
+          {{ "CHANNEL_DIALOGS.COMMON.CLOSE" | translate }}
         </button>
       </div>
     </flw-modal>

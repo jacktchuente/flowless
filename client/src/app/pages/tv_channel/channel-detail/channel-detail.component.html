@@ -16,19 +16,22 @@
           ><span class="dot"></span>{{ status().label }}</span
         >
       </div>
-      <p>{{ c.description || "Aucune description." }}</p>
+      <p>
+        {{ c.description || ("CHANNEL_DETAIL.NO_DESCRIPTION" | translate) }}
+      </p>
       <div class="tags">
         <span class="pill neutral">{{ c.catalog_name }}</span
         ><span class="pill success">{{
-          c.is_enabled ? "Actif" : "Inactif"
+          (c.is_enabled ? "COMMON.ACTIVE" : "COMMON.STATUS.IDLE") | translate
         }}</span
         ><span class="pill info">{{
-          isFlexible ? "Flexible" : "Grille classique"
+          (isFlexible ? "NAV.EDITORIAL_PLANNING" : "CHANNELS.GRID") | translate
         }}</span>
       </div>
     </div>
     <div class="hero-actions">
-      <button class="btn" (click)="edit()">Modifier</button
+      <button class="btn" (click)="edit()">
+        {{ "COMMON.EDIT" | translate }}</button
       ><button class="btn" (click)="openReports()">
         Rapports
         <span class="pill critical" *ngIf="reportIssueCount">{{
@@ -39,41 +42,51 @@
         [disabled]="isFlexible"
         (click)="generateBlueprint()"
       >
-        Générer le plan</button
+        {{ "CHANNELS.GENERATE_BLUEPRINT" | translate }}</button
       ><button class="btn primary" (click)="generatePlayout()">
-        Générer le planning</button
-      ><button class="btn ghost" (click)="push()">Publier vers ErsatzTV</button>
+        {{ "CHANNELS.GENERATE_PLAYOUT" | translate }}</button
+      ><button class="btn ghost" (click)="push()">
+        {{ "CHANNELS.PUSH_ETV" | translate }}
+      </button>
     </div>
   </section>
   <div class="summary">
     <section class="card">
-      <div class="card-head"><h2>Paramètres techniques</h2></div>
+      <div class="card-head">
+        <h2>{{ "CHANNEL_DETAIL.SPECIFICATION" | translate }}</h2>
+      </div>
       <div class="card-body kv">
         <div class="row">
-          <span class="k">Catalogue</span
+          <span class="k">{{ "CHANNELS.CATALOG_LABEL" | translate }}</span
           ><strong class="v">{{ c.catalog_name }}</strong>
         </div>
         <div class="row">
-          <span class="k">Playout externe</span
+          <span class="k">{{
+            "CHANNEL_DETAIL.EXTERNAL_PLAYOUT" | translate
+          }}</span
           ><strong class="v mono">{{ c.external_playout_id || "—" }}</strong>
         </div>
         <div class="row">
-          <span class="k">Planning actif</span
+          <span class="k">{{
+            "CHANNEL_DETAIL.ACTIVE_PLAYOUT" | translate
+          }}</span
           ><strong class="v mono">{{ c.active_playout_id || "—" }}</strong>
         </div>
         <div class="row">
-          <span class="k">Dernière mise à jour</span
+          <span class="k">{{ "CHANNEL_DETAIL.UPDATED_AT" | translate }}</span
           ><strong class="v">{{ c.updated_at | flwTimeAgo }}</strong>
         </div>
         <div class="row">
-          <span class="k">Éléments programmés</span
+          <span class="k">{{
+            "CHANNEL_DETAIL.SCHEDULE_ITEMS" | translate
+          }}</span
           ><strong class="v mono">{{ c.active_schedule_items.length }}</strong>
         </div>
       </div>
     </section>
     <section class="card">
       <div class="card-head">
-        <h2>Ligne éditoriale</h2>
+        <h2>{{ "CHANNEL_DETAIL.EDITORIAL_LINE" | translate }}</h2>
         <div>
           <button class="btn ghost sm" (click)="openResetRules()">
             Réinitialiser</button
@@ -91,8 +104,10 @@
           >
         </div>
         <div class="row">
-          <span class="k">Filler autorisé</span
-          ><strong class="v">{{ line.allow_filler ? "Oui" : "Non" }}</strong>
+          <span class="k">{{ "CHANNEL_DETAIL.ALLOW_FILLER" | translate }}</span
+          ><strong class="v">{{
+            (line.allow_filler ? "COMMON.YES" : "COMMON.NO") | translate
+          }}</strong>
         </div>
         <div class="tags">
           <span class="tag allow" *ngFor="let tag of line.allowed_categories">{{
@@ -110,20 +125,21 @@
         </div>
       </div>
       <div class="empty" *ngIf="!c.editorial_line_data">
-        Aucune ligne éditoriale.
+        {{ "MANUAL_EDIT.NO_EDITORIAL_LINE" | translate }}
       </div>
     </section>
   </div>
   <section class="card" *ngIf="!isFlexible">
     <div class="card-head">
       <div>
-        <h2>Grille éditoriale</h2>
+        <h2>{{ "MANUAL_EDIT.EDITORIAL_BLOCKS" | translate }}</h2>
         <p class="desc">Blocs de programmation de la version active.</p>
       </div>
       <div>
         <button class="btn ghost" (click)="openGridSettings()">
           Paramètres de la grille</button
-        ><button class="btn" (click)="newVersion()">Nouvelle version</button
+        ><button class="btn" (click)="newVersion()">
+          {{ "MANUAL_EDIT.NEW_VERSION" | translate }}</button
         ><button class="btn primary" (click)="openBlock(null)">
           Ajouter un bloc
         </button>
@@ -160,23 +176,26 @@
   <section class="card timelines">
     <div class="card-head">
       <div>
-        <h2>Grille & planning</h2>
+        <h2>{{ "CHANNEL_DETAIL.GRID_AND_SCHEDULE" | translate }}</h2>
         <p class="desc mono">{{ calendarDate | date: "dd/MM/yyyy" }}</p>
       </div>
       <div>
-        <button class="btn ghost" (click)="shift(-1)">Veille</button
+        <button class="btn ghost" (click)="shift(-1)">
+          {{ "CHANNELS.PREVIOUS_DAY" | translate }}</button
         ><button class="btn ghost" (click)="resetCalendarDay()">
           Aujourd'hui</button
-        ><button class="btn ghost" (click)="shift(1)">Lendemain</button>
+        ><button class="btn ghost" (click)="shift(1)">
+          {{ "CHANNELS.NEXT_DAY" | translate }}
+        </button>
       </div>
     </div>
     <div class="timeline-grid">
       <div *ngIf="!isFlexible">
-        <span class="section-label">Grille</span
+        <span class="section-label">{{ "CHANNELS.GRID" | translate }}</span
         ><flw-timeline [blocks]="gridBlocks()" [pxPerHour]="52" />
       </div>
       <div>
-        <span class="section-label">Planning</span
+        <span class="section-label">{{ "CHANNELS.SCHEDULE" | translate }}</span
         ><flw-timeline
           [blocks]="scheduleBlocks()"
           [pxPerHour]="52"
@@ -189,7 +208,12 @@
 <ng-template #loading
   ><div class="content">
     <div class="card empty">
-      {{ isLoading ? "Chargement…" : "Chaîne introuvable" }}
+      {{
+        (isLoading
+          ? "CHANNEL_DETAIL.LOADING_TITLE"
+          : "CHANNEL_DETAIL.NOT_FOUND_TITLE"
+        ) | translate
+      }}
     </div>
   </div></ng-template
 >

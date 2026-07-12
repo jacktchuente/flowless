@@ -12,8 +12,101 @@
     "LANGUAGE": "Langue",
     "ADMIN": "Admin"
   },
-  "OVERVIEW": {"EYEBROW":"Régie","TITLE":"Vue d'ensemble","LOADING":"Chargement de l'état de la régie…"},
-  "EDITORIAL_PLANNING": {"EYEBROW":"Programmation","TITLE":"Planification flexible","SUBTITLE":"Analysez les collections, construisez des segments et promouvez les meilleurs candidats.","LOADING":"Chargement de la planification…"},
+  "OVERVIEW": {
+    "EYEBROW": "Régie",
+    "TITLE": "Vue d'ensemble",
+    "SUBTITLE": "Voici l’état actuel de vos chaînes et des traitements prioritaires.",
+    "LOADING": "Chargement de l'état de la régie…",
+    "NEW_CHANNEL": "Nouvelle chaîne",
+    "PRIORITY": "À traiter en priorité",
+    "NO_ALERTS": "Aucune alerte ouverte.",
+    "RECENT_ACTIVITY": "Activité récente",
+    "NO_ACTIVITY": "Aucune activité récente.",
+    "ON_AIR": "Chaînes à l’antenne",
+    "ON_AIR_DESC": "Programme actuel et suivant.",
+    "VIEW_CHANNELS": "Voir toutes les chaînes",
+    "LIVE": "Direct",
+    "NEXT": "Suivant",
+    "NO_ON_AIR": "Aucune chaîne n’émet actuellement.",
+    "STATS": {
+      "ON_AIR": "Chaînes à l’antenne",
+      "ALERTS": "Alertes · {{count}} chaînes",
+      "STALE_SOURCES": "Sources à resynchroniser",
+      "LAST_GENERATION": "Minutes depuis la génération"
+    },
+    "ALERTS": {
+      "STALE_SOURCE": "Cette source doit être resynchronisée.",
+      "GRID_WARNING": "La grille éditoriale comporte une incohérence.",
+      "PLAYOUT_ISSUE": "Le planning comporte une anomalie."
+    },
+    "ACTIVITY": {
+      "PLAYOUT_GENERATED": "Planning de {{channel}} généré pour {{days}} jour(s)",
+      "PLAYOUT_FAILED": "Échec de génération pour {{channel}}",
+      "COLLECTION_ANALYZED": "Collection {{collection}} analysée",
+      "EDITORIAL_RUN": "Analyse éditoriale de {{catalog}}"
+    }
+  },
+  "EDITORIAL_PLANNING": {
+    "EYEBROW": "Programmation",
+    "TITLE": "Planification flexible",
+    "SUBTITLE": "Transformez les collections analysées en segments cohérents puis en chaînes éditoriales.",
+    "LOADING": "Chargement de la planification…",
+    "TABS": {
+      "COLLECTIONS": "1 · Collections",
+      "ANALYSIS": "2 · Lancer l’analyse",
+      "SEGMENTS": "3 · Segments",
+      "CANDIDATES": "4 · Candidats",
+      "REVIEW": "5 · Revue"
+    },
+    "NOTIFY": {
+      "PROMOTED": "Chaîne flexible créée.",
+      "MATCHED": "Nouveaux médias intégrés.",
+      "NO_ACTIVE_RUN": "Aucun run actif."
+    },
+    "CATALOG": "Catalogue",
+    "TITLES": "{{count}} titres",
+    "COLLECTIONS": {
+      "TITLE": "Collections analysées",
+      "DESC": "Sélectionnez les bibliothèques qui alimenteront le modèle.",
+      "SELECTED": "{{count}} sélectionnée(s)"
+    },
+    "ANALYSIS": {
+      "LAST_RUN": "Dernier run",
+      "MATCH_NEW": "Intégrer les nouveaux médias",
+      "TARGET": "Nombre cible de chaînes",
+      "MAX_CANDIDATES": "Maximum de candidats",
+      "MULTI_SEGMENT": "Autoriser plusieurs segments par chaîne",
+      "SHARING": "Autoriser le partage de segments",
+      "THRESHOLD": "Seuil d’affinité",
+      "RUN": "Lancer l’analyse",
+      "VIEW_SEGMENTS": "Voir les segments détectés",
+      "STEPS": {
+        "COLLECTIONS": "Lecture des collections choisies",
+        "SEGMENTS": "Regroupement en segments",
+        "VIABILITY": "Évaluation de la viabilité",
+        "CANDIDATES": "Construction des candidats"
+      }
+    },
+    "SEGMENTS": {
+      "DESC": "Chaque segment rassemble des titres proches. Les scores indiquent sa qualité éditoriale.",
+      "PROGRAMMABILITY": "Programmabilité",
+      "COHESION": "Cohésion",
+      "SEPARATION": "Séparation",
+      "VIEW_CANDIDATES": "Voir les candidats"
+    },
+    "CANDIDATES": {
+      "VIABILITY": "Viabilité",
+      "PROMOTED": "Déjà promu",
+      "PROMOTE": "Promouvoir en chaîne",
+      "REVIEW": "Revoir les rattachements"
+    },
+    "REVIEW": {
+      "SCORE": "Score d’affinité",
+      "ACCEPTED": "Accepté",
+      "REJECTED": "Rejeté",
+      "MANUAL": "Revue manuelle"
+    }
+  },
   "COMMON": {
     "NAME": "Nom",
     "USERNAME": "Utilisateur",
@@ -43,7 +136,20 @@
       "SKIPPED": "Ignoré",
       "COMPLETE_WITH_ERRORS": "Terminé avec erreurs",
       "CANCELLED": "Annulé"
-    }
+    },
+    "ERROR": "Erreur",
+    "WARNING": "Alerte",
+    "OK": "OK",
+    "FAILURE": "Échec",
+    "INFO": "Info",
+    "AT": "à",
+    "SEARCH": "Rechercher…",
+    "CONTINUE": "Continuer",
+    "AVAILABLE": "Disponible",
+    "ACTIVATE": "Activer",
+    "DONE": "Terminé",
+    "CANCEL": "Annuler",
+    "CONFIRM": "Confirmer"
   },
   "MEDIA_SOURCE": {
     "EYEBROW": "Sources",
@@ -146,14 +252,47 @@
     "NOTIFY_LOGO_GENERATION_FAILED": "Échec du lancement de la génération du logo."
   },
   "MANUAL_EDIT": {
-    "EDIT_EDITORIAL_LINE": "Modifier la ligne éditoriale", "NO_EDITORIAL_LINE": "Aucune ligne éditoriale.",
-    "FIXED_GRID": "Grille fixe", "EDITORIAL_BLOCKS": "Blocks éditoriaux", "EDIT_GRID": "Modifier la grille", "NEW_VERSION": "Nouvelle version", "ADD_BLOCK": "Ajouter un block", "EDIT_BLOCK": "Modifier le block",
-    "BLOCK_SUMMARY": "Priorité {{priority}} · {{min}}–{{max}} éléments", "CONFIRM_DELETE_BLOCK": "Supprimer ce block de grille ?", "CONFIRM_NEW_VERSION": "Créer une nouvelle version de la grille active ?",
-    "DELETE_FAILED": "Suppression impossible.", "VERSION_FAILED": "Création de version impossible.", "OPTIONS_FAILED": "Chargement des options impossible.", "SAVE_FAILED": "Enregistrement impossible.",
-    "SAVED_REGENERATE": "Modifications enregistrées. Régénérer le playout ?", "REGENERATE": "Régénérer", "CANCEL": "Annuler", "SAVE": "Enregistrer", "NONE": "Aucune",
-    "SUGGESTION_CONTEXT": "Contexte pour la suggestion", "SUGGEST_LLM": "Suggérer (LLM)", "FILLER_POLICY": "Politique de remplissage", "POST_FILLER_POLICY": "Politique post-remplissage",
-    "START": "Début", "END": "Fin", "PRIORITY": "Priorité", "MIN_ITEMS": "Minimum éléments", "MAX_ITEMS": "Maximum éléments", "MIN_DURATION": "Durée minimum (s)", "MAX_DURATION": "Durée maximum (s)", "ALLOW_FILLER": "Autoriser le remplissage",
-    "ALLOWED_CATEGORIES": "Catégories autorisées", "FORBIDDEN_CATEGORIES": "Catégories interdites", "PREFERRED_CATEGORIES": "Catégories préférées", "ALLOWED_NATURES": "Natures autorisées", "FORBIDDEN_NATURES": "Natures interdites", "PREFERRED_NATURES": "Natures préférées", "ALLOWED_KINDS": "Types autorisés", "FORBIDDEN_KINDS": "Types interdits", "PREFERRED_KINDS": "Types préférés"
+    "EDIT_EDITORIAL_LINE": "Modifier la ligne éditoriale",
+    "NO_EDITORIAL_LINE": "Aucune ligne éditoriale.",
+    "FIXED_GRID": "Grille fixe",
+    "EDITORIAL_BLOCKS": "Blocks éditoriaux",
+    "EDIT_GRID": "Modifier la grille",
+    "NEW_VERSION": "Nouvelle version",
+    "ADD_BLOCK": "Ajouter un block",
+    "EDIT_BLOCK": "Modifier le block",
+    "BLOCK_SUMMARY": "Priorité {{priority}} · {{min}}–{{max}} éléments",
+    "CONFIRM_DELETE_BLOCK": "Supprimer ce block de grille ?",
+    "CONFIRM_NEW_VERSION": "Créer une nouvelle version de la grille active ?",
+    "DELETE_FAILED": "Suppression impossible.",
+    "VERSION_FAILED": "Création de version impossible.",
+    "OPTIONS_FAILED": "Chargement des options impossible.",
+    "SAVE_FAILED": "Enregistrement impossible.",
+    "SAVED_REGENERATE": "Modifications enregistrées. Régénérer le playout ?",
+    "REGENERATE": "Régénérer",
+    "CANCEL": "Annuler",
+    "SAVE": "Enregistrer",
+    "NONE": "Aucune",
+    "SUGGESTION_CONTEXT": "Contexte pour la suggestion",
+    "SUGGEST_LLM": "Suggérer (LLM)",
+    "FILLER_POLICY": "Politique de remplissage",
+    "POST_FILLER_POLICY": "Politique post-remplissage",
+    "START": "Début",
+    "END": "Fin",
+    "PRIORITY": "Priorité",
+    "MIN_ITEMS": "Minimum éléments",
+    "MAX_ITEMS": "Maximum éléments",
+    "MIN_DURATION": "Durée minimum (s)",
+    "MAX_DURATION": "Durée maximum (s)",
+    "ALLOW_FILLER": "Autoriser le remplissage",
+    "ALLOWED_CATEGORIES": "Catégories autorisées",
+    "FORBIDDEN_CATEGORIES": "Catégories interdites",
+    "PREFERRED_CATEGORIES": "Catégories préférées",
+    "ALLOWED_NATURES": "Natures autorisées",
+    "FORBIDDEN_NATURES": "Natures interdites",
+    "PREFERRED_NATURES": "Natures préférées",
+    "ALLOWED_KINDS": "Types autorisés",
+    "FORBIDDEN_KINDS": "Types interdits",
+    "PREFERRED_KINDS": "Types préférés"
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",
@@ -202,10 +341,143 @@
       "SKIPPED": "Ignoré",
       "COMPLETE_WITH_ERRORS": "Terminé avec erreurs",
       "CANCELLED": "Annulé"
-    }
+    },
+    "CLASSIC_HELP": "Pilotez les règles fixes et comparez-les au planning réel.",
+    "FLEXIBLE_HELP": "Regroupez les médias en segments et créez des chaînes flexibles.",
+    "OPEN_DETAIL": "Ouvrir la fiche",
+    "FLEXIBLE_TITLE": "Planification flexible",
+    "FLEXIBLE_BUILD": "Construire des chaînes à partir de vos collections",
+    "FLEXIBLE_DESC": "Analysez la cohésion de votre catalogue, révisez les segments puis promouvez les meilleurs candidats.",
+    "FLEXIBLE_OPEN": "Ouvrir la planification flexible",
+    "ERRORS": "{{count}} erreurs",
+    "WARNINGS": "{{count}} alertes",
+    "UP_TO_DATE": "À jour"
   },
   "TV_CHANNEL_DIALOG": {
     "SUGGEST_NAME": "Suggérer un nom",
     "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
+  },
+  "UI": {
+    "GEN_STEPS": {
+      "DONE": "Terminé",
+      "ERROR": "Échec"
+    },
+    "TAG_INPUT": {
+      "ADD": "Ajouter…",
+      "INVALID": "Choisissez une valeur proposée."
+    },
+    "SUGGESTION": {
+      "TITLE": "Modifications suggérées",
+      "DISMISS": "Ignorer",
+      "APPLY": "Appliquer la sélection",
+      "ADD": "Ajouter : {{value}}",
+      "REMOVE": "Retirer : {{value}}"
+    }
+  },
+  "CHANNEL_DIALOGS": {
+    "COMMON": {
+      "CLOSE": "Fermer",
+      "CANCEL": "Annuler",
+      "SAVE": "Enregistrer",
+      "DELETE": "Supprimer",
+      "ALLOWED": "Autorisé",
+      "PREFERRED": "Préféré",
+      "FORBIDDEN": "Interdit"
+    },
+    "GENERATION": {
+      "BLUEPRINT_TITLE": "Générer le plan",
+      "PLAYOUT_TITLE": "Générer le planning",
+      "CHANNEL": "Chaîne — {{name}}",
+      "METHOD": "Méthode",
+      "AI": "Assistée par IA",
+      "PRESET": "Modèle prédéfini",
+      "RANDOM": "Aléatoire",
+      "GRID_ONLY": "Grille seule",
+      "REBOOT": "Forcer le redémarrage",
+      "DAYS": "Nombre de jours",
+      "RESET": "Réinitialiser le planning existant",
+      "ERROR": "La génération a échoué ou n’a pas confirmé sa fin dans le délai attendu.",
+      "HIDE": "Masquer",
+      "START": "Lancer la génération",
+      "STEPS": {
+        "READ_COLLECTIONS": "Lecture des collections",
+        "BUILD_BLOCKS": "Construction des blocs",
+        "CHECK_RULES": "Vérification des règles",
+        "WRITE_GRID": "Écriture de la grille",
+        "READ_RULES": "Lecture des règles",
+        "SELECT_MEDIA": "Sélection des médias",
+        "RESOLVE": "Résolution des conflits",
+        "WRITE_PLAYOUT": "Écriture du planning"
+      }
+    },
+    "LOGO": {
+      "TITLE": "Logo de la chaîne",
+      "DESC": "Importez une image ou lancez une génération.",
+      "UPLOAD": "Importer un fichier",
+      "LOCAL": "Générer localement",
+      "CLOUD": "Générer avec l’IA",
+      "HINT": "Le prompt utilisé reste disponible après la génération.",
+      "DOWNLOAD": "Télécharger le prompt"
+    },
+    "REPORT": {
+      "TITLE": "Rapports de génération",
+      "LOADING": "Chargement…",
+      "ERRORS": "{{count}} erreurs",
+      "WARNINGS": "{{count}} alertes",
+      "INFO": "{{count}} informations",
+      "PREVIOUS": "Runs précédents",
+      "WITH_ERRORS": "Avec erreurs",
+      "DONE": "Terminé"
+    },
+    "RESET": {
+      "TITLE": "Réinitialiser des règles",
+      "WARNING": "Cette opération est irréversible.",
+      "WHAT": "Quoi",
+      "NATURES": "Natures",
+      "KINDS": "Types de contenant",
+      "CATEGORIES": "Catégories",
+      "LEVEL": "Quel niveau",
+      "ACTION": "Réinitialiser la sélection"
+    },
+    "GRID": {
+      "SETTINGS": "Paramètres de la grille",
+      "FILLER_POLICY": "Politique de remplissage",
+      "NONE": "Non",
+      "EDIT_BLOCK": "Modifier le bloc",
+      "ADD_BLOCK": "Ajouter un bloc",
+      "DESC": "Définissez le créneau et ses règles éditoriales.",
+      "RULE_HINT": "Les règles autorisées, préférées et interdites sont combinées pour sélectionner les médias.",
+      "SUGGESTION": "Suggestion assistée",
+      "PROMPT": "Décrivez l’intention éditoriale…",
+      "SUGGEST": "Suggérer",
+      "START": "Début",
+      "END": "Fin",
+      "PRIORITY": "Priorité",
+      "MIN_DURATION": "Durée min. (min)",
+      "MAX_DURATION": "Durée max. (min)",
+      "MIN_ITEMS": "Min. titres",
+      "MAX_ITEMS": "Max. titres",
+      "POST_FILLER": "Filler après le bloc",
+      "MATCHING": "{{count}} titres correspondent à ces règles.",
+      "DELETE_BLOCK": "Supprimer le bloc",
+      "SAVE_BLOCK": "Enregistrer le bloc",
+      "HIGH": "Haute",
+      "NORMAL": "Normale",
+      "LOW": "Basse"
+    },
+    "EDITORIAL": {
+      "TITLE": "Modifier la ligne éditoriale",
+      "START": "Début de diffusion",
+      "END": "Fin de diffusion",
+      "FILLER": "Autoriser le filler entre les titres"
+    },
+    "SCHEDULE": {
+      "DESC": "Élément du planning",
+      "CONTAINER": "Contenant",
+      "BROADCAST": "Diffusion",
+      "SELECTION": "Sélection",
+      "ROLE": "Rôle",
+      "NO_DESCRIPTION": "Aucune description."
+    }
   }
 }

@@ -10,6 +10,7 @@ import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
 import { FlwGenStepsComponent } from "../../../ui/gen-steps/flw-gen-steps.component";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 export interface GenerationDialogData {
   channelId: string | number;
@@ -26,21 +27,28 @@ export interface GenerationDialogData {
     FlwSwitchComponent,
     FlwSelectComponent,
     FlwGenStepsComponent,
+    TranslateModule,
   ],
   template: `
     <flw-modal [title]="title" [description]="description">
       <ng-container *ngIf="state === 'idle'">
         <ng-container *ngIf="data.kind === 'blueprint'; else playoutFields">
           <div class="field">
-            <label>Méthode</label
+            <label>{{ "CHANNEL_DIALOGS.GENERATION.METHOD" | translate }}</label
             ><flw-select [(ngModel)]="method" [options]="methods" />
           </div>
-          <flw-switch [(ngModel)]="gridOnly" label="Grille seule" />
-          <flw-switch [(ngModel)]="reboot" label="Forcer le redémarrage" />
+          <flw-switch
+            [(ngModel)]="gridOnly"
+            [label]="'CHANNEL_DIALOGS.GENERATION.GRID_ONLY' | translate"
+          />
+          <flw-switch
+            [(ngModel)]="reboot"
+            [label]="'CHANNEL_DIALOGS.GENERATION.REBOOT' | translate"
+          />
         </ng-container>
         <ng-template #playoutFields>
           <div class="field">
-            <label>Nombre de jours</label
+            <label>{{ "CHANNEL_DIALOGS.GENERATION.DAYS" | translate }}</label
             ><input
               class="mono"
               type="number"
@@ -51,13 +59,13 @@ export interface GenerationDialogData {
           </div>
           <flw-switch
             [(ngModel)]="reset"
-            label="Réinitialiser le planning existant"
+            [label]="'CHANNEL_DIALOGS.GENERATION.RESET' | translate"
           />
         </ng-template>
       </ng-container>
       <flw-gen-steps *ngIf="state !== 'idle'" [steps]="steps" [state]="state" />
       <p class="tooltip-note amber" *ngIf="state === 'error'">
-        La génération a échoué ou n’a pas confirmé sa fin dans le délai attendu.
+        {{ "CHANNEL_DIALOGS.GENERATION.ERROR" | translate }}
       </p>
       <div modal-footer>
         <span></span>
@@ -67,7 +75,12 @@ export interface GenerationDialogData {
             type="button"
             (click)="ref.close(state === 'done')"
           >
-            {{ state === "running" ? "Masquer" : "Fermer" }}
+            {{
+              (state === "running"
+                ? "CHANNEL_DIALOGS.GENERATION.HIDE"
+                : "CHANNEL_DIALOGS.COMMON.CLOSE"
+              ) | translate
+            }}
           </button>
           <button
             class="btn primary"
@@ -75,7 +88,7 @@ export interface GenerationDialogData {
             *ngIf="state === 'idle'"
             (click)="start()"
           >
-            Lancer la génération
+            {{ "CHANNEL_DIALOGS.GENERATION.START" | translate }}
           </button>
         </div>
       </div>
@@ -94,11 +107,7 @@ export class GenerationDialogComponent {
   private destroyRef = inject(DestroyRef);
   state: "idle" | "running" | "done" | "error" = "idle";
   method: "full_llm" | "random" | "preset_and_llm" = "preset_and_llm";
-  methods = [
-    { label: "Assistée par IA", value: "full_llm" },
-    { label: "Modèle prédéfini", value: "preset_and_llm" },
-    { label: "Aléatoire", value: "random" },
-  ];
+  methods: Array<{ label: string; value: string }> = [];
   gridOnly = false;
   reboot = false;
   days = 7;
@@ -107,10 +116,25 @@ export class GenerationDialogComponent {
 
   constructor(
     private service: TvChannelService,
+    private translate: TranslateService,
     ws: WebsocketService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA) public data: GenerationDialogData,
   ) {
+    this.methods = [
+      {
+        label: this.translate.instant("CHANNEL_DIALOGS.GENERATION.AI"),
+        value: "full_llm",
+      },
+      {
+        label: this.translate.instant("CHANNEL_DIALOGS.GENERATION.PRESET"),
+        value: "preset_and_llm",
+      },
+      {
+        label: this.translate.instant("CHANNEL_DIALOGS.GENERATION.RANDOM"),
+        value: "random",
+      },
+    ];
     ws.crudEvent
       .pipe(
         filter(
@@ -129,27 +153,23 @@ export class GenerationDialogComponent {
   }
 
   get title() {
-    return this.data.kind === "blueprint"
-      ? "Générer le plan"
-      : "Générer le planning";
+    return this.translate.instant(
+      this.data.kind === "blueprint"
+        ? "CHANNEL_DIALOGS.GENERATION.BLUEPRINT_TITLE"
+        : "CHANNEL_DIALOGS.GENERATION.PLAYOUT_TITLE",
+    );
   }
   get description() {
-    return `Chaîne — ${this.data.channelName}`;
+    return this.translate.instant("CHANNEL_DIALOGS.GENERATION.CHANNEL", {
+      name: this.data.channelName,
+    });
   }
   get steps() {
     return this.data.kind === "blueprint"
-      ? [
-          "Lecture des collections",
-          "Construction des blocs",
-          "Vérification des règles",
-          "Écriture de la grille",
-        ]
-      : [
-          "Lecture des règles",
-          "Sélection des médias",
-          "Résolution des conflits",
-          "Écriture du planning",
-        ];
+      ? ["READ_COLLECTIONS", "BUILD_BLOCKS", "CHECK_RULES", "WRITE_GRID"]
+      : ["READ_RULES", "SELECT_MEDIA", "RESOLVE", "WRITE_PLAYOUT"].map((step) =>
+          this.translate.instant(`CHANNEL_DIALOGS.GENERATION.STEPS.${step}`),
+        );
   }
 
   start() {

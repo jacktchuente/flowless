@@ -11,6 +11,7 @@ import {
   FormsModule,
   NG_VALUE_ACCESSOR,
 } from "@angular/forms";
+import { TranslateModule } from "@ngx-translate/core";
 export interface FlwTagOption {
   label: string;
   value: string | number;
@@ -18,34 +19,51 @@ export interface FlwTagOption {
 @Component({
   selector: "flw-tag-input",
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule],
-  template: `<div class="tag-input" [attr.data-variant]="variant" [class.invalid]="invalidDraft">
-    <span class="tag" [class]="variant" *ngFor="let value of values"
-      ><span>{{ labelFor(value) }}</span
-      ><button
-        type="button"
-        [attr.aria-label]="'Retirer ' + labelFor(value)"
-        (click)="remove(value)"
-      >
-        ✕
-      </button></span
-    ><input
-      #input
-      [disabled]="disabled"
-      [(ngModel)]="draft"
-      [attr.list]="listId"
-      (ngModelChange)="invalidDraft = false"
-      (keydown.enter)="addDraft($event)"
-      (blur)="onBlur()"
-      placeholder="Ajouter…"
-    /><datalist [id]="listId">
-      <option
-        *ngFor="let option of filteredOptions"
-        [value]="option.label"
-      ></option>
-    </datalist>
-  </div><span class="tag-input-error" *ngIf="invalidDraft">Choisissez une valeur proposée.</span>`,
-  styles: [`.tag-input.invalid{border-color:var(--critical)}.tag-input-error{color:var(--critical);font-size:11.5px}`],
+  imports: [NgFor, NgIf, FormsModule, TranslateModule],
+  template: `<div
+      class="tag-input"
+      [attr.data-variant]="variant"
+      [class.invalid]="invalidDraft"
+    >
+      <span class="tag" [class]="variant" *ngFor="let value of values"
+        ><span>{{ labelFor(value) }}</span
+        ><button
+          type="button"
+          [attr.aria-label]="'Retirer ' + labelFor(value)"
+          (click)="remove(value)"
+        >
+          ✕
+        </button></span
+      ><input
+        #input
+        [disabled]="disabled"
+        [(ngModel)]="draft"
+        [attr.list]="listId"
+        (ngModelChange)="invalidDraft = false"
+        (keydown.enter)="addDraft($event)"
+        (blur)="onBlur()"
+        [placeholder]="'UI.TAG_INPUT.ADD' | translate"
+      /><datalist [id]="listId">
+        <option
+          *ngFor="let option of filteredOptions"
+          [value]="option.label"
+        ></option>
+      </datalist>
+    </div>
+    <span class="tag-input-error" *ngIf="invalidDraft">{{
+      "UI.TAG_INPUT.INVALID" | translate
+    }}</span>`,
+  styles: [
+    `
+      .tag-input.invalid {
+        border-color: var(--critical);
+      }
+      .tag-input-error {
+        color: var(--critical);
+        font-size: 11.5px;
+      }
+    `,
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

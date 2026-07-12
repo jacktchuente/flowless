@@ -1,17 +1,14 @@
 <header class="topline">
   <div>
-    <span class="eyebrow">Programmation</span>
-    <h1>Planification flexible</h1>
-    <p class="sub">
-      Transformez les collections analysées en segments cohérents puis en
-      chaînes éditoriales.
-    </p>
+    <span class="eyebrow">{{ "EDITORIAL_PLANNING.EYEBROW" | translate }}</span>
+    <h1>{{ "EDITORIAL_PLANNING.TITLE" | translate }}</h1>
+    <p class="sub">{{ "EDITORIAL_PLANNING.SUBTITLE" | translate }}</p>
   </div>
 </header>
 <div class="content">
   <section class="card">
     <div class="catalog field">
-      <label>Catalogue</label
+      <label>{{ "EDITORIAL_PLANNING.CATALOG" | translate }}</label
       ><flw-select
         [value]="catalogId"
         [options]="catalogOptions"
@@ -26,10 +23,14 @@
     <div class="panel" *ngIf="active === 'collections'">
       <div class="panel-head">
         <div>
-          <h2>Collections analysées</h2>
-          <p>Sélectionnez les bibliothèques qui alimenteront le modèle.</p>
+          <h2>{{ "EDITORIAL_PLANNING.COLLECTIONS.TITLE" | translate }}</h2>
+          <p>{{ "EDITORIAL_PLANNING.COLLECTIONS.DESC" | translate }}</p>
         </div>
-        <input [(ngModel)]="search" type="search" placeholder="Rechercher…" />
+        <input
+          [(ngModel)]="search"
+          type="search"
+          [placeholder]="'COMMON.SEARCH' | translate"
+        />
       </div>
       <label class="collection" *ngFor="let collection of visibleCollections"
         ><input
@@ -42,52 +43,61 @@
         ></label
       >
       <footer>
-        <span>{{ selected.size }} sélectionnée(s)</span
+        <span>{{
+          "EDITORIAL_PLANNING.COLLECTIONS.SELECTED"
+            | translate: { count: selected.size }
+        }}</span
         ><button
           class="btn primary"
           [disabled]="!selected.size"
           (click)="active = 'analysis'"
         >
-          Continuer
+          {{ "COMMON.CONTINUE" | translate }}
         </button>
       </footer>
     </div>
     <div class="panel" *ngIf="active === 'analysis'">
       <div class="runs" *ngIf="runs.length">
-        <span class="section-label">Dernier run</span
+        <span class="section-label">{{
+          "EDITORIAL_PLANNING.ANALYSIS.LAST_RUN" | translate
+        }}</span
         ><strong
           >#{{ runs[0].id }} · {{ runs[0].segment_count }} segments</strong
         ><span class="pill" [class.success]="runs[0].is_active">{{
-          runs[0].is_active ? "Actif" : "Disponible"
+          (runs[0].is_active ? "COMMON.ACTIVE" : "COMMON.AVAILABLE") | translate
         }}</span
         ><button
           class="btn ghost sm"
           *ngIf="!runs[0].is_active"
           (click)="activate(runs[0])"
         >
-          Activer</button
+          {{ "COMMON.ACTIVATE" | translate }}</button
         ><button class="btn ghost sm" (click)="match()">
-          Intégrer les nouveaux médias
+          {{ "EDITORIAL_PLANNING.ANALYSIS.MATCH_NEW" | translate }}
         </button>
       </div>
       <div class="field-row cols-2">
         <div class="field">
-          <label>Nombre cible de chaînes</label
+          <label>{{ "EDITORIAL_PLANNING.ANALYSIS.TARGET" | translate }}</label
           ><input [(ngModel)]="target" type="number" min="1" />
         </div>
         <div class="field">
-          <label>Maximum de candidats</label
+          <label>{{
+            "EDITORIAL_PLANNING.ANALYSIS.MAX_CANDIDATES" | translate
+          }}</label
           ><input [(ngModel)]="maxCandidates" type="number" min="1" />
         </div>
         <flw-switch
           [(ngModel)]="multi"
-          label="Autoriser plusieurs segments par chaîne"
+          [label]="'EDITORIAL_PLANNING.ANALYSIS.MULTI_SEGMENT' | translate"
         /><flw-switch
           [(ngModel)]="sharing"
-          label="Autoriser le partage de segments"
+          [label]="'EDITORIAL_PLANNING.ANALYSIS.SHARING' | translate"
         />
         <div class="field">
-          <label>Seuil d’affinité — {{ threshold }} %</label
+          <label
+            >{{ "EDITORIAL_PLANNING.ANALYSIS.THRESHOLD" | translate }} —
+            {{ threshold }} %</label
           ><input [(ngModel)]="threshold" type="range" min="0" max="100" />
         </div>
       </div>
@@ -96,28 +106,22 @@
         [disabled]="!selected.size || generation === 'running'"
         (click)="generate()"
       >
-        Lancer l’analyse</button
+        {{ "EDITORIAL_PLANNING.ANALYSIS.RUN" | translate }}</button
       ><flw-gen-steps
         *ngIf="generation !== 'idle'"
         [state]="generation"
-        [steps]="[
-          'Lecture des collections choisies',
-          'Regroupement en segments',
-          'Évaluation de la viabilité',
-          'Construction des candidats',
-        ]"
+        [steps]="generationSteps"
       /><button
         class="btn"
         *ngIf="generation === 'done'"
         (click)="active = 'segments'"
       >
-        Voir les segments détectés
+        {{ "EDITORIAL_PLANNING.ANALYSIS.VIEW_SEGMENTS" | translate }}
       </button>
     </div>
     <div class="panel" *ngIf="active === 'segments'">
       <p>
-        Chaque segment rassemble des titres proches. Les scores indiquent sa
-        qualité éditoriale.
+        {{ "EDITORIAL_PLANNING.SEGMENTS.DESC" | translate }}
       </p>
       <div class="seg-grid">
         <article class="seg-card" *ngFor="let segment of segments">
@@ -131,11 +135,16 @@
               [class.warning]="
                 segment.programmable_score < segment.acceptance_threshold
               "
-              >{{ segment.media_count }} titres</span
+              >{{
+                "EDITORIAL_PLANNING.TITLES"
+                  | translate: { count: segment.media_count }
+              }}</span
             >
           </header>
           <div class="meter">
-            <span>Programmabilité</span>
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.PROGRAMMABILITY" | translate
+            }}</span>
             <div class="progress-track">
               <span
                 [style.width.%]="percent(segment.programmable_score)"
@@ -144,14 +153,18 @@
             <b class="mono">{{ percent(segment.programmable_score) }}%</b>
           </div>
           <div class="meter">
-            <span>Cohésion</span>
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.COHESION" | translate
+            }}</span>
             <div class="progress-track">
               <span [style.width.%]="percent(segment.cohesion_score)"></span>
             </div>
             <b class="mono">{{ percent(segment.cohesion_score) }}%</b>
           </div>
           <div class="meter">
-            <span>Séparation</span>
+            <span>{{
+              "EDITORIAL_PLANNING.SEGMENTS.SEPARATION" | translate
+            }}</span>
             <div class="progress-track">
               <span [style.width.%]="percent(segment.separation_score)"></span>
             </div>
@@ -160,7 +173,7 @@
         </article>
       </div>
       <button class="btn primary" (click)="active = 'candidates'">
-        Voir les candidats
+        {{ "EDITORIAL_PLANNING.SEGMENTS.VIEW_CANDIDATES" | translate }}
       </button>
     </div>
     <div class="panel" *ngIf="active === 'candidates'">
@@ -169,19 +182,21 @@
           <h3>{{ candidate.name }}</h3>
           <p>{{ candidate.description }}</p>
           <span class="pill info"
-            >Viabilité {{ percent(candidate.viability_score) }} %</span
+            >{{ "EDITORIAL_PLANNING.CANDIDATES.VIABILITY" | translate }}
+            {{ percent(candidate.viability_score) }} %</span
           >
         </div>
         <span class="pill neutral" *ngIf="candidate.tv_channel"
-          >Déjà promu — {{ candidate.tv_channel_name }}</span
+          >{{ "EDITORIAL_PLANNING.CANDIDATES.PROMOTED" | translate }} —
+          {{ candidate.tv_channel_name }}</span
         ><button
           class="btn primary"
           *ngIf="!candidate.tv_channel"
           (click)="promote(candidate)"
         >
-          Promouvoir en chaîne</button
+          {{ "EDITORIAL_PLANNING.CANDIDATES.PROMOTE" | translate }}</button
         ><button class="btn" (click)="active = 'review'">
-          Revoir les rattachements
+          {{ "EDITORIAL_PLANNING.CANDIDATES.REVIEW" | translate }}
         </button>
       </article>
     </div>
@@ -192,36 +207,43 @@
           [class.active]="segment.id === selectedSegment?.id"
           (click)="selectSegment(segment)"
         >
-          {{ segment.name }}<small>{{ segment.media_count }} titres</small>
+          {{ segment.name
+          }}<small>{{
+            "EDITORIAL_PLANNING.TITLES"
+              | translate: { count: segment.media_count }
+          }}</small>
         </button>
       </aside>
       <main>
         <div class="membership" *ngFor="let m of memberships">
           <div>
             <strong>{{ m.media_container_title }}</strong
-            ><small>Score d’affinité {{ m.score | number: "1.2-2" }}</small>
+            ><small
+              >{{ "EDITORIAL_PLANNING.REVIEW.SCORE" | translate }}
+              {{ m.score | number: "1.2-2" }}</small
+            >
           </div>
           <div class="status">
             <button
               [class.active]="m.status === 'accepted'"
               (click)="setStatus(m, 'accepted')"
             >
-              Accepté</button
+              {{ "EDITORIAL_PLANNING.REVIEW.ACCEPTED" | translate }}</button
             ><button
               [class.active]="m.status === 'rejected'"
               (click)="setStatus(m, 'rejected')"
             >
-              Rejeté</button
+              {{ "EDITORIAL_PLANNING.REVIEW.REJECTED" | translate }}</button
             ><button
               [class.active]="m.status === 'manual_override'"
               (click)="setStatus(m, 'manual_override')"
             >
-              Revue manuelle
+              {{ "EDITORIAL_PLANNING.REVIEW.MANUAL" | translate }}
             </button>
           </div>
         </div>
         <button class="btn primary" (click)="active = 'candidates'">
-          Terminé
+          {{ "COMMON.DONE" | translate }}
         </button>
       </main>
     </div>

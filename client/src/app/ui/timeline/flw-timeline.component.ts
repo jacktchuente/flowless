@@ -120,7 +120,7 @@ export class FlwTimelineComponent {
   top(b: TimelineBlock) {
     return Math.max(
       0,
-      ((this.minutes(b.start) - this.startHour * 60) / 60) * this.pxPerHour
+      ((this.minutes(b.start) - this.startHour * 60) / 60) * this.pxPerHour,
     );
   }
   blockHeight(b: TimelineBlock) {

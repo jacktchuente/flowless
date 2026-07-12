@@ -22,6 +22,7 @@ import {
   SuggestionChange,
 } from "../../../ui/suggestion-preview/flw-suggestion-preview.component";
 import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
@@ -33,25 +34,32 @@ import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
     FlwRuleGroupComponent,
     FlwTagInputComponent,
     FlwSuggestionPreviewComponent,
+    TranslateModule,
   ],
   template: `<flw-modal
-    [title]="data.block ? 'Modifier le bloc' : 'Ajouter un bloc'"
-    description="Définissez le créneau et ses règles éditoriales."
+    [title]="
+      (data.block
+        ? 'CHANNEL_DIALOGS.GRID.EDIT_BLOCK'
+        : 'CHANNEL_DIALOGS.GRID.ADD_BLOCK'
+      ) | translate
+    "
+    [description]="'CHANNEL_DIALOGS.GRID.DESC' | translate"
     [wide]="true"
     ><p class="tooltip-note">
-      Les règles autorisées, préférées et interdites sont combinées pour
-      sélectionner les médias.
+      {{ "CHANNEL_DIALOGS.GRID.RULE_HINT" | translate }}
     </p>
     <div class="assistant">
       <div class="field">
-        <label>Suggestion assistée</label
+        <label>{{ "CHANNEL_DIALOGS.GRID.SUGGESTION" | translate }}</label
         ><textarea
           [formControl]="prompt"
           rows="2"
-          placeholder="Décrivez l’intention éditoriale…"
+          [placeholder]="'CHANNEL_DIALOGS.GRID.PROMPT' | translate"
         ></textarea>
       </div>
-      <button class="btn" (click)="suggest()">Suggérer</button>
+      <button class="btn" (click)="suggest()">
+        {{ "CHANNEL_DIALOGS.GRID.SUGGEST" | translate }}
+      </button>
     </div>
     <flw-suggestion-preview
       *ngIf="changes.length"
@@ -62,71 +70,80 @@ import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
     <form [formGroup]="form">
       <div class="field-row cols-3">
         <div class="field">
-          <label>Début</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.START" | translate }}</label
           ><input class="mono" type="time" formControlName="starts_at" />
         </div>
         <div class="field">
-          <label>Fin</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.END" | translate }}</label
           ><input class="mono" type="time" formControlName="ends_at" />
         </div>
         <div class="field">
-          <label>Priorité</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.PRIORITY" | translate }}</label
           ><flw-select formControlName="priority" [options]="priorities" />
         </div>
       </div>
       <div class="field-row cols-4">
         <div class="field">
-          <label>Durée min. (min)</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.MIN_DURATION" | translate }}</label
           ><input type="number" formControlName="min_minutes" />
         </div>
         <div class="field">
-          <label>Durée max. (min)</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.MAX_DURATION" | translate }}</label
           ><input type="number" formControlName="max_minutes" />
         </div>
         <div class="field">
-          <label>Min. titres</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.MIN_ITEMS" | translate }}</label
           ><input type="number" formControlName="min_items" />
         </div>
         <div class="field">
-          <label>Max. titres</label
+          <label>{{ "CHANNEL_DIALOGS.GRID.MAX_ITEMS" | translate }}</label
           ><input type="number" formControlName="max_items" />
         </div>
       </div>
       <div class="field">
-        <label>Filler après le bloc</label
+        <label>{{ "CHANNEL_DIALOGS.GRID.POST_FILLER" | translate }}</label
         ><flw-select
           formControlName="post_filler_policy"
           [options]="policies"
         />
       </div>
-      <flw-rule-group kind="allow" label="Autorisé"
+      <flw-rule-group
+        kind="allow"
+        [label]="'CHANNEL_DIALOGS.COMMON.ALLOWED' | translate"
         ><flw-tag-input
           variant="allow"
           formControlName="allowed"
           [options]="options" /></flw-rule-group
-      ><flw-rule-group kind="prefer" label="Préféré"
+      ><flw-rule-group
+        kind="prefer"
+        [label]="'CHANNEL_DIALOGS.COMMON.PREFERRED' | translate"
         ><flw-tag-input
           variant="prefer"
           formControlName="preferred"
           [options]="options" /></flw-rule-group
-      ><flw-rule-group kind="forbid" label="Interdit"
+      ><flw-rule-group
+        kind="forbid"
+        [label]="'CHANNEL_DIALOGS.COMMON.FORBIDDEN' | translate"
         ><flw-tag-input
           variant="forbid"
           formControlName="forbidden"
           [options]="options"
       /></flw-rule-group>
       <p class="hint" *ngIf="availableCount !== null">
-        {{ availableCount }} titres correspondent à ces règles.
+        {{
+          "CHANNEL_DIALOGS.GRID.MATCHING" | translate: { count: availableCount }
+        }}
       </p>
     </form>
     <div modal-footer>
       <button class="btn danger-ghost" *ngIf="data.block" (click)="remove()">
-        Supprimer le bloc</button
+        {{ "CHANNEL_DIALOGS.GRID.DELETE_BLOCK" | translate }}</button
       ><span *ngIf="!data.block"></span>
       <div>
-        <button class="btn ghost" (click)="ref.close(false)">Annuler</button
+        <button class="btn ghost" (click)="ref.close(false)">
+          {{ "CHANNEL_DIALOGS.COMMON.CANCEL" | translate }}</button
         ><button class="btn primary" (click)="save()">
-          Enregistrer le bloc
+          {{ "CHANNEL_DIALOGS.GRID.SAVE_BLOCK" | translate }}
         </button>
       </div>
     </div></flw-modal
@@ -219,6 +236,7 @@ export class GridBlockDialogComponent {
   });
   constructor(
     private channels: TvChannelService,
+    private translate: TranslateService,
     private blocks: GridBlockService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)

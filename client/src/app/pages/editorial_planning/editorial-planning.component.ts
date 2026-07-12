@@ -23,6 +23,7 @@ import { TimeAgoPipe } from "../../ui/pipes/time-ago.pipe";
 import { WebsocketService } from "@kwyxyz/ngx-request";
 import { filter } from "rxjs";
 import { AnalyzeStatus } from "../../_utils/analyze-status";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
   standalone: true,
   imports: [
@@ -35,6 +36,7 @@ import { AnalyzeStatus } from "../../_utils/analyze-status";
     FlwSwitchComponent,
     FlwGenStepsComponent,
     TimeAgoPipe,
+    TranslateModule,
   ],
   templateUrl: "./editorial-planning.component.html",
   styleUrl: "./editorial-planning.component.css",
@@ -46,13 +48,8 @@ export class EditorialPlanningComponent {
   selected = new Set<string>();
   catalogId: string | null = null;
   active = "collections";
-  tabs = [
-    { id: "collections", label: "1 · Collections" },
-    { id: "analysis", label: "2 · Lancer l’analyse" },
-    { id: "segments", label: "3 · Segments" },
-    { id: "candidates", label: "4 · Candidats" },
-    { id: "review", label: "5 · Revue" },
-  ];
+  tabs: Array<{ id: string; label: string }> = [];
+  generationSteps: string[] = [];
   target = 4;
   maxCandidates = 8;
   multi = true;
@@ -76,7 +73,28 @@ export class EditorialPlanningComponent {
     route: ActivatedRoute,
     private router: Router,
     websocket: WebsocketService,
+    private translate: TranslateService,
   ) {
+    this.tabs = [
+      "collections",
+      "analysis",
+      "segments",
+      "candidates",
+      "review",
+    ].map((id) => ({
+      id,
+      label: this.translate.instant(
+        `EDITORIAL_PLANNING.TABS.${id.toUpperCase()}`,
+      ),
+    }));
+    this.generationSteps = [
+      "COLLECTIONS",
+      "SEGMENTS",
+      "VIABILITY",
+      "CANDIDATES",
+    ].map((step) =>
+      this.translate.instant(`EDITORIAL_PLANNING.ANALYSIS.STEPS.${step}`),
+    );
     const requested = route.snapshot.queryParamMap.get("catalog");
     catalogService
       .getObjectBehaviorSubject()
@@ -233,7 +251,7 @@ export class EditorialPlanningComponent {
   promote(c: EditorialChannelCandidate) {
     this.planning.createFlexibleChannel(c.id, c.name).subscribe((r) => {
       if (r.isOk) {
-        this.notification.notify("Chaîne flexible créée.");
+        this.notification.notify("EDITORIAL_PLANNING.NOTIFY.PROMOTED");
         this.load();
       }
     });
@@ -247,7 +265,9 @@ export class EditorialPlanningComponent {
         .matchNewMediaForCatalog(this.catalogId)
         .subscribe((r) =>
           this.notification.notify(
-            r.isOk ? "Nouveaux médias intégrés." : "Aucun run actif.",
+            r.isOk
+              ? "EDITORIAL_PLANNING.NOTIFY.MATCHED"
+              : "EDITORIAL_PLANNING.NOTIFY.NO_ACTIVE_RUN",
           ),
         );
   }

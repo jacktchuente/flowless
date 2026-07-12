@@ -8,6 +8,7 @@ import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { FlwRuleGroupComponent } from "../../../ui/rule-group/flw-rule-group.component";
 import { FlwTagInputComponent } from "../../../ui/tag-input/flw-tag-input.component";
 import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   standalone: true,
@@ -17,33 +18,42 @@ import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
     FlwSwitchComponent,
     FlwRuleGroupComponent,
     FlwTagInputComponent,
+    TranslateModule,
   ],
-  template: `<flw-modal title="Modifier la ligne éditoriale" [wide]="true"
+  template: `<flw-modal
+    [title]="'CHANNEL_DIALOGS.EDITORIAL.TITLE' | translate"
+    [wide]="true"
     ><form [formGroup]="form">
       <div class="field-row cols-2">
         <div class="field">
-          <label>Début de diffusion</label
+          <label>{{ "CHANNEL_DIALOGS.EDITORIAL.START" | translate }}</label
           ><input class="mono" type="time" formControlName="start_at" />
         </div>
         <div class="field">
-          <label>Fin de diffusion</label
+          <label>{{ "CHANNEL_DIALOGS.EDITORIAL.END" | translate }}</label
           ><input class="mono" type="time" formControlName="end_at" />
         </div>
       </div>
       <flw-switch
         formControlName="allow_filler"
-        label="Autoriser le filler entre les titres"
-      /><flw-rule-group kind="allow" label="Autorisé"
+        [label]="'CHANNEL_DIALOGS.EDITORIAL.FILLER' | translate"
+      /><flw-rule-group
+        kind="allow"
+        [label]="'CHANNEL_DIALOGS.COMMON.ALLOWED' | translate"
         ><flw-tag-input
           variant="allow"
           formControlName="allowed"
           [options]="options" /></flw-rule-group
-      ><flw-rule-group kind="prefer" label="Préféré"
+      ><flw-rule-group
+        kind="prefer"
+        [label]="'CHANNEL_DIALOGS.COMMON.PREFERRED' | translate"
         ><flw-tag-input
           variant="prefer"
           formControlName="preferred"
           [options]="options" /></flw-rule-group
-      ><flw-rule-group kind="forbid" label="Interdit"
+      ><flw-rule-group
+        kind="forbid"
+        [label]="'CHANNEL_DIALOGS.COMMON.FORBIDDEN' | translate"
         ><flw-tag-input
           variant="forbid"
           formControlName="forbidden"
@@ -51,8 +61,11 @@ import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
       /></flw-rule-group>
     </form>
     <div modal-footer>
-      <button class="btn ghost" (click)="ref.close(false)">Annuler</button
-      ><button class="btn primary" (click)="save()">Enregistrer</button>
+      <button class="btn ghost" (click)="ref.close(false)">
+        {{ "CHANNEL_DIALOGS.COMMON.CANCEL" | translate }}</button
+      ><button class="btn primary" (click)="save()">
+        {{ "CHANNEL_DIALOGS.COMMON.SAVE" | translate }}
+      </button>
     </div></flw-modal
   >`,
   styles: [
