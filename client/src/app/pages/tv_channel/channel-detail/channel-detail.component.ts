@@ -284,6 +284,7 @@ export class ChannelDetailComponent {
         .open(GridBlockDialogComponent, {
           data: {
             channelId: this.channel!.id,
+            channelName: this.channel!.name,
             gridLayoutId: this.channel!.grid_data!.id,
             block,
             formOptions: options,

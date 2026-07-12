@@ -480,6 +480,9 @@
       "MATCHING": "{{count}} titres correspondent à ces règles.",
       "DELETE_BLOCK": "Supprimer le bloc",
       "SAVE_BLOCK": "Enregistrer le bloc",
+      "CONFIRM_DELETE": "Supprimer définitivement ce bloc de grille ?",
+      "SAVED": "Bloc enregistré.",
+      "REGENERATE": "Régénérer le planning",
       "HIGH": "Haute",
       "NORMAL": "Normale",
       "LOW": "Basse"

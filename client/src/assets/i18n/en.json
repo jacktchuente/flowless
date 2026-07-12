@@ -480,6 +480,9 @@
       "MATCHING": "{{count}} titles match these rules.",
       "DELETE_BLOCK": "Delete block",
       "SAVE_BLOCK": "Save block",
+      "CONFIRM_DELETE": "Permanently delete this grid block?",
+      "SAVED": "Block saved.",
+      "REGENERATE": "Regenerate schedule",
       "HIGH": "High",
       "NORMAL": "Normal",
       "LOW": "Low"

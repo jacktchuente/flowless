@@ -23,6 +23,10 @@ import {
 } from "../../../ui/suggestion-preview/flw-suggestion-preview.component";
 import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
+import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import { FlwDialogService } from "../../../ui/dialog.service";
+import { ToastService } from "../../../ui/toast/toast.service";
+import { GenerationDialogComponent } from "./generation-dialog.component";
 
 @Component({
   standalone: true,
@@ -67,7 +71,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
       (apply)="applySuggestion($event)"
       (dismiss)="changes = []"
     />
-    <form [formGroup]="form">
+    <form [formGroup]="form" (focusout)="refreshCount()">
       <div class="field-row cols-3">
         <div class="field">
           <label>{{ "CHANNEL_DIALOGS.GRID.START" | translate }}</label
@@ -187,13 +191,21 @@ export class GridBlockDialogComponent {
   };
   source = this.data.block ?? this.empty;
   options = ruleOptions(this.data.formOptions);
-  priorities = [
-    { label: "Haute", value: 80 },
-    { label: "Normale", value: 50 },
-    { label: "Basse", value: 20 },
-  ];
+  priorities = [80, 50, 20].map((value) => ({
+    label: this.translate.instant(
+      value === 80
+        ? "CHANNEL_DIALOGS.GRID.HIGH"
+        : value === 50
+          ? "CHANNEL_DIALOGS.GRID.NORMAL"
+          : "CHANNEL_DIALOGS.GRID.LOW",
+    ),
+    value,
+  }));
   policies = [
-    { label: "Non", value: null },
+    {
+      label: this.translate.instant("CHANNEL_DIALOGS.GRID.NONE"),
+      value: null,
+    },
     ...this.data.formOptions.filler_policies.map((p) => ({
       label: `${p.name} (${p.duration_seconds}s)`,
       value: p.id,
@@ -238,10 +250,13 @@ export class GridBlockDialogComponent {
     private channels: TvChannelService,
     private translate: TranslateService,
     private blocks: GridBlockService,
+    private dialogs: FlwDialogService,
+    private toast: ToastService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)
     public data: {
       channelId: string | number;
+      channelName: string;
       gridLayoutId: string | number;
       block: GridBlock | null;
       formOptions: FormOptions;
@@ -310,6 +325,14 @@ export class GridBlockDialogComponent {
     };
     for (const [key, control] of Object.entries(scalar))
       if (key in patch) this.form.get(control as string)?.setValue(patch[key]);
+    if ("min_duration_seconds_per_item" in patch)
+      this.form.controls.min_minutes.setValue(
+        this.secondsToMinutes(patch["min_duration_seconds_per_item"]),
+      );
+    if ("max_duration_seconds_per_item" in patch)
+      this.form.controls.max_minutes.setValue(
+        this.secondsToMinutes(patch["max_duration_seconds_per_item"]),
+      );
     for (const level of ["allowed", "preferred", "forbidden"] as const) {
       const combined = [
         ...(
@@ -328,26 +351,63 @@ export class GridBlockDialogComponent {
       this.form.controls[level].setValue(combined);
     }
     this.changes = [];
+    this.refreshCount();
   }
   save() {
     const request = this.data.block
       ? this.blocks.update(this.data.block.id, this.payload())
       : this.blocks.create(this.payload());
     request.subscribe((r) => {
-      if (r.isOk) this.ref.close(true);
+      if (!r.isOk) return;
+      this.toast.show(this.translate.instant("CHANNEL_DIALOGS.GRID.SAVED"), {
+        action: this.translate.instant("CHANNEL_DIALOGS.GRID.REGENERATE"),
+        duration: 10000,
+        onAction: () =>
+          this.dialogs.open(GenerationDialogComponent, {
+            data: {
+              channelId: this.data.channelId,
+              channelName: this.data.channelName,
+              kind: "playout",
+            },
+          }),
+      });
+      this.ref.close(true);
     });
   }
   remove() {
-    if (this.data.block)
-      this.blocks.delete(this.data.block.id).subscribe((r) => {
-        if (r.isOk) this.ref.close(true);
+    if (!this.data.block) return;
+    this.dialogs
+      .open(FlwConfirmComponent, {
+        data: {
+          title: this.translate.instant("CHANNEL_DIALOGS.GRID.DELETE_BLOCK"),
+          message: this.translate.instant(
+            "CHANNEL_DIALOGS.GRID.CONFIRM_DELETE",
+          ),
+          confirmLabel: this.translate.instant("COMMON.DELETE"),
+        },
+      })
+      .closed.subscribe((confirmed) => {
+        if (!confirmed || !this.data.block) return;
+        this.blocks.delete(this.data.block.id).subscribe((r) => {
+          if (r.isOk) this.ref.close(true);
+        });
       });
   }
   refreshCount() {
     if (this.data.block)
-      this.blocks.getAvailableMediaCount(this.data.block.id).subscribe((r) => {
-        if (r.isOk)
-          this.availableCount = (r.body as GridBlockAvailableMediaCount).count;
-      });
+      this.blocks
+        .getAvailableMediaCount(this.data.block.id, this.payload())
+        .subscribe((r) => {
+          if (r.isOk)
+            this.availableCount = (
+              r.body as GridBlockAvailableMediaCount
+            ).count;
+        });
+  }
+
+  private secondsToMinutes(value: unknown): number | null {
+    if (value === null || value === undefined || value === "") return null;
+    const seconds = Number(value);
+    return Number.isFinite(seconds) ? Math.round(seconds / 60) : null;
   }
 }
