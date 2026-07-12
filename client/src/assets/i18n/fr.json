@@ -44,7 +44,8 @@
       "PLAYOUT_FAILED": "Échec de génération pour {{channel}}",
       "COLLECTION_ANALYZED": "Collection {{collection}} analysée",
       "EDITORIAL_RUN": "Analyse éditoriale de {{catalog}}"
-    }
+    },
+    "VIEW_REPORTS": "Voir tous les rapports de génération"
   },
   "EDITORIAL_PLANNING": {
     "EYEBROW": "Programmation",

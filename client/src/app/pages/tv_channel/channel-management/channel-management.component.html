@@ -18,20 +18,24 @@
 </header>
 <div class="content">
   <section class="card setup">
-    <div class="field">
-      <label>{{ "CHANNELS.CATALOG_LABEL" | translate }}</label
-      ><flw-select
-        [value]="selectedCatalogId"
-        [options]="catalogOptions"
-        (valueChange)="onCatalog($event)"
-      />
-    </div>
-    <div class="setup-actions">
-      <button class="btn ghost" (click)="openCatalog(selectedCatalog)">
-        {{ "CHANNELS.EDIT_CATALOG" | translate }}</button
-      ><button class="btn" (click)="generateCatalog()">
-        <flw-icon name="sync" />{{ "CHANNELS.GENERATE_CHANNELS" | translate }}
-      </button>
+    <div class="setup-row">
+      <div class="field">
+        <label>{{ "CHANNELS.CATALOG_LABEL" | translate }}</label
+        ><flw-select
+          [value]="selectedCatalogId"
+          [options]="catalogOptions"
+          (valueChange)="onCatalog($event)"
+        />
+      </div>
+      <div class="setup-actions">
+        <button class="btn sm ghost" (click)="openCatalog(selectedCatalog)">
+          {{ "CHANNELS.EDIT_CATALOG" | translate }}</button
+        ><button class="btn sm" (click)="generateCatalog()">
+          <flw-icon name="generate" />{{
+            "CHANNELS.GENERATE_CHANNELS" | translate
+          }}
+        </button>
+      </div>
     </div>
     <hr class="divider" />
     <flw-segmented
@@ -49,22 +53,28 @@
   </section>
   <ng-container *ngIf="mode === 'classic'"
     ><section class="card toolbar">
-      <flw-segmented
-        [options]="dayOptions"
-        [value]="0"
-        (valueChange)="setDay($event)"
-      /><strong class="mono">{{ calendarDate | date: "dd/MM/yyyy" }}</strong>
-      <div class="legend">
-        <span class="item" *ngFor="let cat of legend"
-          ><i class="sw" [style.background]="cat.sw"></i
-          >{{ cat.label | translate }}</span
-        >
+      <div class="group">
+        <flw-segmented
+          [options]="dayOptions"
+          [value]="0"
+          (valueChange)="setDay($event)"
+        /><strong class="day">{{
+          calendarDate | date: "EEEE d MMMM y"
+        }}</strong>
       </div>
-      <flw-segmented
-        [options]="viewOptions"
-        [value]="calendarViewMode"
-        (valueChange)="calendarViewMode = $any($event)"
-      />
+      <div class="group">
+        <div class="legend">
+          <span class="item" *ngFor="let cat of legend"
+            ><i class="sw" [style.background]="cat.sw"></i
+            >{{ cat.label | translate }}</span
+          >
+        </div>
+        <flw-segmented
+          [options]="viewOptions"
+          [value]="calendarViewMode"
+          (valueChange)="calendarViewMode = $any($event)"
+        />
+      </div>
     </section>
     <div class="channel-cards">
       <article class="card channel" *ngFor="let channel of channels">

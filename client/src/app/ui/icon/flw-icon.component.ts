@@ -18,6 +18,9 @@ const ICON_PATHS: Record<string, string[]> = {
   channels: ["M4 6h16v12H4z", "M9 6l3-3 3 3", "M9 21h6"],
   planning: ["M4 19V5", "M4 12h16", "M8 8h4", "M8 16h8"],
   plus: ["M12 5v14", "M5 12h14"],
+  generate: [
+    "M12 3v3m0 12v3m9-9h-3M6 12H3m14.4-6.4-2.1 2.1M8.7 15.3l-2.1 2.1m10.8 0-2.1-2.1M8.7 8.7 6.6 6.6",
+  ],
   search: ["m21 21-4.3-4.3", "M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"],
   filter: ["M4 5h16", "M7 12h10", "M10 19h4"],
   edit: ["M4 20h4L19 9l-4-4L4 16v4Z M15 5l4 4"],

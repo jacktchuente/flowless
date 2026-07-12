@@ -92,6 +92,12 @@
         <div class="empty" *ngIf="!d.recent_activity.length">
           {{ "OVERVIEW.NO_ACTIVITY" | translate }}
         </div>
+        <a
+          class="view-all"
+          routerLink="/app/channels"
+          *ngIf="d.recent_activity.length"
+          >{{ "OVERVIEW.VIEW_REPORTS" | translate }} →</a
+        >
       </div>
     </section>
   </div>

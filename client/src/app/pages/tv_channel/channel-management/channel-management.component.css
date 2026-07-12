@@ -1,14 +1,17 @@
 .setup {
   padding: 18px 22px;
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto;
-  align-items: end;
   gap: 14px;
 }
-.setup .divider,
-.setup > p,
-.setup > flw-segmented {
-  grid-column: 1/-1;
+.setup-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.setup-row .field {
+  min-width: 260px;
 }
 .setup-actions {
   display: flex;
@@ -20,6 +23,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
+}
+.toolbar .group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.toolbar .day {
+  font-size: 14px;
+  text-transform: capitalize;
 }
 .channel-cards {
   display: grid;

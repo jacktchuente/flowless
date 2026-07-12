@@ -44,7 +44,8 @@
       "PLAYOUT_FAILED": "Generation failed for {{channel}}",
       "COLLECTION_ANALYZED": "Collection {{collection}} analyzed",
       "EDITORIAL_RUN": "Editorial analysis for {{catalog}}"
-    }
+    },
+    "VIEW_REPORTS": "View all generation reports"
   },
   "EDITORIAL_PLANNING": {
     "EYEBROW": "Programming",
