@@ -134,7 +134,43 @@ jobs:
           rm -f flowless-client.tar
           docker compose down --remove-orphans
           docker compose up -d
+          docker image prune -f
           EOF
+
+      - name: Wait for healthy API on remote host
+        env:
+          LIVE_DEPLOY_HOST: ${{ secrets.LIVE_DEPLOY_HOST }}
+          LIVE_DEPLOY_USER: ${{ secrets.LIVE_DEPLOY_USER }}
+          REMOTE_PROJECT_PATH: ${{ steps.project.outputs.remote_project_path }}
+        run: |
+          set -euo pipefail
+
+          ssh -i ~/.ssh/id_ed25519 "${LIVE_DEPLOY_USER}@${LIVE_DEPLOY_HOST}" /bin/bash <<EOF
+          set -euo pipefail
+
+          cd "${REMOTE_PROJECT_PATH}"
+
+          for attempt in \$(seq 1 30); do
+            state=\$(docker inspect -f '{{.State.Health.Status}}' "\$(docker compose ps -q api)" 2>/dev/null || echo unknown)
+            if [ "\$state" = "healthy" ]; then
+              echo "API healthy after \$attempt check(s)."
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "API still \$state after 5 minutes" >&2
+          docker compose logs --tail=100 api >&2 || true
+          exit 1
+          EOF
+
+      - name: Clean up build artifacts on runner
+        run: |
+          set -euo pipefail
+
+          rm -f repo/flowless-api.tar repo/flowless-client.tar
+          docker rmi -f flowless/flowless-api:latest flowless/flowless-client:latest
+          docker image prune -f
 
   sonarqube:
     if: github.ref == 'refs/heads/main'
