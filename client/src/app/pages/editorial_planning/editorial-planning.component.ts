@@ -20,6 +20,9 @@ import { FlwTabsComponent } from "../../ui/tabs/flw-tabs.component";
 import { FlwSwitchComponent } from "../../ui/switch/flw-switch.component";
 import { FlwGenStepsComponent } from "../../ui/gen-steps/flw-gen-steps.component";
 import { TimeAgoPipe } from "../../ui/pipes/time-ago.pipe";
+import { WebsocketService } from "@kwyxyz/ngx-request";
+import { filter } from "rxjs";
+import { AnalyzeStatus } from "../../_utils/analyze-status";
 @Component({
   standalone: true,
   imports: [
@@ -62,6 +65,9 @@ export class EditorialPlanningComponent {
   memberships: EditorialSegmentMembership[] = [];
   selectedSegment: EditorialSegment | null = null;
   search = "";
+  private generationStartedAt = 0;
+  private generationPoll?: ReturnType<typeof setInterval>;
+  private generationTimeout?: ReturnType<typeof setTimeout>;
   constructor(
     private catalogService: CatalogService,
     collectionsService: MediaCollectionService,
@@ -69,6 +75,7 @@ export class EditorialPlanningComponent {
     private notification: NotificationService,
     route: ActivatedRoute,
     private router: Router,
+    websocket: WebsocketService,
   ) {
     const requested = route.snapshot.queryParamMap.get("catalog");
     catalogService
@@ -91,9 +98,19 @@ export class EditorialPlanningComponent {
       .subscribe(
         (v) =>
           (this.collections = v.filter(
-            (c: MediaCollection) => c.is_active && c.analyze_status === 2,
+            (c: MediaCollection) =>
+              c.is_active && c.analyze_status === AnalyzeStatus.Done,
           )),
       );
+    websocket.crudEvent
+      .pipe(
+        filter(
+          (event: any) => event.type?.toLowerCase?.() === "editorialflowrun",
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.checkGeneration());
+    this.destroyRef.onDestroy(() => this.clearGenerationWatch());
   }
   get catalogOptions() {
     return this.catalogs.map((c) => ({ label: c.name, value: String(c.id) }));
@@ -117,7 +134,11 @@ export class EditorialPlanningComponent {
   load() {
     if (!this.catalogId) return;
     this.planning.listRuns(this.catalogId).subscribe((r) => {
-      if (r.isOk) this.runs = r.body as EditorialFlowRun[];
+      if (r.isOk)
+        this.runs = (r.body as EditorialFlowRun[]).sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
     });
     this.planning.listSegmentsForCatalog(this.catalogId).subscribe((r) => {
       if (r.isOk) {
@@ -133,6 +154,7 @@ export class EditorialPlanningComponent {
   generate() {
     if (!this.catalogId || !this.selected.size) return;
     this.generation = "running";
+    this.generationStartedAt = Date.now();
     this.catalogService
       .generateEditorialPlanning(this.catalogId, {
         media_collection_ids: [...this.selected],
@@ -148,11 +170,54 @@ export class EditorialPlanningComponent {
           return;
         }
         this.notification.notify("CHANNELS.NOTIFY_GENERATION_STARTED");
-        setTimeout(() => {
-          this.generation = "done";
-          this.load();
-        }, 2500);
+        this.startGenerationWatch();
       });
+  }
+  private startGenerationWatch() {
+    this.clearGenerationWatch();
+    this.generationPoll = setInterval(() => this.checkGeneration(), 3000);
+    this.generationTimeout = setTimeout(
+      () => {
+        if (this.generation === "running") this.generation = "error";
+        this.clearGenerationWatch();
+      },
+      15 * 60 * 1000,
+    );
+  }
+  private checkGeneration() {
+    if (this.generation !== "running" || !this.catalogId) return;
+    this.planning.listRuns(this.catalogId).subscribe((response) => {
+      if (!response.isOk) return;
+      const latest = (response.body as EditorialFlowRun[])
+        .filter(
+          (run) =>
+            new Date(run.created_at).getTime() >=
+            this.generationStartedAt - 5000,
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        )[0];
+      if (!latest) return;
+      if (Number(latest.status) === AnalyzeStatus.Done) {
+        this.generation = "done";
+        this.clearGenerationWatch();
+        this.load();
+      } else if (
+        [AnalyzeStatus.DoneWithErrors, AnalyzeStatus.Cancelled].includes(
+          Number(latest.status),
+        )
+      ) {
+        this.generation = "error";
+        this.clearGenerationWatch();
+      }
+    });
+  }
+  private clearGenerationWatch() {
+    if (this.generationPoll) clearInterval(this.generationPoll);
+    if (this.generationTimeout) clearTimeout(this.generationTimeout);
+    this.generationPoll = undefined;
+    this.generationTimeout = undefined;
   }
   selectSegment(segment: EditorialSegment) {
     this.selectedSegment = segment;
