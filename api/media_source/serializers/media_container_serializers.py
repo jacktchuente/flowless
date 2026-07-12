@@ -6,6 +6,7 @@ from media_source.models import MediaContainer
 class MediaContainerSerializer(serializers.ModelSerializer):
     nature = serializers.IntegerField(source="media_collection.nature", read_only=True)
     container_kind = serializers.IntegerField(source="media_collection.container_kind", read_only=True)
+    item_count = serializers.IntegerField(source="live_item_count", read_only=True)
 
     class Meta:
         model = MediaContainer
@@ -13,6 +14,8 @@ class MediaContainerSerializer(serializers.ModelSerializer):
 
 
 class MediaContainerDetailSerializer(serializers.ModelSerializer):
+    item_count = serializers.IntegerField(source="live_item_count", read_only=True)
+
     class Meta:
         model = MediaContainer
         fields = ("id", "original_data_hash", "external_id", "title", "description", "media_source", "media_collection",
