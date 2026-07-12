@@ -11,6 +11,6 @@ export class DashboardService extends BaseApiService {
     super(http);
   }
   overview(): Observable<DashboardOverview> {
-    return this.http.get<DashboardOverview>(`${this.getFullUrl()}/`);
+    return this.http.get<DashboardOverview>(this.getFullUrl());
   }
 }

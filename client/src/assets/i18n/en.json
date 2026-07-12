@@ -153,7 +153,9 @@
     "SAVE": "Save",
     "APPLY": "Apply",
     "TYPE": "Type",
-    "LOADING": "Loading…"
+    "LOADING": "Loading…",
+    "CONFIRM_TITLE": "Confirm action",
+    "CONFIRM_MESSAGE": "Do you really want to continue?"
   },
   "MEDIA_SOURCE": {
     "EYEBROW": "Sources",

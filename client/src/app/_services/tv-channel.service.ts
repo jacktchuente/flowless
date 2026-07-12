@@ -195,6 +195,8 @@ export class TvChannelService extends ObjectApiService {
   override data: { [indexer: string]: TvChannel } = {};
   override baseName = "tvChannel";
   override objectName = "TvChannel";
+  // La page confirme déjà via FlwConfirm avant deleteObject
+  override confirmedBeforeDelete = false;
   private lastQueryParams: Record<string, unknown> | null = null;
 
   constructor(protected override api: TvChannelApiService) {

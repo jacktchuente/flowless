@@ -13,6 +13,8 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { NgxRequestModule } from "@kwyxyz/ngx-request";
 import { environment } from "../environments/environment";
 import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwConfirmationService } from "./ui/confirmation.service";
+import { FlwLoadingService } from "./ui/loading.service";
 
 @NgModule({
   declarations: [],
@@ -37,6 +39,8 @@ import { NotificationService } from "@project-shared/services/notification.servi
     NgxRequestModule.forRoot({
       defaultApiUrl: environment.baseUrl,
       notificationService: NotificationService,
+      confirmationService: FlwConfirmationService,
+      loadingService: FlwLoadingService,
       defaultWsUrl: environment.wsBaseUrl,
       defaultPublicWs: "public",
       userSocketUrl: "user-socket/me",
