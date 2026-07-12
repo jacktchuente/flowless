@@ -21,6 +21,7 @@ import { categoryLegend, natureToCategory } from "../../../ui/category";
 import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
 import { CatalogDialogComponent } from "../catalog-dialog/catalog-dialog.component";
 import { TvChannelDialogComponent } from "../tv-channel-dialog/tv-channel-dialog.component";
+import { GenerationDialogComponent } from "../channel-dialogs/generation-dialog.component";
 @Component({
   selector: "app-channel-management",
   standalone: true,
@@ -182,30 +183,14 @@ export class ChannelManagementComponent {
       });
   }
   generateBlueprint(c: TvChannel) {
-    this.channelsService
-      .generateBlueprint(c.id, {
-        grid_generation_mode: "preset_and_llm",
-        grid_only: false,
-        reboot: false,
-      })
-      .subscribe((r) =>
-        this.notification.notify(
-          r.isOk
-            ? "CHANNELS.NOTIFY_CHANNEL_BLUEPRINT_STARTED"
-            : "CHANNELS.NOTIFY_GENERATION_FAILED",
-        ),
-      );
+    this.dialogs.open(GenerationDialogComponent, {
+      data: { channelId: c.id, channelName: c.name, kind: "blueprint" },
+    });
   }
   generatePlayout(c: TvChannel) {
-    this.channelsService
-      .generatePlayout(c.id, { days: 7, reset: false })
-      .subscribe((r) =>
-        this.notification.notify(
-          r.isOk
-            ? "CHANNELS.NOTIFY_PLAYOUT_STARTED"
-            : "CHANNELS.NOTIFY_GENERATION_FAILED",
-        ),
-      );
+    this.dialogs.open(GenerationDialogComponent, {
+      data: { channelId: c.id, channelName: c.name, kind: "playout" },
+    });
   }
   push(c: TvChannel) {
     this.channelsService

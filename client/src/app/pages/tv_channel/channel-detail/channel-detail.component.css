@@ -71,6 +71,12 @@
   gap: 16px;
   padding: 14px 22px;
   border-bottom: 1px solid var(--slate-100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 .gap {
   display: flex;

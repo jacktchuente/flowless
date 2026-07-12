@@ -5,15 +5,9 @@
       <img *ngIf="c.logo" [src]="c.logo" [alt]="c.name" /><span
         *ngIf="!c.logo"
         >{{ c.name.charAt(0) }}</span
-      ><button class="btn icon-only" (click)="file.click()">
-        <flw-icon name="edit" /></button
-      ><input
-        #file
-        hidden
-        type="file"
-        accept="image/*"
-        (change)="upload($event)"
-      />
+      ><button class="btn icon-only" (click)="openLogoDialog()">
+        <flw-icon name="edit" />
+      </button>
     </div>
     <div class="identity">
       <div>
@@ -35,6 +29,11 @@
     </div>
     <div class="hero-actions">
       <button class="btn" (click)="edit()">Modifier</button
+      ><button class="btn" (click)="openReports()">
+        Rapports
+        <span class="pill critical" *ngIf="reportIssueCount">{{
+          reportIssueCount
+        }}</span></button
       ><button
         class="btn"
         [disabled]="isFlexible"
@@ -73,7 +72,16 @@
       </div>
     </section>
     <section class="card">
-      <div class="card-head"><h2>Ligne éditoriale</h2></div>
+      <div class="card-head">
+        <h2>Ligne éditoriale</h2>
+        <div>
+          <button class="btn ghost sm" (click)="openResetRules()">
+            Réinitialiser</button
+          ><button class="btn sm" (click)="openEditorialLine()">
+            Modifier
+          </button>
+        </div>
+      </div>
       <div class="card-body kv" *ngIf="c.editorial_line_data as line">
         <div class="row">
           <span class="k">Fenêtre horaire</span
@@ -112,10 +120,22 @@
         <h2>Grille éditoriale</h2>
         <p class="desc">Blocs de programmation de la version active.</p>
       </div>
-      <button class="btn" (click)="newVersion()">Nouvelle version</button>
+      <div>
+        <button class="btn ghost" (click)="openGridSettings()">
+          Paramètres de la grille</button
+        ><button class="btn" (click)="newVersion()">Nouvelle version</button
+        ><button class="btn primary" (click)="openBlock(null)">
+          Ajouter un bloc
+        </button>
+      </div>
     </div>
     <div class="blocks">
-      <div class="block-row" *ngFor="let block of c.grid_data?.blocks">
+      <button
+        type="button"
+        class="block-row"
+        *ngFor="let block of c.grid_data?.blocks"
+        (click)="openBlock(block)"
+      >
         <strong class="mono"
           >{{ block.starts_at.slice(0, 5) }} –
           {{ block.ends_at.slice(0, 5) }}</strong
@@ -131,7 +151,7 @@
           }}
           titres</span
         >
-      </div>
+      </button>
       <div class="gap" *ngFor="let warning of gridWarnings">
         <flw-icon name="warning" />{{ warning }}
       </div>
@@ -157,7 +177,11 @@
       </div>
       <div>
         <span class="section-label">Planning</span
-        ><flw-timeline [blocks]="scheduleBlocks()" [pxPerHour]="52" />
+        ><flw-timeline
+          [blocks]="scheduleBlocks()"
+          [pxPerHour]="52"
+          (blockClick)="openScheduleBlock($event)"
+        />
       </div>
     </div>
   </section>
