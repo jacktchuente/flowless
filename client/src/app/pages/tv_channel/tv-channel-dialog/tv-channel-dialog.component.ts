@@ -1,4 +1,5 @@
 import { Component, Inject } from "@angular/core";
+import { NgIf } from "@angular/common";
 import {
   FormControl,
   FormGroup,
@@ -8,7 +9,12 @@ import {
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { Catalog } from "@project-interfaces/catalog";
 import { TvChannel } from "@project-interfaces/tv-channel";
-import { TvChannelService } from "@project-services/tv-channel.service";
+import {
+  TvChannelNameSuggestionResponse,
+  TvChannelService,
+} from "@project-services/tv-channel.service";
+import { NotificationService } from "@project-shared/services/notification.service";
+import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
@@ -16,7 +22,9 @@ import { TranslateModule } from "@ngx-translate/core";
 @Component({
   standalone: true,
   imports: [
+    NgIf,
     ReactiveFormsModule,
+    FlwIconComponent,
     FlwModalComponent,
     FlwSelectComponent,
     FlwSwitchComponent,
@@ -29,8 +37,21 @@ import { TranslateModule } from "@ngx-translate/core";
     "
     ><form [formGroup]="form">
       <div class="field">
-        <label>{{ "COMMON.NAME" | translate }}</label
-        ><input formControlName="name" type="text" />
+        <label>{{ "COMMON.NAME" | translate }}</label>
+        <div class="name-row">
+          <input formControlName="name" type="text" />
+          <button
+            class="btn sm ghost"
+            type="button"
+            *ngIf="data.channel"
+            [disabled]="isSuggestingName"
+            (click)="suggestName()"
+          >
+            <flw-icon name="generate" />{{
+              "TV_CHANNEL_DIALOG.SUGGEST_NAME" | translate
+            }}
+          </button>
+        </div>
       </div>
       <div class="field">
         <label>{{ "COMMON.DESCRIPTION" | translate }}</label
@@ -62,10 +83,19 @@ import { TranslateModule } from "@ngx-translate/core";
         display: grid;
         gap: 14px;
       }
+      .name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .name-row input {
+        flex: 1;
+      }
     `,
   ],
 })
 export class TvChannelDialogComponent {
+  isSuggestingName = false;
   catalogOptions = this.data.catalogs.map((c) => ({
     label: c.name,
     value: c.id,
@@ -86,6 +116,7 @@ export class TvChannelDialogComponent {
   });
   constructor(
     private service: TvChannelService,
+    private notification: NotificationService,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)
     public data: {
@@ -94,6 +125,23 @@ export class TvChannelDialogComponent {
       catalogs: Catalog[];
     },
   ) {}
+  suggestName() {
+    if (!this.data.channel || this.isSuggestingName) return;
+    this.isSuggestingName = true;
+    this.service.suggestName(this.data.channel.id).subscribe((response) => {
+      this.isSuggestingName = false;
+      const body = response.body as TvChannelNameSuggestionResponse | null;
+      const name = body?.name?.trim();
+      if (!response.isOk || !name) {
+        this.notification.notify(
+          "TV_CHANNEL_DIALOG.NOTIFY_SUGGEST_NAME_FAILED",
+        );
+        return;
+      }
+      this.form.controls.name.setValue(name);
+      this.form.controls.name.markAsDirty();
+    });
+  }
   save() {
     if (this.form.invalid) return;
     const req = this.data.channel
