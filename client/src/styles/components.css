@@ -462,6 +462,19 @@ table.grid .cell-sub {
   border-top: 1px solid var(--slate-100);
   background: var(--slate-050);
 }
+/* Le contenu projeté est un wrapper unique : il porte lui-même la répartition gauche/droite. */
+.modal-foot > [modal-footer] {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.modal-foot > [modal-footer] > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .section-label {
   font-size: 11px;
   letter-spacing: 0.1em;

@@ -54,9 +54,9 @@
   border-radius: var(--radius-m);
 }
 .seg-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 .seg-card,
 .candidate {
