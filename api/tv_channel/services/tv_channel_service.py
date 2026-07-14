@@ -150,10 +150,8 @@ class TvChannelService:
         return grid_layout
 
     def _attach_default_post_filler_policies(self, blocks: list[GridBlock]) -> None:
+        filler_policy = FillerPolicy.objects.get_or_create_for_params()
         for block in blocks:
-            filler_policy = FillerPolicy.objects.create(
-                name=f"{self.tv_channel.name} - block#{block.id}",
-            )
             block.post_filler_policy = filler_policy
 
         GridBlock.objects.bulk_update(blocks, ["post_filler_policy"])

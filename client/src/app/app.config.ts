@@ -11,14 +11,17 @@ import { provideAnimationsAsync } from "@angular/platform-browser/animations/asy
 import { provideRouter, withComponentInputBinding } from "@angular/router";
 import { routes } from "./app.routes";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { readStoredLanguage } from "@project-services/app-settings.service";
 
 registerLocaleData(localeFr);
 
-const browserLocale = navigator.languages?.some((v) =>
-  v.toLowerCase().startsWith("fr"),
-)
-  ? "fr"
-  : "en-US";
+const storedLanguage = readStoredLanguage();
+const language =
+  storedLanguage ??
+  (navigator.languages?.some((v) => v.toLowerCase().startsWith("fr"))
+    ? "fr"
+    : "en");
+const browserLocale = language === "fr" ? "fr" : "en-US";
 
 export const appConfig: ApplicationConfig = {
   providers: [

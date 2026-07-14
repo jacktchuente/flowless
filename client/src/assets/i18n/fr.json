@@ -10,7 +10,28 @@
     "EDITORIAL_PLANNING": "Planification flexible",
     "ALL_CHANNELS_ON_AIR": "Toutes les chaînes actives émettent",
     "LANGUAGE": "Langue",
+    "SETTINGS": "Paramètres",
     "ADMIN": "Admin"
+  },
+  "SETTINGS": {
+    "EYEBROW": "Configuration",
+    "TITLE": "Paramètres",
+    "SUBTITLE": "Configurez le client et le comportement du serveur.",
+    "TABS": {
+      "GENERAL": "Général",
+      "BACKEND": "Backend"
+    },
+    "LANGUAGE": {
+      "TITLE": "Langue de l'interface",
+      "DESC": "Appliquée immédiatement et mémorisée sur ce navigateur.",
+      "EN": "English",
+      "FR": "Français"
+    },
+    "BACKEND": {
+      "TITLE": "Configuration du serveur",
+      "DESC": "Paramètres côté serveur.",
+      "PLACEHOLDER": "Aucun paramètre serveur n'est disponible pour le moment."
+    }
   },
   "OVERVIEW": {
     "EYEBROW": "Régie",

@@ -10,7 +10,28 @@
     "EDITORIAL_PLANNING": "Flexible planning",
     "ALL_CHANNELS_ON_AIR": "All active channels are on air",
     "LANGUAGE": "Language",
+    "SETTINGS": "Settings",
     "ADMIN": "Admin"
+  },
+  "SETTINGS": {
+    "EYEBROW": "Configuration",
+    "TITLE": "Settings",
+    "SUBTITLE": "Configure the client and backend behavior.",
+    "TABS": {
+      "GENERAL": "General",
+      "BACKEND": "Backend"
+    },
+    "LANGUAGE": {
+      "TITLE": "Interface language",
+      "DESC": "Applied immediately and remembered on this browser.",
+      "EN": "English",
+      "FR": "Français"
+    },
+    "BACKEND": {
+      "TITLE": "Backend configuration",
+      "DESC": "Server-side settings.",
+      "PLACEHOLDER": "No backend setting is available yet."
+    }
   },
   "OVERVIEW": {
     "EYEBROW": "Control room",

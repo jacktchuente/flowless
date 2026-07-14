@@ -108,6 +108,32 @@ class GridBlock(models.Model):
     post_filler_policy = models.ForeignKey("FillerPolicy", on_delete=models.SET_NULL, blank=True, null=True)
 
 
+class FillerPolicyManager(models.Manager):
+    def get_or_create_for_params(self, duration_seconds: int = 180, allowed_roles: list | None = None) -> "FillerPolicy":
+        """
+        Return an existing policy with these behavioral params, or create one.
+
+        There is no unique constraint on (duration_seconds, allowed_roles):
+        databases predating the reuse may hold duplicates, so the oldest match
+        wins. Duplicates from concurrent creations are harmless since every
+        consumer only reads duration_seconds/allowed_roles.
+        """
+        allowed_roles = sorted(allowed_roles or [])
+        policy = (
+            self.filter(duration_seconds=duration_seconds, allowed_roles=allowed_roles)
+            .order_by("id")
+            .first()
+        )
+        if policy is not None:
+            return policy
+        roles_label = ", ".join(allowed_roles) if allowed_roles else "default roles"
+        return self.create(
+            name=f"Post-roll {duration_seconds}s ({roles_label})"[:80],
+            duration_seconds=duration_seconds,
+            allowed_roles=allowed_roles,
+        )
+
+
 class FillerPolicy(models.Model):
     """
     The slot for fillers: a post-roll window of duration_seconds filled with
@@ -117,6 +143,8 @@ class FillerPolicy(models.Model):
     name = models.CharField(max_length=80)
     duration_seconds = models.PositiveIntegerField(default=180)
     allowed_roles = models.JSONField(default=list, blank=True)
+
+    objects = FillerPolicyManager()
 
     def __str__(self):
         return self.name

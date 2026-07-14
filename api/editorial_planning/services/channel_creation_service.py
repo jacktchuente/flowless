@@ -42,7 +42,7 @@ class EditorialFlexibleChannelCreationService:
             )
             if activate_grid:
                 GridLayout.objects.filter(tv_channel=tv_channel, is_active=True).update(is_active=False)
-            filler_policy = FillerPolicy.objects.create(name=f"{tv_channel.name} - flexible")
+            filler_policy = FillerPolicy.objects.get_or_create_for_params()
             grid_layout = GridLayout.objects.create(
                 tv_channel=tv_channel,
                 is_active=activate_grid,

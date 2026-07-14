@@ -32,6 +32,7 @@ export class BaseComponent {
       route: "editorial-planning",
       icon: "planning",
     },
+    { label: "NAV.SETTINGS", route: "settings", icon: "settings" },
   ];
   readonly adminUrl = "/admin/";
   readonly appName = environment.appName;
