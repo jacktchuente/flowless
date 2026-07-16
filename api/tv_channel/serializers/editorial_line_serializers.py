@@ -8,15 +8,9 @@ class EditorialLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = EditorialLine
         fields = (
-            "allowed_categories",
-            "forbidden_categories",
-            "preferred_categories",
-            "allowed_natures",
-            "forbidden_natures",
-            "preferred_natures",
-            "allowed_container_kinds",
-            "forbidden_container_kinds",
-            "preferred_container_kinds",
+            "allowed",
+            "preferred",
+            "forbidden",
             "start_at",
             "end_at",
             "allow_filler",

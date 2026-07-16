@@ -21,15 +21,10 @@ class TvChannelGridPresetSelectionError(ValueError):
 
 
 class PresetBlockOverrides(TypedDict):
-    allowed_categories: list[str]
-    forbidden_categories: list[str]
-    preferred_categories: list[str]
-    allowed_natures: list[int]
-    forbidden_natures: list[int]
-    preferred_natures: list[int]
-    allowed_container_kinds: list[int]
-    forbidden_container_kinds: list[int]
-    preferred_container_kinds: list[int]
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed: dict[str, list]
+    preferred: dict[str, list]
+    forbidden: dict[str, list]
 
 
 class TvChannelGridGeneratorWithPresetAndLlm:
@@ -248,15 +243,18 @@ class TvChannelGridGeneratorWithPresetAndLlm:
                 continue
 
             overrides_by_index[block_index] = {
-                "allowed_categories": self._sanitize_string_list(values_by_field["allowed_categories"], available_categories),
-                "forbidden_categories": self._sanitize_string_list(values_by_field["forbidden_categories"], available_categories),
-                "preferred_categories": self._sanitize_string_list(values_by_field["preferred_categories"], available_categories),
-                "allowed_natures": self._sanitize_mapped_list(values_by_field["allowed_natures"], nature_by_label),
-                "forbidden_natures": self._sanitize_mapped_list(values_by_field["forbidden_natures"], nature_by_label),
-                "preferred_natures": self._sanitize_mapped_list(values_by_field["preferred_natures"], nature_by_label),
-                "allowed_container_kinds": self._sanitize_mapped_list(values_by_field["allowed_container_kinds"], container_kind_by_label),
-                "forbidden_container_kinds": self._sanitize_mapped_list(values_by_field["forbidden_container_kinds"], container_kind_by_label),
-                "preferred_container_kinds": self._sanitize_mapped_list(values_by_field["preferred_container_kinds"], container_kind_by_label),
+                level: {
+                    "categories": self._sanitize_string_list(
+                        values_by_field[f"{level}_categories"], available_categories
+                    ),
+                    "natures": self._sanitize_mapped_list(
+                        values_by_field[f"{level}_natures"], nature_by_label
+                    ),
+                    "container_kinds": self._sanitize_mapped_list(
+                        values_by_field[f"{level}_container_kinds"], container_kind_by_label
+                    ),
+                }
+                for level in ("allowed", "preferred", "forbidden")
             }
 
         for block_index in range(1, block_count + 1):
@@ -284,15 +282,9 @@ class TvChannelGridGeneratorWithPresetAndLlm:
                     max_items=min(preset_block.max_items, 3),
                     min_duration_seconds_per_item=preset_block.min_duration_seconds_per_item,
                     max_duration_seconds_per_item=preset_block.max_duration_seconds_per_item,
-                    allowed_categories=override["allowed_categories"],
-                    forbidden_categories=override["forbidden_categories"],
-                    preferred_categories=override["preferred_categories"],
-                    allowed_natures=override["allowed_natures"],
-                    forbidden_natures=override["forbidden_natures"],
-                    preferred_natures=override["preferred_natures"],
-                    allowed_container_kinds=override["allowed_container_kinds"],
-                    forbidden_container_kinds=override["forbidden_container_kinds"],
-                    preferred_container_kinds=override["preferred_container_kinds"],
+                    allowed=override["allowed"],
+                    preferred=override["preferred"],
+                    forbidden=override["forbidden"],
                 )
             )
         return result

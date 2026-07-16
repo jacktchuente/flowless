@@ -47,15 +47,9 @@ class TvChannelService:
             "start_at": editorial_line.start_at,
             "end_at": editorial_line.end_at,
             "allow_filler": editorial_line.allow_filler,
-            "allowed_categories": editorial_line.allowed_categories,
-            "forbidden_categories": editorial_line.forbidden_categories,
-            "preferred_categories": editorial_line.preferred_categories,
-            "allowed_natures": editorial_line.allowed_natures,
-            "forbidden_natures": editorial_line.forbidden_natures,
-            "preferred_natures": editorial_line.preferred_natures,
-            "allowed_container_kinds": editorial_line.allowed_container_kinds,
-            "forbidden_container_kinds": editorial_line.forbidden_container_kinds,
-            "preferred_container_kinds": editorial_line.preferred_container_kinds,
+            "allowed": editorial_line.allowed,
+            "preferred": editorial_line.preferred,
+            "forbidden": editorial_line.forbidden,
         }
         if grid_generation_mode == self.GRID_GENERATION_MODE_FULL_LLM:
             grid_service = TvChannelGridGeneratorWithLlm(tv_channel_data=TvChannelGridGeneratorWithLlmPayload(**grid_payload))
@@ -128,15 +122,9 @@ class TvChannelService:
                         max_items=block.max_items,
                         min_duration_seconds_per_item=block.min_duration_seconds_per_item,
                         max_duration_seconds_per_item=block.max_duration_seconds_per_item,
-                        allowed_categories=block.allowed_categories,
-                        forbidden_categories=block.forbidden_categories,
-                        preferred_categories=block.preferred_categories,
-                        allowed_natures=block.allowed_natures,
-                        forbidden_natures=block.forbidden_natures,
-                        preferred_natures=block.preferred_natures,
-                        allowed_container_kinds=block.allowed_container_kinds,
-                        forbidden_container_kinds=block.forbidden_container_kinds,
-                        preferred_container_kinds=block.preferred_container_kinds,
+                        allowed=block.allowed,
+                        preferred=block.preferred,
+                        forbidden=block.forbidden,
                     )
                     for block in blocks
                 ]

@@ -35,8 +35,8 @@ class LogoPromptService:
         if editorial_line is None:
             return ""
         parts = []
-        preferred = [value for value in (editorial_line.preferred_categories or []) if isinstance(value, str)]
-        allowed = [value for value in (editorial_line.allowed_categories or []) if isinstance(value, str)]
+        preferred = [value for value in editorial_line.preferred.get("categories", []) if isinstance(value, str)]
+        allowed = [value for value in editorial_line.allowed.get("categories", []) if isinstance(value, str)]
         categories = preferred or allowed
         if categories:
             parts.append(f"Main themes: {', '.join(categories[:8])}.")

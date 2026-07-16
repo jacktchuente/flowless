@@ -61,8 +61,7 @@ class FormSuggestionService:
         blocks = []
         if active_grid is not None:
             blocks = list(active_grid.gridblock_set.order_by("starts_at").values(
-                "id", "starts_at", "ends_at", "allowed_categories", "forbidden_categories",
-                "allowed_natures", "forbidden_natures", "allowed_container_kinds", "forbidden_container_kinds",
+                "id", "starts_at", "ends_at", "allowed", "forbidden",
             ))
         context = {
             "channel": {"name": self.tv_channel.name, "description": self.tv_channel.description or "", "specification": self.tv_channel.specification or ""},

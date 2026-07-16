@@ -34,10 +34,14 @@ class EditorialFlexibleChannelCreationService:
             )
             EditorialLine.objects.create(
                 tv_channel=tv_channel,
-                allowed_categories=self._dominant_categories(),
-                preferred_categories=self._dominant_categories(),
-                allowed_natures=self._dominant_natures(),
-                preferred_natures=self._dominant_natures(),
+                allowed={
+                    "categories": self._dominant_categories(),
+                    "natures": self._dominant_natures(),
+                },
+                preferred={
+                    "categories": self._dominant_categories(),
+                    "natures": self._dominant_natures(),
+                },
                 allow_filler=True,
             )
             if activate_grid:

@@ -74,8 +74,8 @@ def compute_grid_warnings(grid_layout) -> list[str]:
     for block in blocks:
         for axis, vocabulary in complete_values.items():
             if (
-                not getattr(block, f"allowed_{axis}")
-                and set(getattr(block, f"forbidden_{axis}")) >= vocabulary
+                not block.allowed.get(axis)
+                and set(block.forbidden.get(axis, [])) >= vocabulary
             ):
                 warnings.append(
                     f"Block {block.id} forbids every {axis.replace('_', ' ')} value."

@@ -22,17 +22,10 @@ class GridBlockPreset(models.Model):
     min_duration_seconds_per_item = models.PositiveIntegerField(null=True, blank=True)
     max_duration_seconds_per_item = models.PositiveIntegerField(null=True, blank=True)
 
-    allowed_categories = models.JSONField(default=list)
-    forbidden_categories = models.JSONField(default=list)
-    preferred_categories = models.JSONField(default=list)
-
-    allowed_natures = models.JSONField(default=list)
-    forbidden_natures = models.JSONField(default=list)
-    preferred_natures = models.JSONField(default=list)
-
-    allowed_container_kinds = models.JSONField(default=list)
-    forbidden_container_kinds = models.JSONField(default=list)
-    preferred_container_kinds = models.JSONField(default=list)
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed = models.JSONField(default=dict, blank=True)
+    preferred = models.JSONField(default=dict, blank=True)
+    forbidden = models.JSONField(default=dict, blank=True)
 
     post_filler_policy = models.ForeignKey("FillerPolicyPreset", on_delete=models.SET_NULL, blank=True, null=True)
 

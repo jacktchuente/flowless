@@ -13,7 +13,6 @@ from rule_engine.services import category_service
 
 RULE_AXES = ("categories", "natures", "container_kinds")
 RULE_LEVELS = ("allowed", "forbidden", "preferred")
-RULE_FIELDS = tuple(f"{level}_{axis}" for axis in RULE_AXES for level in RULE_LEVELS)
 
 
 def _deduplicate(values):
@@ -65,30 +64,68 @@ def ensure_no_overlap(a: list, b: list, field_a: str, field_b: str) -> None:
         raise ValidationError({field_a: f"Must not overlap with {field_b}: {sorted(overlap)}."})
 
 
-def validate_editorial_rules_payload(data: dict) -> dict:
+AXIS_VALIDATORS = {
+    "categories": validate_categories,
+    "natures": validate_natures,
+    "container_kinds": validate_container_kinds,
+}
+
+
+def validate_rule_level(value, level_name: str, *, lenient: bool = False) -> dict:
+    if value is None:
+        value = {}
+    if not isinstance(value, dict):
+        raise ValidationError({level_name: "Must be a dict keyed by rule axis."})
+    unknown_axes = [axis for axis in value if axis not in RULE_AXES]
+    if unknown_axes and not lenient:
+        raise ValidationError({level_name: f"Unknown rule axes: {sorted(unknown_axes)}."})
+
+    normalized = {}
+    errors = []
+    for axis in RULE_AXES:
+        axis_values = value.get(axis, [])
+        try:
+            normalized[axis] = AXIS_VALIDATORS[axis](axis_values)
+        except ValidationError as exc:
+            if lenient and isinstance(axis_values, list):
+                normalized[axis] = _lenient_filter(axis_values, axis)
+            else:
+                errors.extend(f"{axis}: {message}" for message in exc.messages)
+    if errors:
+        raise ValidationError({level_name: errors})
+    return normalized
+
+
+def _lenient_filter(values: list, axis: str) -> list:
+    kept = []
+    for value in values:
+        try:
+            kept.extend(AXIS_VALIDATORS[axis]([value]))
+        except ValidationError:
+            continue
+    return _deduplicate(kept)
+
+
+def validate_editorial_rules_payload(data: dict, *, lenient: bool = False) -> dict:
     normalized = dict(data)
     errors = {}
-    validators = {
-        "categories": validate_categories,
-        "natures": validate_natures,
-        "container_kinds": validate_container_kinds,
-    }
-    for axis, validator in validators.items():
-        for level in RULE_LEVELS:
-            field = f"{level}_{axis}"
-            if field not in normalized:
-                continue
-            try:
-                normalized[field] = validator(normalized[field])
-            except ValidationError as exc:
-                errors[field] = exc.messages
+    for level in RULE_LEVELS:
+        if level not in normalized:
+            continue
+        try:
+            normalized[level] = validate_rule_level(normalized[level], level, lenient=lenient)
+        except ValidationError as exc:
+            errors.update(exc.message_dict)
     if errors:
         raise ValidationError(errors)
 
+    forbidden = normalized.get("forbidden", {})
     for axis in RULE_AXES:
-        forbidden_field = f"forbidden_{axis}"
-        forbidden = normalized.get(forbidden_field, [])
         for level in ("allowed", "preferred"):
-            field = f"{level}_{axis}"
-            ensure_no_overlap(normalized.get(field, []), forbidden, field, forbidden_field)
+            ensure_no_overlap(
+                normalized.get(level, {}).get(axis, []),
+                forbidden.get(axis, []),
+                level,
+                f"forbidden {axis}",
+            )
     return normalized

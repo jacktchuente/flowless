@@ -20,15 +20,10 @@ class TvChannelGridGeneratorWithLlmPayload(TypedDict):
     specification: str
     start_at: time
     end_at: time
-    preferred_categories: list[str]
-    forbidden_categories: list[str]
-    allowed_categories: list[str]
-    preferred_natures: list[int]
-    forbidden_natures: list[int]
-    allowed_natures: list[int]
-    preferred_container_kinds: list[int]
-    forbidden_container_kinds: list[int]
-    allowed_container_kinds: list[int]
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed: dict[str, list]
+    preferred: dict[str, list]
+    forbidden: dict[str, list]
     allow_filler: bool
 
 
@@ -85,33 +80,9 @@ class TvChannelGridGeneratorWithLlm:
                 "start_at": self.tv_channel_data["start_at"].strftime("%H:%M"),
                 "end_at": self.tv_channel_data["end_at"].strftime("%H:%M"),
                 "allow_filler": self.tv_channel_data["allow_filler"],
-                "allowed_categories": self.tv_channel_data.get("allowed_categories", []),
-                "forbidden_categories": self.tv_channel_data.get("forbidden_categories", []),
-                "preferred_categories": self.tv_channel_data.get("preferred_categories", []),
-                "allowed_natures": self._labels_from_values(
-                    self.tv_channel_data.get("allowed_natures", []),
-                    MediaNature,
-                ),
-                "forbidden_natures": self._labels_from_values(
-                    self.tv_channel_data.get("forbidden_natures", []),
-                    MediaNature,
-                ),
-                "preferred_natures": self._labels_from_values(
-                    self.tv_channel_data.get("preferred_natures", []),
-                    MediaNature,
-                ),
-                "allowed_container_kinds": self._labels_from_values(
-                    self.tv_channel_data.get("allowed_container_kinds", []),
-                    MediaContainerKind,
-                ),
-                "forbidden_container_kinds": self._labels_from_values(
-                    self.tv_channel_data.get("forbidden_container_kinds", []),
-                    MediaContainerKind,
-                ),
-                "preferred_container_kinds": self._labels_from_values(
-                    self.tv_channel_data.get("preferred_container_kinds", []),
-                    MediaContainerKind,
-                ),
+                "allowed": self._labels_for(self.tv_channel_data.get("allowed", {})),
+                "forbidden": self._labels_for(self.tv_channel_data.get("forbidden", {})),
+                "preferred": self._labels_for(self.tv_channel_data.get("preferred", {})),
                 "available_categories": category_service.get_all_category_names(),
                 "available_natures": [choice.label for choice in MediaNature],
                 "available_container_kinds": [choice.label for choice in MediaContainerKind],
@@ -191,60 +162,32 @@ class TvChannelGridGeneratorWithLlm:
                     max_items=max_items,
                 )
 
-                allowed_categories = self._validate_string_choices(
-                    raw_block.get("allowed_categories", []),
-                    category_set,
-                    "allowed_categories",
-                )
-                forbidden_categories = self._validate_string_choices(
-                    raw_block.get("forbidden_categories", []),
-                    category_set,
-                    "forbidden_categories",
-                )
-                preferred_categories = self._validate_string_choices(
-                    raw_block.get("preferred_categories", []),
-                    category_set,
-                    "preferred_categories",
-                )
+                rules: dict[str, dict[str, list]] = {}
+                for level in ("allowed", "preferred", "forbidden"):
+                    raw_level = raw_block.get(level, {})
+                    if not isinstance(raw_level, dict):
+                        raise TvChannelGridGenerationError(f"{level} must be a dict keyed by rule axis.")
+                    rules[level] = {
+                        "categories": self._validate_string_choices(
+                            raw_level.get("categories", []),
+                            category_set,
+                            f"{level} categories",
+                        ),
+                        "natures": self._validate_mapped_choices(
+                            raw_level.get("natures", []),
+                            nature_by_label,
+                            f"{level} natures",
+                        ),
+                        "container_kinds": self._validate_mapped_choices(
+                            raw_level.get("container_kinds", []),
+                            container_kind_by_label,
+                            f"{level} container_kinds",
+                        ),
+                    }
 
-                allowed_natures = self._validate_mapped_choices(
-                    raw_block.get("allowed_natures", []),
-                    nature_by_label,
-                    "allowed_natures",
-                )
-                forbidden_natures = self._validate_mapped_choices(
-                    raw_block.get("forbidden_natures", []),
-                    nature_by_label,
-                    "forbidden_natures",
-                )
-                preferred_natures = self._validate_mapped_choices(
-                    raw_block.get("preferred_natures", []),
-                    nature_by_label,
-                    "preferred_natures",
-                )
-
-                allowed_container_kinds = self._validate_mapped_choices(
-                    raw_block.get("allowed_container_kinds", []),
-                    container_kind_by_label,
-                    "allowed_container_kinds",
-                )
-                forbidden_container_kinds = self._validate_mapped_choices(
-                    raw_block.get("forbidden_container_kinds", []),
-                    container_kind_by_label,
-                    "forbidden_container_kinds",
-                )
-                preferred_container_kinds = self._validate_mapped_choices(
-                    raw_block.get("preferred_container_kinds", []),
-                    container_kind_by_label,
-                    "preferred_container_kinds",
-                )
-
-                self._ensure_no_overlap(allowed_categories, forbidden_categories, "categories")
-                self._ensure_no_overlap(preferred_categories, forbidden_categories, "categories")
-                self._ensure_no_overlap(allowed_natures, forbidden_natures, "natures")
-                self._ensure_no_overlap(preferred_natures, forbidden_natures, "natures")
-                self._ensure_no_overlap(allowed_container_kinds, forbidden_container_kinds, "container_kinds")
-                self._ensure_no_overlap(preferred_container_kinds, forbidden_container_kinds, "container_kinds")
+                for axis in ("categories", "natures", "container_kinds"):
+                    self._ensure_no_overlap(rules["allowed"][axis], rules["forbidden"][axis], axis)
+                    self._ensure_no_overlap(rules["preferred"][axis], rules["forbidden"][axis], axis)
 
                 blocks.append(
                     PreparedGridBlock(
@@ -255,15 +198,9 @@ class TvChannelGridGeneratorWithLlm:
                         max_items=max_items,
                         min_duration_seconds_per_item=min_duration,
                         max_duration_seconds_per_item=max_duration,
-                        allowed_categories=allowed_categories,
-                        forbidden_categories=forbidden_categories,
-                        preferred_categories=preferred_categories,
-                        allowed_natures=allowed_natures,
-                        forbidden_natures=forbidden_natures,
-                        preferred_natures=preferred_natures,
-                        allowed_container_kinds=allowed_container_kinds,
-                        forbidden_container_kinds=forbidden_container_kinds,
-                        preferred_container_kinds=preferred_container_kinds,
+                        allowed=rules["allowed"],
+                        preferred=rules["preferred"],
+                        forbidden=rules["forbidden"],
                     )
                 )
             except TvChannelGridGenerationError as exc:
@@ -351,6 +288,18 @@ class TvChannelGridGeneratorWithLlm:
             end += timedelta(days=1)
 
         return block, start, end
+
+    def _labels_for(self, level_rules: dict[str, list]) -> dict[str, list[str]]:
+        level_rules = level_rules or {}
+        return {
+            "categories": [
+                value for value in level_rules.get("categories", []) if isinstance(value, str)
+            ],
+            "natures": self._labels_from_values(level_rules.get("natures", []), MediaNature),
+            "container_kinds": self._labels_from_values(
+                level_rules.get("container_kinds", []), MediaContainerKind
+            ),
+        }
 
     @staticmethod
     def _labels_from_values(values: list[int], enum_cls) -> list[str]:

@@ -141,7 +141,7 @@ class LogoPromptEnrichmentTests(TestCase):
         )
         EditorialLine.objects.create(
             tv_channel=self.tv_channel,
-            preferred_categories=["science-fiction", "aventure"],
+            preferred={"categories": ["science-fiction", "aventure"]},
         )
 
     def test_prompt_contains_specification_and_editorial_summary(self):

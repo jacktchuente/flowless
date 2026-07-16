@@ -13,7 +13,8 @@ User context: {{ user_context }}
 Previous validation errors: {{ retry_errors | tojson }}
 
 Return every editable field except grid_layout: starts_at, ends_at, priority, min_items,
-max_items, min_duration_seconds_per_item, max_duration_seconds_per_item, all nine
-allowed/forbidden/preferred category/nature/container-kind fields, post_filler_policy.
+max_items, min_duration_seconds_per_item, max_duration_seconds_per_item, allowed,
+preferred, forbidden, post_filler_policy. `allowed`, `preferred`, and `forbidden` are
+dicts keyed by categories, natures, container_kinds.
 Use labels for natures/kinds, HH:MM times, and a filler policy id or null.
 Return only <suggestion_output> followed by one JSON object and </suggestion_output>.

@@ -19,15 +19,9 @@ Channel window:
 - allow_filler: {{ allow_filler|tojson }}
 
 Channel editorial rules:
-- allowed_categories: {{ allowed_categories|tojson }}
-- forbidden_categories: {{ forbidden_categories|tojson }}
-- preferred_categories: {{ preferred_categories|tojson }}
-- allowed_natures: {{ allowed_natures|tojson }}
-- forbidden_natures: {{ forbidden_natures|tojson }}
-- preferred_natures: {{ preferred_natures|tojson }}
-- allowed_container_kinds: {{ allowed_container_kinds|tojson }}
-- forbidden_container_kinds: {{ forbidden_container_kinds|tojson }}
-- preferred_container_kinds: {{ preferred_container_kinds|tojson }}
+- allowed: {{ allowed|tojson }}
+- preferred: {{ preferred|tojson }}
+- forbidden: {{ forbidden|tojson }}
 
 Allowed value universes:
 - categories: {{ available_categories|tojson }}
@@ -59,11 +53,12 @@ Hard constraints:
 - `min_duration_seconds_per_item` and `max_duration_seconds_per_item` must describe a meaningful range, not an exact fixed duration.
 - Do not return `min_duration_seconds_per_item` equal to `max_duration_seconds_per_item`.
 - Prefer plausible duration bands such as 20-35 min, 40-65 min, 75-120 min, etc., depending on the editorial intent.
-- `allowed_*` means required.
-- `forbidden_*` means excluded.
-- `preferred_*` means preferred but not mandatory.
-- `allowed_*` and `forbidden_*` must not overlap.
-- `preferred_*` and `forbidden_*` must not overlap.
+- `allowed`, `preferred`, and `forbidden` are dicts keyed by `categories`, `natures`, and `container_kinds`.
+- `allowed` means required.
+- `forbidden` means excluded.
+- `preferred` means preferred but not mandatory.
+- For each axis, `allowed` and `forbidden` must not overlap.
+- For each axis, `preferred` and `forbidden` must not overlap.
 - `priority` must be between 0 and 100.
 - `min_items` must be at least 1.
 - `max_items` must be greater than or equal to `min_items`.
@@ -84,15 +79,9 @@ Return strictly this XML-wrapped JSON format and nothing else:
       "max_items": 2,
       "min_duration_seconds_per_item": 1800,
       "max_duration_seconds_per_item": 3600,
-      "allowed_categories": [],
-      "forbidden_categories": [],
-      "preferred_categories": [],
-      "allowed_natures": [],
-      "forbidden_natures": [],
-      "preferred_natures": [],
-      "allowed_container_kinds": [],
-      "forbidden_container_kinds": [],
-      "preferred_container_kinds": []
+      "allowed": {"categories": [], "natures": [], "container_kinds": []},
+      "preferred": {"categories": [], "natures": [], "container_kinds": []},
+      "forbidden": {"categories": [], "natures": [], "container_kinds": []}
     }
   ]
 }

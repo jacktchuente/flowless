@@ -44,7 +44,10 @@ class MusicBlockGenerationTests(PostRollFillerFixtureMixin, TestCase):
         self.block.max_items = 20
         self.block.min_duration_seconds_per_item = 60
         self.block.max_duration_seconds_per_item = 600
-        self.block.allowed_container_kinds = [MediaContainerKind.MUSIC_VIDEO_RELEASE]
+        self.block.allowed = {
+            **self.block.allowed,
+            "container_kinds": [MediaContainerKind.MUSIC_VIDEO_RELEASE],
+        }
         self.block.save()
 
         self.clip_collection = self._create_collection("Clips", role=None)

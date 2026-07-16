@@ -45,15 +45,13 @@ class ManualGridApiTests(APITestCase):
             "max_items": 2,
             "min_duration_seconds_per_item": 60,
             "max_duration_seconds_per_item": 3600,
-            "allowed_categories": ["horror"],
-            "forbidden_categories": [],
-            "preferred_categories": [],
-            "allowed_natures": ["fiction"],
-            "forbidden_natures": [],
-            "preferred_natures": [],
-            "allowed_container_kinds": ["standalone_video"],
-            "forbidden_container_kinds": [],
-            "preferred_container_kinds": [],
+            "allowed": {
+                "categories": ["horror"],
+                "natures": ["fiction"],
+                "container_kinds": ["standalone_video"],
+            },
+            "preferred": {},
+            "forbidden": {},
             "post_filler_policy": self.policy.id,
         }
         payload.update(overrides)
@@ -69,26 +67,26 @@ class ManualGridApiTests(APITestCase):
         response = self.client.patch(
             f"/api/tv-channel/{self.channel.id}/editorial-line/",
             {
-                "allowed_natures": ["fiction", 1],
-                "forbidden_categories": ["family"],
+                "allowed": {"natures": ["fiction", 1]},
+                "forbidden": {"categories": ["family"]},
                 "start_at": "06:00",
                 "end_at": "23:00",
             },
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual(response.data["allowed_natures"], [1])
+        self.assertEqual(response.data["allowed"]["natures"], [1])
         self.assertEqual(
             self.client.get(f"/api/tv-channel/{self.channel.id}/").data[
                 "editorial_line_data"
-            ]["forbidden_categories"],
+            ]["forbidden"]["categories"],
             ["family"],
         )
 
     def test_editorial_validation_rejects_overlap_and_bad_window(self):
         response = self.client.patch(
             f"/api/tv-channel/{self.channel.id}/editorial-line/",
-            {"allowed_natures": [1], "forbidden_natures": ["fiction"]},
+            {"allowed": {"natures": [1]}, "forbidden": {"natures": ["fiction"]}},
             format="json",
         )
         self.assertEqual(response.status_code, 400)
@@ -136,22 +134,22 @@ class ManualGridApiTests(APITestCase):
             grid_layout=self.layout,
             starts_at=time(12),
             ends_at=time(13),
-            allowed_categories=["emotion"],
+            allowed={"categories": ["emotion"]},
         )
 
         response = self.client.post(
             f"/api/grid-block/{block.id}/available-media-count/",
-            {"allowed_categories": ["humor"], "min_duration_seconds_per_item": 600},
+            {"allowed": {"categories": ["humor"]}, "min_duration_seconds_per_item": 600},
             format="json",
         )
 
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(response.data, {"count": 12})
         preview = service_class.call_args.kwargs["grid_block"]
-        self.assertEqual(preview.allowed_categories, ["humor"])
+        self.assertEqual(preview.allowed["categories"], ["humor"])
         self.assertEqual(preview.min_duration_seconds_per_item, 600)
         block.refresh_from_db()
-        self.assertEqual(block.allowed_categories, ["emotion"])
+        self.assertEqual(block.allowed, {"categories": ["emotion"]})
 
     def test_flexible_grid_writes_are_rejected(self):
         self.layout.mode = GridLayoutMode.FLEXIBLE
@@ -217,7 +215,7 @@ class FormSuggestionApiTests(APITestCase):
         complete.side_effect = [
             LLMResponse(content="bad", raw_response=None),
             LLMResponse(
-                content='<suggestion_output>{"allowed_natures":["fiction"],"start_at":"06:00","end_at":"22:00"}</suggestion_output>',
+                content='<suggestion_output>{"allowed":{"natures":["fiction"]},"start_at":"06:00","end_at":"22:00"}</suggestion_output>',
                 raw_response=None,
             ),
         ]
@@ -231,13 +229,13 @@ class FormSuggestionApiTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual(response.data["values"]["allowed_natures"], [1])
+        self.assertEqual(response.data["values"]["allowed"]["natures"], [1])
         self.assertEqual(complete.call_count, 2)
 
     @mock.patch("tv_channel.services.form_suggestion_service.LLMService.complete")
     def test_persistent_invalid_value_returns_502(self, complete):
         complete.return_value = LLMResponse(
-            content='<suggestion_output>{"allowed_natures":["alien"]}</suggestion_output>',
+            content='<suggestion_output>{"allowed":{"natures":["alien"]}}</suggestion_output>',
             raw_response=None,
         )
         response = self.client.post(

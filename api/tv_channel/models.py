@@ -37,17 +37,10 @@ class TvChannel(models.Model):
 class EditorialLine(models.Model):
     tv_channel = models.OneToOneField("TvChannel", on_delete=models.CASCADE)
 
-    allowed_categories = models.JSONField(default=list, blank=True)
-    forbidden_categories = models.JSONField(default=list, blank=True)
-    preferred_categories = models.JSONField(default=list, blank=True)
-
-    allowed_natures = models.JSONField(default=list, blank=True)
-    forbidden_natures = models.JSONField(default=list, blank=True)
-    preferred_natures = models.JSONField(default=list, blank=True)
-
-    allowed_container_kinds = models.JSONField(default=list, blank=True)
-    forbidden_container_kinds = models.JSONField(default=list, blank=True)
-    preferred_container_kinds = models.JSONField(default=list, blank=True)
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed = models.JSONField(default=dict, blank=True)
+    preferred = models.JSONField(default=dict, blank=True)
+    forbidden = models.JSONField(default=dict, blank=True)
 
     # diffusion
     start_at = models.TimeField(default=time(6, 0))
@@ -93,17 +86,10 @@ class GridBlock(models.Model):
 
     # block editorial rules
 
-    allowed_categories = models.JSONField(default=list)
-    forbidden_categories = models.JSONField(default=list)
-    preferred_categories = models.JSONField(default=list)
-
-    allowed_natures = models.JSONField(default=list)
-    forbidden_natures = models.JSONField(default=list)
-    preferred_natures = models.JSONField(default=list)
-
-    allowed_container_kinds = models.JSONField(default=list)
-    forbidden_container_kinds = models.JSONField(default=list)
-    preferred_container_kinds = models.JSONField(default=list)
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed = models.JSONField(default=dict, blank=True)
+    preferred = models.JSONField(default=dict, blank=True)
+    forbidden = models.JSONField(default=dict, blank=True)
 
     post_filler_policy = models.ForeignKey("FillerPolicy", on_delete=models.SET_NULL, blank=True, null=True)
 

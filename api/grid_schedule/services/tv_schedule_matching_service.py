@@ -75,34 +75,34 @@ class TvScheduleMatchingService:
     ) -> bool:
         categories = self._container_categories(container)
 
-        if not self._passes_allowed_categories(categories, self.editorial_line.allowed_categories):
+        if not self._passes_allowed_categories(categories, self.editorial_line.allowed.get("categories", [])):
             return False
-        if not self._passes_allowed_categories(categories, block.allowed_categories):
+        if not self._passes_allowed_categories(categories, block.allowed.get("categories", [])):
             return False
-        if self._intersects(categories, self.editorial_line.forbidden_categories):
+        if self._intersects(categories, self.editorial_line.forbidden.get("categories", [])):
             return False
-        if self._intersects(categories, block.forbidden_categories):
+        if self._intersects(categories, block.forbidden.get("categories", [])):
             return False
 
         container_nature = self._container_nature(container)
         container_kind = self._container_kind(container)
 
-        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed_natures):
+        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed.get("natures", [])):
             return False
-        if not self._passes_allowed_choice(container_nature, block.allowed_natures):
+        if not self._passes_allowed_choice(container_nature, block.allowed.get("natures", [])):
             return False
-        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden_natures):
+        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden.get("natures", [])):
             return False
-        if self._matches_forbidden_choice(container_nature, block.forbidden_natures):
+        if self._matches_forbidden_choice(container_nature, block.forbidden.get("natures", [])):
             return False
 
-        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed_container_kinds):
+        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed.get("container_kinds", [])):
             return False
-        if not self._passes_allowed_choice(container_kind, block.allowed_container_kinds):
+        if not self._passes_allowed_choice(container_kind, block.allowed.get("container_kinds", [])):
             return False
-        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden_container_kinds):
+        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden.get("container_kinds", [])):
             return False
-        if self._matches_forbidden_choice(container_kind, block.forbidden_container_kinds):
+        if self._matches_forbidden_choice(container_kind, block.forbidden.get("container_kinds", [])):
             return False
 
         duration_min = container.duration_min_seconds or container.total_duration_seconds
