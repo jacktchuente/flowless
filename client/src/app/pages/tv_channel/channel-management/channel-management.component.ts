@@ -163,13 +163,13 @@ export class ChannelManagementComponent {
         end: b.ends_at.slice(0, 5),
         title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
           category:
-            b.allowed_categories[0] ??
+            b.allowed?.categories?.[0] ??
             this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
         }),
         sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
           priority: b.priority,
         }),
-        category: natureToCategory(b.allowed_natures[0]),
+        category: natureToCategory(b.allowed?.natures?.[0] ?? null),
       }));
     return (c.active_schedule_items ?? [])
       .filter((i) => this.sameDay(i.starts_at))
