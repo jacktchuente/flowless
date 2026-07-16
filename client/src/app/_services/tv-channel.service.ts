@@ -12,6 +12,7 @@ import {
   GridPayload,
   GridWarningsResponse,
   PlayoutGenerationReport,
+  RuleOptionSearchResponse,
   TvChannel,
 } from "../_interfaces/tv-channel";
 import { Observable, Subject } from "rxjs";
@@ -33,7 +34,19 @@ export interface TvPlayoutGenerationPayload {
 }
 
 export interface TvChannelResetRulesPayload {
-  types: Array<"nature" | "kind" | "category">;
+  types: Array<
+    | "nature"
+    | "kind"
+    | "category"
+    | "director"
+    | "writer"
+    | "creator"
+    | "actor"
+    | "studio"
+    | "country"
+    | "audio_language"
+    | "subtitle_language"
+  >;
   levels: Array<"allowed" | "forbidden">;
 }
 
@@ -139,6 +152,15 @@ export class TvChannelApiService extends BaseApiService {
 
   getFormOptions(): Observable<FormOptions> {
     return this.http.get<FormOptions>(`${this.getFullUrl()}form-options/`);
+  }
+  searchRuleOptions(
+    query: string,
+    limit = 20,
+  ): Observable<RuleOptionSearchResponse> {
+    return this.http.get<RuleOptionSearchResponse>(
+      `${this.getFullUrl()}rule-option-search/`,
+      { params: { q: query, limit } },
+    );
   }
   getEditorialLine(id: string | number): Observable<EditorialLineData> {
     return this.http.get<EditorialLineData>(
@@ -331,6 +353,10 @@ export class TvChannelService extends ObjectApiService {
   }
   getFormOptions() {
     return this.wrap(this.api.getFormOptions());
+  }
+  // Flux brut (pas de wrap isOk) : consomme directement par l'autocomplete.
+  searchRuleOptions(query: string, limit = 20) {
+    return this.api.searchRuleOptions(query, limit);
   }
   getEditorialLine(id: string | number) {
     return this.wrap(this.api.getEditorialLine(id));

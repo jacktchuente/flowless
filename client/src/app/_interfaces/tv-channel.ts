@@ -2,6 +2,23 @@ export interface RuleValuesByAxis {
   categories?: string[]
   natures?: Array<string | number>
   container_kinds?: Array<string | number>
+  directors?: string[]
+  writers?: string[]
+  creators?: string[]
+  actors?: string[]
+  studios?: string[]
+  countries?: string[]
+  audio_languages?: string[]
+  subtitle_languages?: string[]
+}
+
+export interface RuleOptionSearchResult {
+  axis: string
+  value: string
+}
+
+export interface RuleOptionSearchResponse {
+  results: RuleOptionSearchResult[]
 }
 
 export interface GridBlock {
