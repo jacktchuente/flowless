@@ -13,15 +13,25 @@ import {
   GridBlockService,
   GridBlockAvailableMediaCount,
 } from "@project-services/grid-block.service";
+import { map } from "rxjs/operators";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSelectComponent } from "../../../ui/select/flw-select.component";
 import { FlwRuleGroupComponent } from "../../../ui/rule-group/flw-rule-group.component";
-import { FlwTagInputComponent } from "../../../ui/tag-input/flw-tag-input.component";
+import {
+  FlwTagInputComponent,
+  FlwTagOption,
+} from "../../../ui/tag-input/flw-tag-input.component";
 import {
   FlwSuggestionPreviewComponent,
   SuggestionChange,
 } from "../../../ui/suggestion-preview/flw-suggestion-preview.component";
-import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
+import {
+  readRuleValues,
+  ruleOptions,
+  ruleValueLabel,
+  searchResultToOption,
+  writeRuleValues,
+} from "./rule-values";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
 import { FlwDialogService } from "../../../ui/dialog.service";
@@ -117,14 +127,18 @@ import { GenerationDialogComponent } from "./generation-dialog.component";
         ><flw-tag-input
           variant="allow"
           formControlName="allowed"
-          [options]="options" /></flw-rule-group
+          [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="prefer"
         [label]="'CHANNEL_DIALOGS.COMMON.PREFERRED' | translate"
         ><flw-tag-input
           variant="prefer"
           formControlName="preferred"
-          [options]="options" /></flw-rule-group
+          [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="forbid"
         [label]="'CHANNEL_DIALOGS.COMMON.FORBIDDEN' | translate"
@@ -132,6 +146,8 @@ import { GenerationDialogComponent } from "./generation-dialog.component";
           variant="forbid"
           formControlName="forbidden"
           [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter"
       /></flw-rule-group>
       <p class="hint" *ngIf="availableCount !== null">
         {{
@@ -184,9 +200,25 @@ export class GridBlockDialogComponent {
     post_filler_policy_name: null,
   };
   source = this.data.block ?? { ...this.empty, ...(this.data.defaults ?? {}) };
-  options = ruleOptions(this.data.formOptions, (key, params) =>
-    this.translate.instant(key, params),
-  );
+  private translateFn = (key: string, params?: Record<string, unknown>) =>
+    this.translate.instant(key, params);
+  options = ruleOptions(this.data.formOptions, this.translateFn);
+  searchOptions = (query: string) =>
+    this.channels.searchRuleOptions(query).pipe(
+      map((response) =>
+        response.results
+          .map((result) =>
+            searchResultToOption(
+              result,
+              this.translateFn,
+              this.translate.currentLang,
+            ),
+          )
+          .filter((option): option is FlwTagOption => option !== null),
+      ),
+    );
+  labelFormatter = (value: string | number) =>
+    ruleValueLabel(value, this.translateFn, this.translate.currentLang);
   priorities = [80, 50, 20].map((value) => ({
     label: this.translate.instant(
       value === 80

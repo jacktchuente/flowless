@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from project_ops.constants import AnalyzeStatus
 from media_source.models import MediaContainer, MediaItem
 from tv_channel.models import EditorialLine, GridBlock, TvChannel
+from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
 
 
 class TvScheduleMatchingService:
@@ -73,16 +74,17 @@ class TvScheduleMatchingService:
         block: GridBlock,
         container: MediaContainer,
     ) -> bool:
-        categories = self._container_categories(container)
+        for axis in STRING_RULE_AXES:
+            values = self._container_axis_values(container, axis)
 
-        if not self._passes_allowed_categories(categories, self.editorial_line.allowed.get("categories", [])):
-            return False
-        if not self._passes_allowed_categories(categories, block.allowed.get("categories", [])):
-            return False
-        if self._intersects(categories, self.editorial_line.forbidden.get("categories", [])):
-            return False
-        if self._intersects(categories, block.forbidden.get("categories", [])):
-            return False
+            if not self._passes_allowed_values(values, self.editorial_line.allowed.get(axis, [])):
+                return False
+            if not self._passes_allowed_values(values, block.allowed.get(axis, [])):
+                return False
+            if self._intersects(values, self.editorial_line.forbidden.get(axis, [])):
+                return False
+            if self._intersects(values, block.forbidden.get(axis, [])):
+                return False
 
         container_nature = self._container_nature(container)
         container_kind = self._container_kind(container)
@@ -125,6 +127,16 @@ class TvScheduleMatchingService:
                     values.add(value)
         return values
 
+    @classmethod
+    def _container_axis_values(cls, container: MediaContainer, axis: str) -> set[str]:
+        if axis == "categories":
+            return cls._container_categories(container)
+        return {
+            value
+            for value in (getattr(container, axis) or [])
+            if isinstance(value, str) and value
+        }
+
     @staticmethod
     def _container_nature(container: MediaContainer):
         return getattr(container.media_collection, "nature", None)
@@ -141,11 +153,11 @@ class TvScheduleMatchingService:
             raise ValidationError("TvChannel must have an editorial line.") from exc
 
     @staticmethod
-    def _passes_allowed_categories(container_categories: set[str], allowed_categories: list[str]) -> bool:
-        allowed = {value for value in (allowed_categories or []) if isinstance(value, str)}
+    def _passes_allowed_values(container_values: set[str], allowed_values: list[str]) -> bool:
+        allowed = {value for value in (allowed_values or []) if isinstance(value, str)}
         if not allowed:
             return True
-        return bool(container_categories.intersection(allowed))
+        return bool(container_values.intersection(allowed))
 
     @staticmethod
     def _intersects(left: set[str], right: list[str]) -> bool:

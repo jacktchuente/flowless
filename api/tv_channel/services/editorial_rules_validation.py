@@ -8,10 +8,14 @@ suggestions one validation source of truth.
 from django.core.exceptions import ValidationError
 
 from media_source.constants import MediaContainerKind, MediaNature
-from rule_engine.services import category_service
+from rule_engine.services import category_service, vocabulary_service
 
 
-RULE_AXES = ("categories", "natures", "container_kinds")
+# Axes a valeurs texte, matches contre les listes homonymes de MediaContainer
+# (categories agrege categories+genres+tags).
+STRING_RULE_AXES = ("categories", *vocabulary_service.VOCABULARY_AXES)
+CHOICE_RULE_AXES = ("natures", "container_kinds")
+RULE_AXES = (*STRING_RULE_AXES, *CHOICE_RULE_AXES)
 RULE_LEVELS = ("allowed", "forbidden", "preferred")
 
 
@@ -58,6 +62,19 @@ def validate_container_kinds(values: list) -> list[int]:
     return _validate_choices(values, MediaContainerKind, "container kinds")
 
 
+def make_vocabulary_validator(axis: str):
+    def validate(values: list) -> list[str]:
+        if not isinstance(values, list):
+            raise ValidationError("Must be a list.")
+        known_values = set(vocabulary_service.get_values(axis))
+        invalid = [value for value in values if not isinstance(value, str) or value not in known_values]
+        if invalid:
+            raise ValidationError(f"Unknown {axis}: {invalid}.")
+        return _deduplicate(values)
+
+    return validate
+
+
 def ensure_no_overlap(a: list, b: list, field_a: str, field_b: str) -> None:
     overlap = set(a).intersection(b)
     if overlap:
@@ -68,6 +85,7 @@ AXIS_VALIDATORS = {
     "categories": validate_categories,
     "natures": validate_natures,
     "container_kinds": validate_container_kinds,
+    **{axis: make_vocabulary_validator(axis) for axis in vocabulary_service.VOCABULARY_AXES},
 }
 
 

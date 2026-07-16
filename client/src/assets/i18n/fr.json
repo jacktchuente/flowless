@@ -541,9 +541,17 @@
       "ALLOWED": "Autorisé",
       "PREFERRED": "Préféré",
       "FORBIDDEN": "Interdit",
-      "CATEGORY_VALUE": "Catégorie · {{value}}",
-      "NATURE_VALUE": "Nature · {{value}}",
-      "KIND_VALUE": "Type · {{value}}"
+      "CATEGORY_VALUE": "Catégorie={{value}}",
+      "NATURE_VALUE": "Nature={{value}}",
+      "KIND_VALUE": "Type={{value}}",
+      "DIRECTOR_VALUE": "Réalisateur={{value}}",
+      "WRITER_VALUE": "Scénariste={{value}}",
+      "CREATOR_VALUE": "Créateur={{value}}",
+      "ACTOR_VALUE": "Acteur={{value}}",
+      "STUDIO_VALUE": "Studio={{value}}",
+      "COUNTRY_VALUE": "Pays={{value}}",
+      "AUDIO_LANGUAGE_VALUE": "Langue audio={{value}}",
+      "SUBTITLE_LANGUAGE_VALUE": "Sous-titres={{value}}"
     },
     "GENERATION": {
       "BLUEPRINT_TITLE": "Générer le plan",

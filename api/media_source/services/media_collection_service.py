@@ -7,6 +7,7 @@ from media_source.models import MediaCollection, MediaContainer, MediaSource, Me
 from media_source.services.media_container_service import MediaContainerService
 from media_source.services.media_server_services.jellyfin_service import JellyfinService, MediaServerMediaContainer
 from project_ops.constants import AnalyzeStatus
+from rule_engine.services import vocabulary_service
 from utils.hash_data import hash_data
 
 
@@ -114,6 +115,9 @@ class MediaCollectionService:
 
         media_to_create = []
         media_to_update = []
+        vocabulary_values: dict[str, set[str]] = {
+            axis: set() for axis in vocabulary_service.VOCABULARY_AXES
+        }
 
         for media in medias:
             payload = {
@@ -152,6 +156,11 @@ class MediaCollectionService:
                 "tags": media.get("tags", []),
                 "genres": media.get("genres", []),
             }
+
+            for axis in vocabulary_service.VOCABULARY_AXES:
+                vocabulary_values[axis].update(
+                    value for value in payload[axis] if isinstance(value, str) and value
+                )
 
             original_data_hash = hash_data(payload)
 
@@ -229,6 +238,8 @@ class MediaCollectionService:
                     "raw_data",
                 ],
             )
+
+        vocabulary_service.upsert_values(vocabulary_values)
 
     def manage_media_items(
             self,

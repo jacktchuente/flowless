@@ -541,9 +541,17 @@
       "ALLOWED": "Allowed",
       "PREFERRED": "Preferred",
       "FORBIDDEN": "Forbidden",
-      "CATEGORY_VALUE": "Category · {{value}}",
-      "NATURE_VALUE": "Nature · {{value}}",
-      "KIND_VALUE": "Type · {{value}}"
+      "CATEGORY_VALUE": "Category={{value}}",
+      "NATURE_VALUE": "Nature={{value}}",
+      "KIND_VALUE": "Type={{value}}",
+      "DIRECTOR_VALUE": "Director={{value}}",
+      "WRITER_VALUE": "Writer={{value}}",
+      "CREATOR_VALUE": "Creator={{value}}",
+      "ACTOR_VALUE": "Actor={{value}}",
+      "STUDIO_VALUE": "Studio={{value}}",
+      "COUNTRY_VALUE": "Country={{value}}",
+      "AUDIO_LANGUAGE_VALUE": "Audio language={{value}}",
+      "SUBTITLE_LANGUAGE_VALUE": "Subtitles={{value}}"
     },
     "GENERATION": {
       "BLUEPRINT_TITLE": "Generate plan",

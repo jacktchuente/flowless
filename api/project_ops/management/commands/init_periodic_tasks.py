@@ -30,6 +30,14 @@ PERIODIC_TASK_SPECS = (
         "every": 6,
         "period": IntervalSchedule.HOURS,
     },
+    {
+        # Recale le vocabulaire des axes de regles sur les containers actifs
+        # (l'ingestion pendant les syncs est purement additive).
+        "name": "Rebuild rule vocabulary",
+        "task": "rule_engine.tasks.rebuild_vocabulary",
+        "every": 24,
+        "period": IntervalSchedule.HOURS,
+    },
 )
 
 # Anciennes taches pointant vers du code disparu: a purger des bases existantes.

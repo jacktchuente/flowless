@@ -30,3 +30,24 @@ class CategoryRule(models.Model):
 
     def __str__(self):
         return self.category.category
+
+
+class VocabularyEntry(models.Model):
+    """
+    Vocabulaire des axes de regles editoriales a valeurs ouvertes
+    (directors, actors, studios, countries, langues...). Alimente a la sync
+    des collections, purge des orphelins par tache periodique.
+    """
+    axis = models.CharField(max_length=32)
+    value = models.CharField(max_length=255)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["axis", "value"], name="unique_vocabulary_axis_value"),
+        ]
+        indexes = [
+            models.Index(fields=["axis", "value"]),
+        ]
+
+    def __str__(self):
+        return f"{self.axis}: {self.value}"

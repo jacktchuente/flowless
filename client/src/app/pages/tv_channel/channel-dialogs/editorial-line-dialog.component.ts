@@ -1,13 +1,23 @@
 import { Component, Inject } from "@angular/core";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { map } from "rxjs/operators";
 import { EditorialLineData, FormOptions } from "@project-interfaces/tv-channel";
 import { TvChannelService } from "@project-services/tv-channel.service";
 import { FlwModalComponent } from "../../../ui/modal/flw-modal.component";
 import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { FlwRuleGroupComponent } from "../../../ui/rule-group/flw-rule-group.component";
-import { FlwTagInputComponent } from "../../../ui/tag-input/flw-tag-input.component";
-import { readRuleValues, ruleOptions, writeRuleValues } from "./rule-values";
+import {
+  FlwTagInputComponent,
+  FlwTagOption,
+} from "../../../ui/tag-input/flw-tag-input.component";
+import {
+  readRuleValues,
+  ruleOptions,
+  ruleValueLabel,
+  searchResultToOption,
+  writeRuleValues,
+} from "./rule-values";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 @Component({
@@ -43,14 +53,18 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
         ><flw-tag-input
           variant="allow"
           formControlName="allowed"
-          [options]="options" /></flw-rule-group
+          [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="prefer"
         [label]="'CHANNEL_DIALOGS.COMMON.PREFERRED' | translate"
         ><flw-tag-input
           variant="prefer"
           formControlName="preferred"
-          [options]="options" /></flw-rule-group
+          [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="forbid"
         [label]="'CHANNEL_DIALOGS.COMMON.FORBIDDEN' | translate"
@@ -58,6 +72,8 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           variant="forbid"
           formControlName="forbidden"
           [options]="options"
+          [searchProvider]="searchOptions"
+          [labelFormatter]="labelFormatter"
       /></flw-rule-group>
     </form>
     <div modal-footer>
@@ -78,9 +94,25 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
   ],
 })
 export class EditorialLineDialogComponent {
-  options = ruleOptions(this.data.formOptions, (key, params) =>
-    this.translate.instant(key, params),
-  );
+  private translateFn = (key: string, params?: Record<string, unknown>) =>
+    this.translate.instant(key, params);
+  options = ruleOptions(this.data.formOptions, this.translateFn);
+  searchOptions = (query: string) =>
+    this.service.searchRuleOptions(query).pipe(
+      map((response) =>
+        response.results
+          .map((result) =>
+            searchResultToOption(
+              result,
+              this.translateFn,
+              this.translate.currentLang,
+            ),
+          )
+          .filter((option): option is FlwTagOption => option !== null),
+      ),
+    );
+  labelFormatter = (value: string | number) =>
+    ruleValueLabel(value, this.translateFn, this.translate.currentLang);
   form = new FormGroup({
     start_at: new FormControl(this.data.line.start_at.slice(0, 5), {
       nonNullable: true,

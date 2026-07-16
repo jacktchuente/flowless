@@ -135,11 +135,31 @@ class TvChannelResetRulesSerializer(serializers.Serializer):
     TYPE_CATEGORY = "category"
     TYPE_NATURE = "nature"
     TYPE_KIND = "kind"
+    TYPE_DIRECTOR = "director"
+    TYPE_WRITER = "writer"
+    TYPE_CREATOR = "creator"
+    TYPE_ACTOR = "actor"
+    TYPE_STUDIO = "studio"
+    TYPE_COUNTRY = "country"
+    TYPE_AUDIO_LANGUAGE = "audio_language"
+    TYPE_SUBTITLE_LANGUAGE = "subtitle_language"
     LEVEL_ALLOWED = "allowed"
     LEVEL_FORBIDDEN = "forbidden"
 
     types = serializers.ListField(
-        child=serializers.ChoiceField(choices=(TYPE_CATEGORY, TYPE_NATURE, TYPE_KIND)),
+        child=serializers.ChoiceField(choices=(
+            TYPE_CATEGORY,
+            TYPE_NATURE,
+            TYPE_KIND,
+            TYPE_DIRECTOR,
+            TYPE_WRITER,
+            TYPE_CREATOR,
+            TYPE_ACTOR,
+            TYPE_STUDIO,
+            TYPE_COUNTRY,
+            TYPE_AUDIO_LANGUAGE,
+            TYPE_SUBTITLE_LANGUAGE,
+        )),
         allow_empty=False,
     )
     levels = serializers.ListField(
