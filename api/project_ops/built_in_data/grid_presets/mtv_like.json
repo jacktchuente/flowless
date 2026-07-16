@@ -11,8 +11,8 @@
         "max_items": 40,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 600,
-        "allowed_container_kinds": [4],
-        "preferred_categories": ["pop", "variete-francaise"],
+        "allowed": {"container_kinds": [4]},
+        "preferred": {"categories": ["pop", "variete-francaise"]},
         "post_filler_policy": {
           "name": "Jingle clips",
           "duration_seconds": 30
@@ -27,7 +27,7 @@
         "max_items": 40,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 600,
-        "allowed_container_kinds": [4],
+        "allowed": {"container_kinds": [4]},
         "post_filler_policy": {
           "name": "Jingle clips",
           "duration_seconds": 30
@@ -42,7 +42,7 @@
         "max_items": 2,
         "min_duration_seconds_per_item": 900,
         "max_duration_seconds_per_item": 2400,
-        "allowed_container_kinds": [2],
+        "allowed": {"container_kinds": [2]},
         "post_filler_policy": {
           "name": "Inter-émission musique",
           "duration_seconds": 120
@@ -57,8 +57,8 @@
         "max_items": 40,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 600,
-        "allowed_container_kinds": [4],
-        "preferred_categories": ["rock", "metal"],
+        "allowed": {"container_kinds": [4]},
+        "preferred": {"categories": ["rock", "metal"]},
         "post_filler_policy": {
           "name": "Jingle clips",
           "duration_seconds": 30
@@ -73,8 +73,8 @@
         "max_items": 40,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 600,
-        "allowed_container_kinds": [4],
-        "preferred_categories": ["hip-hop", "rnb-soul", "electronic"],
+        "allowed": {"container_kinds": [4]},
+        "preferred": {"categories": ["hip-hop", "rnb-soul", "electronic"]},
         "post_filler_policy": {
           "name": "Jingle clips",
           "duration_seconds": 30
@@ -89,7 +89,7 @@
         "max_items": 2,
         "min_duration_seconds_per_item": 900,
         "max_duration_seconds_per_item": 2400,
-        "allowed_container_kinds": [2],
+        "allowed": {"container_kinds": [2]},
         "post_filler_policy": {
           "name": "Inter-émission musique",
           "duration_seconds": 120
@@ -104,7 +104,7 @@
         "max_items": 30,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 600,
-        "allowed_container_kinds": [4],
+        "allowed": {"container_kinds": [4]},
         "post_filler_policy": {
           "name": "Jingle clips",
           "duration_seconds": 30
@@ -119,8 +119,8 @@
         "max_items": 30,
         "min_duration_seconds_per_item": 60,
         "max_duration_seconds_per_item": 900,
-        "allowed_container_kinds": [4],
-        "preferred_categories": ["electronic", "metal", "rock"],
+        "allowed": {"container_kinds": [4]},
+        "preferred": {"categories": ["electronic", "metal", "rock"]},
         "post_filler_policy": {
           "name": "Jingle clips nuit",
           "duration_seconds": 30

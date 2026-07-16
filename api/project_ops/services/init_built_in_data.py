@@ -168,15 +168,9 @@ class Initializer:
             max_items=payload.get("max_items", 1),
             min_duration_seconds_per_item=payload.get("min_duration_seconds_per_item"),
             max_duration_seconds_per_item=payload.get("max_duration_seconds_per_item"),
-            allowed_categories=payload.get("allowed_categories", []),
-            forbidden_categories=payload.get("forbidden_categories", []),
-            preferred_categories=payload.get("preferred_categories", []),
-            allowed_natures=payload.get("allowed_natures", []),
-            forbidden_natures=payload.get("forbidden_natures", []),
-            preferred_natures=payload.get("preferred_natures", []),
-            allowed_container_kinds=payload.get("allowed_container_kinds", []),
-            forbidden_container_kinds=payload.get("forbidden_container_kinds", []),
-            preferred_container_kinds=payload.get("preferred_container_kinds", []),
+            allowed=payload.get("allowed", {}),
+            preferred=payload.get("preferred", {}),
+            forbidden=payload.get("forbidden", {}),
             post_filler_policy=filler_policy
         )
 
