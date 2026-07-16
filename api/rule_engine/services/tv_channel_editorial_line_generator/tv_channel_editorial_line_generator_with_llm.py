@@ -8,7 +8,7 @@ from typing import TypedDict
 from django.conf import settings
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 from utils.format_with_jinja import format_with_jinja
 from utils.llm_service import LLMService
 
@@ -57,7 +57,7 @@ class TvChannelEditorialLineGeneratorWithLlm:
                 "channel_name": self.tv_channel_data["name"],
                 "channel_description": self.tv_channel_data.get("description") or "",
                 "channel_specification": self.tv_channel_data.get("specification") or "",
-                "available_categories": categories,
+                "available_categories": category_service.get_all_category_names(),
                 "available_natures": [choice.label for choice in MediaNature],
                 "available_container_kinds": [choice.label for choice in MediaContainerKind],
             },
@@ -83,7 +83,7 @@ class TvChannelEditorialLineGeneratorWithLlm:
         return payload
 
     def _validate_payload(self, payload: dict) -> PreparedTvChannelEditorialLine:
-        available_categories = set(categories)
+        available_categories = set(category_service.get_all_category_names())
         nature_by_label = {choice.label: choice.value for choice in MediaNature}
         container_kind_by_label = {choice.label: choice.value for choice in MediaContainerKind}
 
