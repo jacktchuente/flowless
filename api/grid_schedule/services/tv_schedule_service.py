@@ -563,31 +563,31 @@ class TvPlayoutGenerationService:
         container_nature = self._container_nature(container)
         container_kind = self._container_kind(container)
 
-        if not self._passes_allowed_categories(categories, self.editorial_line.allowed_categories):
+        if not self._passes_allowed_categories(categories, self.editorial_line.allowed.get("categories", [])):
             return False
-        if not self._passes_allowed_categories(categories, block.allowed_categories):
+        if not self._passes_allowed_categories(categories, block.allowed.get("categories", [])):
             return False
-        if self._intersects(categories, self.editorial_line.forbidden_categories):
+        if self._intersects(categories, self.editorial_line.forbidden.get("categories", [])):
             return False
-        if self._intersects(categories, block.forbidden_categories):
-            return False
-
-        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed_natures):
-            return False
-        if not self._passes_allowed_choice(container_nature, block.allowed_natures):
-            return False
-        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden_natures):
-            return False
-        if self._matches_forbidden_choice(container_nature, block.forbidden_natures):
+        if self._intersects(categories, block.forbidden.get("categories", [])):
             return False
 
-        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed_container_kinds):
+        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed.get("natures", [])):
             return False
-        if not self._passes_allowed_choice(container_kind, block.allowed_container_kinds):
+        if not self._passes_allowed_choice(container_nature, block.allowed.get("natures", [])):
             return False
-        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden_container_kinds):
+        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden.get("natures", [])):
             return False
-        if self._matches_forbidden_choice(container_kind, block.forbidden_container_kinds):
+        if self._matches_forbidden_choice(container_nature, block.forbidden.get("natures", [])):
+            return False
+
+        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed.get("container_kinds", [])):
+            return False
+        if not self._passes_allowed_choice(container_kind, block.allowed.get("container_kinds", [])):
+            return False
+        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden.get("container_kinds", [])):
+            return False
+        if self._matches_forbidden_choice(container_kind, block.forbidden.get("container_kinds", [])):
             return False
 
         duration_min = container.duration_min_seconds or container.total_duration_seconds
@@ -643,21 +643,27 @@ class TvPlayoutGenerationService:
 
         category_bonus = self._preferred_category_bonus(
             categories=categories,
-            preferred_values=(self.editorial_line.preferred_categories or []) + (block.preferred_categories or []),
+            preferred_values=(
+                self.editorial_line.preferred.get("categories", [])
+                + block.preferred.get("categories", [])
+            ),
         )
         score += category_bonus
         reasons["preferred_categories"] = category_bonus
 
         nature_bonus = self._preferred_choice_bonus(
             self._container_nature(container),
-            (self.editorial_line.preferred_natures or []) + (block.preferred_natures or []),
+            self.editorial_line.preferred.get("natures", []) + block.preferred.get("natures", []),
         )
         score += nature_bonus
         reasons["preferred_natures"] = nature_bonus
 
         kind_bonus = self._preferred_choice_bonus(
             self._container_kind(container),
-            (self.editorial_line.preferred_container_kinds or []) + (block.preferred_container_kinds or []),
+            (
+                self.editorial_line.preferred.get("container_kinds", [])
+                + block.preferred.get("container_kinds", [])
+            ),
         )
         score += kind_bonus
         reasons["preferred_container_kinds"] = kind_bonus

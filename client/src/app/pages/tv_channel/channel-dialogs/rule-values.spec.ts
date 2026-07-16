@@ -10,15 +10,9 @@ describe("unified rule values", () => {
     filler_policies: [],
   };
   const line: EditorialLineData = {
-    allowed_categories: ["crime"],
-    allowed_natures: [1],
-    allowed_container_kinds: [2],
-    preferred_categories: [],
-    preferred_natures: [],
-    preferred_container_kinds: [],
-    forbidden_categories: [],
-    forbidden_natures: [],
-    forbidden_container_kinds: [],
+    allowed: { categories: ["crime"], natures: [1], container_kinds: [2] },
+    preferred: {},
+    forbidden: {},
     start_at: "18:00:00",
     end_at: "23:00:00",
     allow_filler: true,
@@ -34,9 +28,7 @@ describe("unified rule values", () => {
     const payload: Record<string, unknown> = {};
     writeRuleValues(payload, "allowed", values);
     expect(payload).toEqual({
-      allowed_categories: ["crime"],
-      allowed_natures: [1],
-      allowed_container_kinds: [2],
+      allowed: { categories: ["crime"], natures: [1], container_kinds: [2] },
     });
   });
 });

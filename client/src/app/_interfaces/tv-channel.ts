@@ -1,3 +1,9 @@
+export interface RuleValuesByAxis {
+  categories?: string[]
+  natures?: Array<string | number>
+  container_kinds?: Array<string | number>
+}
+
 export interface GridBlock {
   id: string | number
   starts_at: string
@@ -7,29 +13,17 @@ export interface GridBlock {
   max_items: number
   min_duration_seconds_per_item: number | null
   max_duration_seconds_per_item: number | null
-  allowed_categories: string[]
-  forbidden_categories: string[]
-  preferred_categories: string[]
-  allowed_natures: Array<string | number>
-  forbidden_natures: Array<string | number>
-  preferred_natures: Array<string | number>
-  allowed_container_kinds: Array<string | number>
-  forbidden_container_kinds: Array<string | number>
-  preferred_container_kinds: Array<string | number>
+  allowed: RuleValuesByAxis
+  preferred: RuleValuesByAxis
+  forbidden: RuleValuesByAxis
   post_filler_policy: string | number | null
   post_filler_policy_name: string | null
 }
 
 export interface EditorialLineData {
-  allowed_categories: string[]
-  forbidden_categories: string[]
-  preferred_categories: string[]
-  allowed_natures: Array<string | number>
-  forbidden_natures: Array<string | number>
-  preferred_natures: Array<string | number>
-  allowed_container_kinds: Array<string | number>
-  forbidden_container_kinds: Array<string | number>
-  preferred_container_kinds: Array<string | number>
+  allowed: RuleValuesByAxis
+  preferred: RuleValuesByAxis
+  forbidden: RuleValuesByAxis
   start_at: string
   end_at: string
   allow_filler: boolean

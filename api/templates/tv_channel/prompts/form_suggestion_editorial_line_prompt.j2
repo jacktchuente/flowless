@@ -10,8 +10,7 @@ Available container-kind labels: {{ container_kinds | tojson }}
 User context: {{ user_context }}
 Previous validation errors: {{ retry_errors | tojson }}
 
-Return every field: allowed_categories, forbidden_categories, preferred_categories,
-allowed_natures, forbidden_natures, preferred_natures, allowed_container_kinds,
-forbidden_container_kinds, preferred_container_kinds, start_at, end_at, allow_filler.
+Return every field: allowed, preferred, forbidden, start_at, end_at, allow_filler.
+`allowed`, `preferred`, and `forbidden` are dicts keyed by categories, natures, container_kinds.
 Use labels for natures and container kinds, and HH:MM times. Return only:
-<suggestion_output>{"allowed_categories": [], "forbidden_categories": [], "preferred_categories": [], "allowed_natures": [], "forbidden_natures": [], "preferred_natures": [], "allowed_container_kinds": [], "forbidden_container_kinds": [], "preferred_container_kinds": [], "start_at": "06:00", "end_at": "22:00", "allow_filler": true}</suggestion_output>
+<suggestion_output>{"allowed": {"categories": [], "natures": [], "container_kinds": []}, "preferred": {"categories": [], "natures": [], "container_kinds": []}, "forbidden": {"categories": [], "natures": [], "container_kinds": []}, "start_at": "06:00", "end_at": "22:00", "allow_filler": true}</suggestion_output>

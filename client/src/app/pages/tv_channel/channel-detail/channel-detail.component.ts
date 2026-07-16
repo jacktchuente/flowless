@@ -15,6 +15,7 @@ import {
   GridBlock,
   FormOptions,
   PlayoutGenerationReport,
+  RuleValuesByAxis,
   ScheduledMediaItem,
   TvChannel,
 } from "@project-interfaces/tv-channel";
@@ -133,42 +134,28 @@ export class ChannelDetailComponent {
     return this.gridWarnings.filter((w) => !w.startsWith("Gap between blocks"));
   }
   lineRules(line: EditorialLineData) {
-    const tags = (
-      categories: string[],
-      natures: Array<string | number>,
-      kinds: Array<string | number>,
-    ) => [
-      ...categories,
-      ...natures.map((v) => this.translate.instant(natureLabel(v))),
-      ...kinds.map((v) => this.translate.instant(containerKindLabel(v))),
+    const tags = (rules: RuleValuesByAxis | undefined) => [
+      ...(rules?.categories ?? []),
+      ...(rules?.natures ?? []).map((v) => this.translate.instant(natureLabel(v))),
+      ...(rules?.container_kinds ?? []).map((v) =>
+        this.translate.instant(containerKindLabel(v)),
+      ),
     ];
     return [
       {
         label: "CHANNEL_DETAIL.ALLOWED",
         kind: "allow",
-        tags: tags(
-          line.allowed_categories,
-          line.allowed_natures,
-          line.allowed_container_kinds,
-        ),
+        tags: tags(line.allowed),
       },
       {
         label: "CHANNEL_DETAIL.PREFERRED",
         kind: "prefer",
-        tags: tags(
-          line.preferred_categories,
-          line.preferred_natures,
-          line.preferred_container_kinds,
-        ),
+        tags: tags(line.preferred),
       },
       {
         label: "CHANNEL_DETAIL.FORBIDDEN",
         kind: "forbid",
-        tags: tags(
-          line.forbidden_categories,
-          line.forbidden_natures,
-          line.forbidden_container_kinds,
-        ),
+        tags: tags(line.forbidden),
       },
     ].filter((rule) => rule.tags.length);
   }
@@ -408,13 +395,13 @@ export class ChannelDetailComponent {
       end: b.ends_at.slice(0, 5),
       title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
         category:
-          b.allowed_categories[0] ??
+          b.allowed?.categories?.[0] ??
           this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
       }),
       sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
         priority: b.priority,
       }),
-      category: natureToCategory(b.allowed_natures[0]),
+      category: natureToCategory(b.allowed?.natures?.[0] ?? null),
     }));
   }
   scheduleBlocks(): TimelineBlock[] {
@@ -430,11 +417,11 @@ export class ChannelDetailComponent {
   }
   blockTags(b: GridBlock) {
     return [
-      ...b.allowed_categories,
-      ...b.allowed_natures.map((value) =>
+      ...(b.allowed?.categories ?? []),
+      ...(b.allowed?.natures ?? []).map((value) =>
         this.translate.instant(natureLabel(value)),
       ),
-      ...b.allowed_container_kinds.map((value) =>
+      ...(b.allowed?.container_kinds ?? []).map((value) =>
         this.translate.instant(containerKindLabel(value)),
       ),
     ].slice(0, 4);

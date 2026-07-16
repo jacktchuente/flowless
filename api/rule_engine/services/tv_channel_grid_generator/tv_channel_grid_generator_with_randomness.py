@@ -21,15 +21,10 @@ class TvChannelGridGeneratorPayload(TypedDict, total=False):
     specification: str
     start_at: time
     end_at: time
-    preferred_categories: list[str]
-    forbidden_categories: list[str]
-    allowed_categories: list[str]
-    preferred_natures: list[int]
-    forbidden_natures: list[int]
-    allowed_natures: list[int]
-    preferred_container_kinds: list[int]
-    forbidden_container_kinds: list[int]
-    allowed_container_kinds: list[int]
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed: dict[str, list]
+    preferred: dict[str, list]
+    forbidden: dict[str, list]
     allow_filler: bool
 
 
@@ -42,15 +37,10 @@ class PreparedGridBlock:
     max_items: int
     min_duration_seconds_per_item: int | None
     max_duration_seconds_per_item: int | None
-    allowed_categories: list[str]
-    forbidden_categories: list[str]
-    preferred_categories: list[str]
-    allowed_natures: list[int]
-    forbidden_natures: list[int]
-    preferred_natures: list[int]
-    allowed_container_kinds: list[int]
-    forbidden_container_kinds: list[int]
-    preferred_container_kinds: list[int]
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed: dict[str, list]
+    preferred: dict[str, list]
+    forbidden: dict[str, list]
 
 
 class TvChannelGridGeneratorWithRandomness:
@@ -63,15 +53,18 @@ class TvChannelGridGeneratorWithRandomness:
         self.start_at = tv_channel_data["start_at"]
         self.end_at = tv_channel_data["end_at"]
 
-        self.preferred_categories = self._clean_strings(tv_channel_data.get("preferred_categories", []))
-        self.forbidden_categories = self._clean_strings(tv_channel_data.get("forbidden_categories", []))
-        self.allowed_categories = self._clean_strings(tv_channel_data.get("allowed_categories", []))
-        self.preferred_natures = self._clean_ints(tv_channel_data.get("preferred_natures", []))
-        self.forbidden_natures = self._clean_ints(tv_channel_data.get("forbidden_natures", []))
-        self.allowed_natures = self._clean_ints(tv_channel_data.get("allowed_natures", []))
-        self.preferred_container_kinds = self._clean_ints(tv_channel_data.get("preferred_container_kinds", []))
-        self.forbidden_container_kinds = self._clean_ints(tv_channel_data.get("forbidden_container_kinds", []))
-        self.allowed_container_kinds = self._clean_ints(tv_channel_data.get("allowed_container_kinds", []))
+        allowed = tv_channel_data.get("allowed", {}) or {}
+        preferred = tv_channel_data.get("preferred", {}) or {}
+        forbidden = tv_channel_data.get("forbidden", {}) or {}
+        self.preferred_categories = self._clean_strings(preferred.get("categories", []))
+        self.forbidden_categories = self._clean_strings(forbidden.get("categories", []))
+        self.allowed_categories = self._clean_strings(allowed.get("categories", []))
+        self.preferred_natures = self._clean_ints(preferred.get("natures", []))
+        self.forbidden_natures = self._clean_ints(forbidden.get("natures", []))
+        self.allowed_natures = self._clean_ints(allowed.get("natures", []))
+        self.preferred_container_kinds = self._clean_ints(preferred.get("container_kinds", []))
+        self.forbidden_container_kinds = self._clean_ints(forbidden.get("container_kinds", []))
+        self.allowed_container_kinds = self._clean_ints(allowed.get("container_kinds", []))
         self.allow_filler = bool(tv_channel_data.get("allow_filler", True))
         self.random = random.Random(seed)
 
@@ -111,15 +104,21 @@ class TvChannelGridGeneratorWithRandomness:
                     max_items=max_items,
                     min_duration_seconds_per_item=min_minutes * 60,
                     max_duration_seconds_per_item=max_minutes * 60,
-                    allowed_categories=self._select_allowed_categories(),
-                    forbidden_categories=self.forbidden_categories,
-                    preferred_categories=self._select_preferred_categories(),
-                    allowed_natures=selected_natures,
-                    forbidden_natures=self.forbidden_natures,
-                    preferred_natures=self._select_preferred_natures(selected_natures),
-                    allowed_container_kinds=self._select_allowed_container_kinds(),
-                    forbidden_container_kinds=self.forbidden_container_kinds,
-                    preferred_container_kinds=self._select_preferred_container_kinds(),
+                    allowed={
+                        "categories": self._select_allowed_categories(),
+                        "natures": selected_natures,
+                        "container_kinds": self._select_allowed_container_kinds(),
+                    },
+                    preferred={
+                        "categories": self._select_preferred_categories(),
+                        "natures": self._select_preferred_natures(selected_natures),
+                        "container_kinds": self._select_preferred_container_kinds(),
+                    },
+                    forbidden={
+                        "categories": self.forbidden_categories,
+                        "natures": self.forbidden_natures,
+                        "container_kinds": self.forbidden_container_kinds,
+                    },
                 )
             )
             cursor = block_end

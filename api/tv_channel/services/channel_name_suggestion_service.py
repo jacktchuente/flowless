@@ -104,13 +104,9 @@ class ChannelNameSuggestionService:
         if editorial_line is None:
             return None
         return {
-            "allowed_categories": editorial_line.allowed_categories,
-            "forbidden_categories": editorial_line.forbidden_categories,
-            "preferred_categories": editorial_line.preferred_categories,
-            "allowed_natures": editorial_line.allowed_natures,
-            "preferred_natures": editorial_line.preferred_natures,
-            "allowed_container_kinds": editorial_line.allowed_container_kinds,
-            "preferred_container_kinds": editorial_line.preferred_container_kinds,
+            "allowed": editorial_line.allowed,
+            "preferred": editorial_line.preferred,
+            "forbidden": editorial_line.forbidden,
             "start_at": editorial_line.start_at.isoformat(),
             "end_at": editorial_line.end_at.isoformat(),
         }

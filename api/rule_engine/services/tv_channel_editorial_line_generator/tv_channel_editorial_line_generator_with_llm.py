@@ -20,15 +20,10 @@ class TvChannelEditorialLineInput(TypedDict):
 
 
 class PreparedTvChannelEditorialLine(TypedDict):
-    allowed_categories: list[str]
-    forbidden_categories: list[str]
-    preferred_categories: list[str]
-    allowed_natures: list[int]
-    forbidden_natures: list[int]
-    preferred_natures: list[int]
-    allowed_container_kinds: list[int]
-    forbidden_container_kinds: list[int]
-    preferred_container_kinds: list[int]
+    # dicts keyed by rule axis: categories / natures / container_kinds
+    allowed: dict[str, list]
+    preferred: dict[str, list]
+    forbidden: dict[str, list]
     start_at: time
     end_at: time
     allow_filler: bool
@@ -87,60 +82,32 @@ class TvChannelEditorialLineGeneratorWithLlm:
         nature_by_label = {choice.label: choice.value for choice in MediaNature}
         container_kind_by_label = {choice.label: choice.value for choice in MediaContainerKind}
 
-        allowed_categories = self._validate_string_choices(
-            payload.get("allowed_categories", []),
-            available_categories,
-            "allowed_categories",
-        )
-        forbidden_categories = self._validate_string_choices(
-            payload.get("forbidden_categories", []),
-            available_categories,
-            "forbidden_categories",
-        )
-        preferred_categories = self._validate_string_choices(
-            payload.get("preferred_categories", []),
-            available_categories,
-            "preferred_categories",
-        )
+        rules: dict[str, dict[str, list]] = {}
+        for level in ("allowed", "preferred", "forbidden"):
+            raw_level = payload.get(level, {})
+            if not isinstance(raw_level, dict):
+                raise TvChannelEditorialLineGenerationError(f"{level} must be a dict keyed by rule axis.")
+            rules[level] = {
+                "categories": self._validate_string_choices(
+                    raw_level.get("categories", []),
+                    available_categories,
+                    f"{level} categories",
+                ),
+                "natures": self._validate_mapped_choices(
+                    raw_level.get("natures", []),
+                    nature_by_label,
+                    f"{level} natures",
+                ),
+                "container_kinds": self._validate_mapped_choices(
+                    raw_level.get("container_kinds", []),
+                    container_kind_by_label,
+                    f"{level} container_kinds",
+                ),
+            }
 
-        allowed_natures = self._validate_mapped_choices(
-            payload.get("allowed_natures", []),
-            nature_by_label,
-            "allowed_natures",
-        )
-        forbidden_natures = self._validate_mapped_choices(
-            payload.get("forbidden_natures", []),
-            nature_by_label,
-            "forbidden_natures",
-        )
-        preferred_natures = self._validate_mapped_choices(
-            payload.get("preferred_natures", []),
-            nature_by_label,
-            "preferred_natures",
-        )
-
-        allowed_container_kinds = self._validate_mapped_choices(
-            payload.get("allowed_container_kinds", []),
-            container_kind_by_label,
-            "allowed_container_kinds",
-        )
-        forbidden_container_kinds = self._validate_mapped_choices(
-            payload.get("forbidden_container_kinds", []),
-            container_kind_by_label,
-            "forbidden_container_kinds",
-        )
-        preferred_container_kinds = self._validate_mapped_choices(
-            payload.get("preferred_container_kinds", []),
-            container_kind_by_label,
-            "preferred_container_kinds",
-        )
-
-        self._ensure_no_overlap(allowed_categories, forbidden_categories, "categories")
-        self._ensure_no_overlap(preferred_categories, forbidden_categories, "categories")
-        self._ensure_no_overlap(allowed_natures, forbidden_natures, "natures")
-        self._ensure_no_overlap(preferred_natures, forbidden_natures, "natures")
-        self._ensure_no_overlap(allowed_container_kinds, forbidden_container_kinds, "container_kinds")
-        self._ensure_no_overlap(preferred_container_kinds, forbidden_container_kinds, "container_kinds")
+        for axis in ("categories", "natures", "container_kinds"):
+            self._ensure_no_overlap(rules["allowed"][axis], rules["forbidden"][axis], axis)
+            self._ensure_no_overlap(rules["preferred"][axis], rules["forbidden"][axis], axis)
 
         start_at = self._parse_time(payload.get("start_at"), "start_at")
         end_at = self._parse_time(payload.get("end_at"), "end_at")
@@ -152,15 +119,9 @@ class TvChannelEditorialLineGeneratorWithLlm:
             raise TvChannelEditorialLineGenerationError("allow_filler must be a boolean.")
 
         return {
-            "allowed_categories": allowed_categories,
-            "forbidden_categories": forbidden_categories,
-            "preferred_categories": preferred_categories,
-            "allowed_natures": allowed_natures,
-            "forbidden_natures": forbidden_natures,
-            "preferred_natures": preferred_natures,
-            "allowed_container_kinds": allowed_container_kinds,
-            "forbidden_container_kinds": forbidden_container_kinds,
-            "preferred_container_kinds": preferred_container_kinds,
+            "allowed": rules["allowed"],
+            "preferred": rules["preferred"],
+            "forbidden": rules["forbidden"],
             "start_at": start_at,
             "end_at": end_at,
             "allow_filler": allow_filler,

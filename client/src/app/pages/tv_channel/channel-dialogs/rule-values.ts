@@ -33,10 +33,11 @@ export function readRuleValues(
   source: EditorialLineData | GridBlock,
   level: RuleLevel,
 ): Array<string | number> {
+  const rules = source[level] ?? {};
   return [
-    ...source[`${level}_categories`].map((value) => `category:${value}`),
-    ...source[`${level}_natures`].map((value) => `nature:${value}`),
-    ...source[`${level}_container_kinds`].map((value) => `kind:${value}`),
+    ...(rules.categories ?? []).map((value) => `category:${value}`),
+    ...(rules.natures ?? []).map((value) => `nature:${value}`),
+    ...(rules.container_kinds ?? []).map((value) => `kind:${value}`),
   ];
 }
 export function writeRuleValues(
@@ -44,13 +45,15 @@ export function writeRuleValues(
   level: RuleLevel,
   values: Array<string | number>,
 ) {
-  target[`${level}_categories`] = values
-    .filter((v) => String(v).startsWith("category:"))
-    .map((v) => String(v).slice(9));
-  target[`${level}_natures`] = values
-    .filter((v) => String(v).startsWith("nature:"))
-    .map((v) => Number(String(v).slice(7)));
-  target[`${level}_container_kinds`] = values
-    .filter((v) => String(v).startsWith("kind:"))
-    .map((v) => Number(String(v).slice(5)));
+  target[level] = {
+    categories: values
+      .filter((v) => String(v).startsWith("category:"))
+      .map((v) => String(v).slice(9)),
+    natures: values
+      .filter((v) => String(v).startsWith("nature:"))
+      .map((v) => Number(String(v).slice(7))),
+    container_kinds: values
+      .filter((v) => String(v).startsWith("kind:"))
+      .map((v) => Number(String(v).slice(5))),
+  };
 }
