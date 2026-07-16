@@ -9,7 +9,7 @@ from grid_schedule.models import PlayoutGenerationReport
 from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSerializer
 from django.utils.timezone import now
 from media_source.constants import MediaContainerKind, MediaNature, MediaProgrammingRole
-from rule_engine.services import category_service
+from rule_engine.services import category_service, vocabulary_service
 from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, GridLayoutMode, TvChannel
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer, EditorialLineWriteSerializer
 from tv_channel.serializers.form_suggestion_serializers import FormSuggestionRequestSerializer
@@ -74,6 +74,18 @@ class TvChannelViewSet(
             "programming_roles": [{"value": choice.value, "label": choice.label} for choice in MediaProgrammingRole],
             "filler_policies": list(FillerPolicy.objects.order_by("name").values("id", "name", "duration_seconds")),
         })
+
+    @action(detail=False, methods=("get",), url_path="rule-option-search")
+    def rule_option_search(self, request):
+        query = (request.query_params.get("q") or "").strip()
+        if len(query) < 2:
+            return Response({"results": []})
+        try:
+            limit = int(request.query_params.get("limit", 20))
+        except (TypeError, ValueError):
+            limit = 20
+        limit = max(1, min(limit, 50))
+        return Response({"results": vocabulary_service.search(query, limit=limit)})
 
     @action(detail=True, methods=("get", "put", "patch"), url_path="editorial-line")
     def editorial_line(self, request, pk=None):
