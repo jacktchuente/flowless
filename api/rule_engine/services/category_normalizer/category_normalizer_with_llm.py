@@ -33,7 +33,7 @@ class CategoryNormalizerWithLlm:
         return getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS
 
     def _get_general_categories(self) -> list[str]:
-        available_categories = category_service.get_general_category_names()
+        available_categories = self._get_general_vocabulary()
         if not available_categories:
             return []
 
@@ -63,6 +63,21 @@ class CategoryNormalizerWithLlm:
             self._parse_categories(response.content),
             available_categories,
         )
+
+    def _get_general_vocabulary(self) -> list[str]:
+        # Nature de collection connue -> vocabulaire restreint aux categories
+        # de cette nature (0 lien = toutes). Nature inconnue -> vocabulaire
+        # general complet. Les genres musicaux restent exclus dans les deux cas.
+        collection = getattr(self.media_container, "media_collection", None)
+        nature = getattr(collection, "nature", None)
+        if nature is None:
+            return category_service.get_general_category_names()
+        music_categories = category_service.get_music_category_names()
+        return [
+            name
+            for name in category_service.get_category_names_for_nature(nature)
+            if name not in music_categories
+        ]
 
     def _get_music_categories(self) -> list[str]:
         # Genres uniquement: "music" serait redondant avec le kind du container.
