@@ -7,7 +7,7 @@ from django.conf import settings
 from rest_framework.serializers import ValidationError
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 from tv_channel.models import FillerPolicy
 from tv_channel.serializers.editorial_line_serializers import EditorialLineWriteSerializer
 from tv_channel.serializers.grid_block_serializers import GridBlockWriteSerializer
@@ -71,7 +71,7 @@ class FormSuggestionService:
             "editorial_line": self._model_values(editorial),
             "blocks": self._json_safe(blocks),
             "current_block_id": self.grid_block.pk if self.grid_block else None,
-            "categories": categories,
+            "categories": category_service.get_all_category_names(),
             "natures": [choice.label for choice in MediaNature],
             "container_kinds": [choice.label for choice in MediaContainerKind],
             "filler_policies": list(FillerPolicy.objects.order_by("name").values("id", "name", "duration_seconds")),

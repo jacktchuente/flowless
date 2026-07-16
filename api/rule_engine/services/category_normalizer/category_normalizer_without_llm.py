@@ -4,9 +4,9 @@ import re
 import unicodedata
 from typing import Any, TypedDict
 
-from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
+from media_source.constants import MUSIC_CONTAINER_KINDS, MediaNature
 from rule_engine.models import CategoryRule as CategoryRuleModel
+from rule_engine.services import category_service
 
 
 class RulePayload(TypedDict, total=False):
@@ -34,7 +34,7 @@ class CategoryNormalizerWithoutLlm:
 
     def get_categories(self) -> list[str]:
         matched_categories: list[str] = []
-        is_music = self._is_music_container()
+        allowed_categories = self._get_allowed_category_names()
 
         category_rules = CategoryRuleModel.objects.select_related(
             "category",
@@ -42,13 +42,7 @@ class CategoryNormalizerWithoutLlm:
 
         for category_rule in category_rules:
             category_name = category_rule.category.category
-            # Vocabulaire scinde par type de contenu: un container musical ne
-            # recoit que des genres musicaux ("music" serait redondant avec son
-            # kind), les autres containers jamais un genre (mais "music" reste
-            # possible: concerts filmes, biopics...).
-            if is_music and category_name not in MUSIC_GENRE_CATEGORIES:
-                continue
-            if not is_music and category_name in MUSIC_GENRE_CATEGORIES:
+            if allowed_categories is not None and category_name not in allowed_categories:
                 continue
             rules = category_rule.rules or []
 
@@ -60,9 +54,24 @@ class CategoryNormalizerWithoutLlm:
 
         return matched_categories
 
-    def _is_music_container(self) -> bool:
+    def _get_allowed_category_names(self) -> set[str] | None:
+        # Le vocabulaire est pilote par la nature du container: categories
+        # liees a cette nature + categories sans lien (valables partout).
+        # Nature inconnue: aucun filtre.
+        nature = self._get_container_nature()
+        if nature is None:
+            return None
+        return set(category_service.get_category_names_for_nature(nature))
+
+    def _get_container_nature(self) -> int | None:
         collection = getattr(self.media_container, "media_collection", None)
-        return getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS
+        nature = getattr(collection, "nature", None)
+        if nature is not None:
+            return nature
+        # Collection non taguee mais kind intrinsequement musical.
+        if getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS:
+            return MediaNature.MUSIC
+        return None
 
     def _rules_match(self, rules: list[dict[str, Any]]) -> bool:
         return any(

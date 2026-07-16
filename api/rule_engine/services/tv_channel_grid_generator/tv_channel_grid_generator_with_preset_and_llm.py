@@ -7,7 +7,7 @@ from django.conf import settings
 
 from grid_layout_preset.models import GridBlockPreset, GridLayoutPreset
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 from rule_engine.services.tv_channel_grid_generator.tv_channel_grid_generator_with_randomness import (
     PreparedGridBlock,
     TvChannelGridGeneratorPayload,
@@ -154,7 +154,7 @@ class TvChannelGridGeneratorWithPresetAndLlm:
                 "preset_id": preset.id,
                 "preset_name": preset.name,
                 "preset_description": preset.description,
-                "available_categories": categories,
+                "available_categories": category_service.get_all_category_names(),
                 "available_natures": [choice.label for choice in MediaNature],
                 "available_container_kinds": [choice.label for choice in MediaContainerKind],
                 "preset_blocks": [
@@ -208,7 +208,7 @@ class TvChannelGridGeneratorWithPresetAndLlm:
         if not raw_sections:
             return [], ["LLM did not return any block section after ###response###."]
 
-        available_categories = set(categories)
+        available_categories = set(category_service.get_all_category_names())
         nature_by_label = {choice.label.lower(): choice.value for choice in MediaNature}
         container_kind_by_label = {choice.label.lower(): choice.value for choice in MediaContainerKind}
         fields = (

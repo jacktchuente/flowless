@@ -8,7 +8,7 @@ suggestions one validation source of truth.
 from django.core.exceptions import ValidationError
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 
 
 RULE_AXES = ("categories", "natures", "container_kinds")
@@ -23,7 +23,8 @@ def _deduplicate(values):
 def validate_categories(values: list) -> list[str]:
     if not isinstance(values, list):
         raise ValidationError("Must be a list.")
-    invalid = [value for value in values if not isinstance(value, str) or value not in categories]
+    known_categories = set(category_service.get_all_category_names())
+    invalid = [value for value in values if not isinstance(value, str) or value not in known_categories]
     if invalid:
         raise ValidationError(f"Unknown categories: {invalid}.")
     return _deduplicate(values)

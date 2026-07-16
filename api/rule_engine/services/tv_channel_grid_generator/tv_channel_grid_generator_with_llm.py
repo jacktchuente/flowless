@@ -8,7 +8,7 @@ from typing import TypedDict
 from django.conf import settings
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 from rule_engine.services.tv_channel_grid_generator.tv_channel_grid_generator_with_randomness import PreparedGridBlock
 from utils.format_with_jinja import format_with_jinja
 from utils.llm_service import LLMService
@@ -112,7 +112,7 @@ class TvChannelGridGeneratorWithLlm:
                     self.tv_channel_data.get("preferred_container_kinds", []),
                     MediaContainerKind,
                 ),
-                "available_categories": categories,
+                "available_categories": category_service.get_all_category_names(),
                 "available_natures": [choice.label for choice in MediaNature],
                 "available_container_kinds": [choice.label for choice in MediaContainerKind],
                 "retry_errors": retry_errors,
@@ -141,7 +141,7 @@ class TvChannelGridGeneratorWithLlm:
         return raw_blocks
 
     def _validate_blocks(self, raw_blocks: list[dict]) -> tuple[list[PreparedGridBlock], list[str]]:
-        category_set = set(categories)
+        category_set = set(category_service.get_all_category_names())
         nature_by_label = {choice.label: choice.value for choice in MediaNature}
         container_kind_by_label = {choice.label: choice.value for choice in MediaContainerKind}
 

@@ -9,7 +9,7 @@ from grid_schedule.models import PlayoutGenerationReport
 from grid_schedule.serializers.playout_report_serializers import PlayoutGenerationReportSerializer
 from django.utils.timezone import now
 from media_source.constants import MediaContainerKind, MediaNature, MediaProgrammingRole
-from media_source.data import categories
+from rule_engine.services import category_service
 from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, GridLayoutMode, TvChannel
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer, EditorialLineWriteSerializer
 from tv_channel.serializers.form_suggestion_serializers import FormSuggestionRequestSerializer
@@ -68,7 +68,7 @@ class TvChannelViewSet(
     @action(detail=False, methods=("get",), url_path="form-options")
     def form_options(self, request):
         return Response({
-            "categories": categories,
+            "categories": category_service.get_all_category_names(),
             "natures": [{"value": choice.value, "label": choice.label} for choice in MediaNature],
             "container_kinds": [{"value": choice.value, "label": choice.label} for choice in MediaContainerKind],
             "programming_roles": [{"value": choice.value, "label": choice.label} for choice in MediaProgrammingRole],

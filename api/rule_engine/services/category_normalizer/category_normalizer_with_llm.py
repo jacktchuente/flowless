@@ -4,9 +4,8 @@ import re
 
 from django.conf import settings
 
-from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
-from rule_engine.models import Category
+from media_source.constants import MUSIC_CONTAINER_KINDS, MediaNature
+from rule_engine.services import category_service
 from utils.format_with_jinja import format_with_jinja
 from utils.llm_service import LLMService
 
@@ -22,23 +21,30 @@ class CategoryNormalizerWithLlm:
         self.media_container = media_container
 
     def get_categories(self) -> list[str]:
-        # Vocabulaire scinde par type de contenu: un container musical est
-        # categorise avec un prompt dedie sur music + genres musicaux, les
-        # autres containers ne voient jamais les genres musicaux.
-        if self._is_music_container():
+        # Le vocabulaire est pilote par la nature du container: categories
+        # liees a cette nature + categories sans lien (valables partout).
+        # Seul le prompt reste specialise pour la nature musicale.
+        nature = self._get_container_nature()
+        if nature == MediaNature.MUSIC:
             return self._get_music_categories()
-        return self._get_general_categories()
+        return self._get_general_categories(nature)
 
-    def _is_music_container(self) -> bool:
+    def _get_container_nature(self) -> int | None:
         collection = getattr(self.media_container, "media_collection", None)
-        return getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS
+        nature = getattr(collection, "nature", None)
+        if nature is not None:
+            return nature
+        # Collection non taguee mais kind intrinsequement musical.
+        if getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS:
+            return MediaNature.MUSIC
+        return None
 
-    def _get_general_categories(self) -> list[str]:
-        available_categories = [
-            category
-            for category in Category.objects.values_list("category", flat=True)
-            if category not in MUSIC_GENRE_CATEGORIES
-        ]
+    def _get_general_categories(self, nature: int | None) -> list[str]:
+        # Nature inconnue: aucun filtre, tout le vocabulaire est propose.
+        if nature is None:
+            available_categories = category_service.get_all_category_names()
+        else:
+            available_categories = category_service.get_category_names_for_nature(nature)
         if not available_categories:
             return []
 
@@ -70,12 +76,7 @@ class CategoryNormalizerWithLlm:
         )
 
     def _get_music_categories(self) -> list[str]:
-        # Genres uniquement: "music" serait redondant avec le kind du container.
-        available_categories = [
-            category
-            for category in Category.objects.values_list("category", flat=True)
-            if category in MUSIC_GENRE_CATEGORIES
-        ]
+        available_categories = category_service.get_category_names_for_nature(MediaNature.MUSIC)
         if not available_categories:
             return []
 

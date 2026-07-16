@@ -1,0 +1,1085 @@
+{
+  "natures": [
+    "fiction",
+    "documentary",
+    "music",
+    "sport",
+    "news",
+    "show",
+    "other"
+  ],
+  "categories": [
+    {
+      "name": "action",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "action",
+            "combat",
+            "fight",
+            "fighting",
+            "course poursuite",
+            "chase",
+            "explosion",
+            "explosions",
+            "martial arts",
+            "arts martiaux",
+            "gunfight",
+            "fusillade",
+            "mission",
+            "commando",
+            "mercenary",
+            "mercenaire",
+            "superhero",
+            "super hero",
+            "super-heros",
+            "superheros",
+            "spy action",
+            "espionnage action"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "adventure",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "adventure",
+            "aventure",
+            "journey",
+            "voyage",
+            "quest",
+            "quete",
+            "treasure",
+            "tresor",
+            "exploration",
+            "explorer",
+            "expedition",
+            "island",
+            "ile",
+            "jungle",
+            "pirate",
+            "pirates",
+            "survival adventure",
+            "road trip",
+            "odyssey",
+            "odyssee"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "classical",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "classical",
+            "classique",
+            "musique classique",
+            "symphony",
+            "symphonie",
+            "opera",
+            "orchestra",
+            "orchestre",
+            "baroque",
+            "chamber music",
+            "piano solo",
+            "concerto"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "country",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "country",
+            "country music",
+            "folk",
+            "folk music",
+            "bluegrass",
+            "americana",
+            "honky tonk",
+            "western swing"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "documentary",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "documentary",
+            "documentaire",
+            "docuseries",
+            "docu series",
+            "docu-serie",
+            "reportage",
+            "investigative documentary",
+            "documentaire d enquete",
+            "real story",
+            "histoire vraie",
+            "true story",
+            "based on true events",
+            "inspire de faits reels",
+            "nature documentary",
+            "science documentary",
+            "historical documentary",
+            "biographical documentary"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "electronic",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "electronic",
+            "electro",
+            "electronica",
+            "techno",
+            "house",
+            "deep house",
+            "edm",
+            "trance",
+            "drum and bass",
+            "drum & bass",
+            "dubstep",
+            "ambient",
+            "synthwave"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "emotion",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "emotion",
+            "emotional",
+            "emouvant",
+            "touching",
+            "poignant",
+            "drama",
+            "drame",
+            "melodrama",
+            "melodrame",
+            "tearjerker",
+            "larmes",
+            "grief",
+            "deuil",
+            "family drama",
+            "drame familial",
+            "human drama",
+            "destin",
+            "intimate",
+            "intimiste"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "family",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "family",
+            "famille",
+            "familial",
+            "family movie",
+            "film familial",
+            "kids",
+            "children",
+            "enfants",
+            "for children",
+            "pour enfants",
+            "all ages",
+            "tous publics",
+            "parent",
+            "parents",
+            "siblings",
+            "frere",
+            "soeur",
+            "brother",
+            "sister",
+            "family adventure",
+            "aventure familiale"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fantasy",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "fantasy",
+            "fantaisie",
+            "heroic fantasy",
+            "high fantasy",
+            "dark fantasy",
+            "medieval fantasy",
+            "magie",
+            "magic",
+            "wizard",
+            "sorcier",
+            "sorciere",
+            "witch",
+            "dragon",
+            "dragons",
+            "elf",
+            "elves",
+            "elfe",
+            "elfes",
+            "kingdom",
+            "royaume",
+            "mythical",
+            "mythique",
+            "legend",
+            "legende"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hip-hop",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "hip hop",
+            "hip-hop",
+            "hiphop",
+            "rap",
+            "rap francais",
+            "gangsta rap",
+            "trap",
+            "drill",
+            "boom bap",
+            "grime"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "history",
+            "historical",
+            "histoire",
+            "historique",
+            "period drama",
+            "film d epoque",
+            "ancient",
+            "antique",
+            "middle ages",
+            "moyen age",
+            "renaissance",
+            "empire",
+            "revolution",
+            "revolution francaise",
+            "victorian",
+            "royalty",
+            "royaute",
+            "king",
+            "roi",
+            "queen",
+            "reine"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "horror",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "horror",
+            "horreur",
+            "scary",
+            "effrayant",
+            "frisson",
+            "frissons",
+            "terror",
+            "terreur",
+            "haunted",
+            "hante",
+            "maison hantee",
+            "ghost",
+            "fantome",
+            "zombie",
+            "zombies",
+            "vampire",
+            "vampires",
+            "monster",
+            "monstre",
+            "monsters",
+            "monstres",
+            "slasher",
+            "paranormal",
+            "supernatural horror",
+            "possession",
+            "demon",
+            "demons",
+            "demoniaque"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "humor",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "humor",
+            "humour",
+            "comedy",
+            "comedie",
+            "funny",
+            "drole",
+            "satire",
+            "satirical",
+            "parody",
+            "parodie",
+            "sitcom",
+            "stand up",
+            "stand-up",
+            "sketch",
+            "absurd",
+            "absurde",
+            "burlesque",
+            "feel good comedy",
+            "romantic comedy",
+            "comedie romantique"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "investigation",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "investigation",
+            "enquete",
+            "detective",
+            "detective privé",
+            "private detective",
+            "police investigation",
+            "enquete policiere",
+            "murder investigation",
+            "crime investigation",
+            "whodunit",
+            "cold case",
+            "affaire non resolue",
+            "detective story",
+            "policier",
+            "procedural",
+            "police procedural",
+            "inspecteur",
+            "inspector",
+            "detective fiction"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "jazz",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "jazz",
+            "blues",
+            "swing",
+            "bebop",
+            "big band",
+            "smooth jazz",
+            "fusion",
+            "ragtime",
+            "gospel"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "latin",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "latin",
+            "latino",
+            "salsa",
+            "reggaeton",
+            "bachata",
+            "merengue",
+            "cumbia",
+            "flamenco",
+            "tango",
+            "bossa nova",
+            "samba"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "metal",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "metal",
+            "heavy metal",
+            "thrash metal",
+            "death metal",
+            "black metal",
+            "doom metal",
+            "power metal",
+            "nu metal",
+            "metalcore",
+            "hardcore"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "music",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "music",
+            "musique",
+            "musical",
+            "concert",
+            "live concert",
+            "album",
+            "song",
+            "chanson",
+            "singer",
+            "chanteur",
+            "chanteuse",
+            "band",
+            "groupe",
+            "musician",
+            "musicien",
+            "musicienne",
+            "rock",
+            "pop",
+            "jazz",
+            "rap",
+            "hip hop",
+            "classical music",
+            "musique classique"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pop",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "pop",
+            "pop music",
+            "synthpop",
+            "synth-pop",
+            "electropop",
+            "dance pop",
+            "k-pop",
+            "kpop",
+            "j-pop",
+            "jpop",
+            "teen pop",
+            "pop rock"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reggae",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "reggae",
+            "ska",
+            "dub",
+            "dancehall",
+            "roots reggae",
+            "ragga"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rnb-soul",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "rnb",
+            "r&b",
+            "r'n'b",
+            "rhythm and blues",
+            "soul",
+            "neo soul",
+            "funk",
+            "motown",
+            "disco"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rock",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "rock",
+            "hard rock",
+            "classic rock",
+            "punk",
+            "punk rock",
+            "grunge",
+            "indie rock",
+            "alternative rock",
+            "garage rock",
+            "psychedelic rock",
+            "rock and roll",
+            "rock'n'roll"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "romance",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "romance",
+            "romantic",
+            "romantique",
+            "love story",
+            "histoire d amour",
+            "amour",
+            "love",
+            "couple",
+            "relationship",
+            "relation amoureuse",
+            "passion",
+            "seduction",
+            "mariage",
+            "wedding",
+            "breakup",
+            "rupture",
+            "romantic drama",
+            "romantic comedy",
+            "comedie romantique"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "science-fiction",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "science fiction",
+            "science-fiction",
+            "sci fi",
+            "sci-fi",
+            "scifi",
+            "sf",
+            "space opera",
+            "space",
+            "alien",
+            "aliens",
+            "extraterrestrial",
+            "extraterrestre",
+            "futuristic",
+            "futuriste",
+            "cyberpunk",
+            "robot",
+            "robots",
+            "android",
+            "androide",
+            "dystopia",
+            "dystopie",
+            "time travel",
+            "voyage dans le temps",
+            "post apocalyptic",
+            "post-apocalyptic",
+            "post apocalyptique",
+            "apocalypse"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sport",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "sport",
+            "sports",
+            "football",
+            "soccer",
+            "basketball",
+            "basket",
+            "tennis",
+            "boxing",
+            "boxe",
+            "baseball",
+            "hockey",
+            "rugby",
+            "athlete",
+            "athlete",
+            "competition",
+            "championship",
+            "championnat",
+            "olympic",
+            "olympique",
+            "race",
+            "course",
+            "formula 1",
+            "formule 1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "suspense",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "suspense",
+            "thriller",
+            "psychological thriller",
+            "thriller psychologique",
+            "tension",
+            "mystery",
+            "mystere",
+            "mysterious",
+            "mysterieux",
+            "conspiracy",
+            "complot",
+            "twist",
+            "plot twist",
+            "danger",
+            "menace",
+            "manhunt",
+            "traque",
+            "survival",
+            "survie",
+            "kidnapping",
+            "enlevement"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "teenagers",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "teen",
+            "teens",
+            "teenager",
+            "teenagers",
+            "adolescent",
+            "adolescents",
+            "adolescente",
+            "adolescentes",
+            "teen drama",
+            "teen comedy",
+            "coming of age",
+            "passage a l age adulte",
+            "high school",
+            "lycee",
+            "college",
+            "school life",
+            "vie scolaire",
+            "young adult",
+            "jeune adulte",
+            "youth",
+            "jeunesse"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "true-crime",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "true crime",
+            "true-crime",
+            "crime reel",
+            "crimes reels",
+            "fait divers",
+            "faits divers",
+            "serial killer",
+            "tueur en serie",
+            "murder case",
+            "affaire criminelle",
+            "criminal case",
+            "cold case",
+            "unsolved crime",
+            "crime non resolu",
+            "real investigation",
+            "enquete reelle",
+            "documentaire criminel",
+            "criminal documentary"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "variete-francaise",
+      "natures": [
+        "music"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "tag",
+            "genre"
+          ],
+          "values": [
+            "variete francaise",
+            "variete",
+            "chanson francaise",
+            "chanson",
+            "french pop",
+            "french touch",
+            "yeye"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "war",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "war",
+            "guerre",
+            "world war",
+            "seconde guerre mondiale",
+            "premiere guerre mondiale",
+            "battle",
+            "bataille",
+            "soldier",
+            "soldat",
+            "army",
+            "armee",
+            "military",
+            "militaire",
+            "combat mission",
+            "front line",
+            "ligne de front",
+            "resistance",
+            "occupation",
+            "veteran",
+            "veteran"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "western",
+      "natures": [
+        "fiction"
+      ],
+      "rules": [
+        {
+          "fields": [
+            "title",
+            "description",
+            "tag",
+            "genre",
+            "category"
+          ],
+          "values": [
+            "western",
+            "cowboy",
+            "cowboys",
+            "far west",
+            "wild west",
+            "ouest americain",
+            "sheriff",
+            "hors la loi",
+            "outlaw",
+            "duel",
+            "saloon",
+            "ranch",
+            "frontier",
+            "frontiere",
+            "bounty hunter",
+            "chasseur de primes",
+            "spaghetti western"
+          ]
+        }
+      ]
+    }
+  ]
+}
