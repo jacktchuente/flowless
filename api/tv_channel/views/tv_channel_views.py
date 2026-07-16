@@ -231,6 +231,14 @@ class TvChannelViewSet(
             "category": "categories",
             "nature": "natures",
             "kind": "container_kinds",
+            "director": "directors",
+            "writer": "writers",
+            "creator": "creators",
+            "actor": "actors",
+            "studio": "studios",
+            "country": "countries",
+            "audio_language": "audio_languages",
+            "subtitle_language": "subtitle_languages",
         }
         levels = serializer.validated_data["levels"]
         axes = [type_to_axis[item_type] for item_type in serializer.validated_data["types"]]

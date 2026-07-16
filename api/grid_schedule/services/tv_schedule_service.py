@@ -20,6 +20,7 @@ from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer, MediaItem
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import EditorialLine, GridBlock, GridLayout, TvChannel
+from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
 
 logger = logging.getLogger(__name__)
 
@@ -559,18 +560,20 @@ class TvPlayoutGenerationService:
         return candidates
 
     def _passes_strict_filters(self, tv_channel: TvChannel, block: GridBlock, container: MediaContainer) -> bool:
-        categories = self._container_categories(container)
         container_nature = self._container_nature(container)
         container_kind = self._container_kind(container)
 
-        if not self._passes_allowed_categories(categories, self.editorial_line.allowed.get("categories", [])):
-            return False
-        if not self._passes_allowed_categories(categories, block.allowed.get("categories", [])):
-            return False
-        if self._intersects(categories, self.editorial_line.forbidden.get("categories", [])):
-            return False
-        if self._intersects(categories, block.forbidden.get("categories", [])):
-            return False
+        for axis in STRING_RULE_AXES:
+            values = self._container_axis_values(container, axis)
+
+            if not self._passes_allowed_values(values, self.editorial_line.allowed.get(axis, [])):
+                return False
+            if not self._passes_allowed_values(values, block.allowed.get(axis, [])):
+                return False
+            if self._intersects(values, self.editorial_line.forbidden.get(axis, [])):
+                return False
+            if self._intersects(values, block.forbidden.get(axis, [])):
+                return False
 
         if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed.get("natures", [])):
             return False
@@ -639,17 +642,17 @@ class TvPlayoutGenerationService:
     ) -> CandidateScore:
         score = 0.0
         reasons = {}
-        categories = self._container_categories(container)
 
-        category_bonus = self._preferred_category_bonus(
-            categories=categories,
-            preferred_values=(
-                self.editorial_line.preferred.get("categories", [])
-                + block.preferred.get("categories", [])
-            ),
-        )
-        score += category_bonus
-        reasons["preferred_categories"] = category_bonus
+        for axis in STRING_RULE_AXES:
+            axis_bonus = self._preferred_values_bonus(
+                values=self._container_axis_values(container, axis),
+                preferred_values=(
+                    self.editorial_line.preferred.get(axis, [])
+                    + block.preferred.get(axis, [])
+                ),
+            )
+            score += axis_bonus
+            reasons[f"preferred_{axis}"] = axis_bonus
 
         nature_bonus = self._preferred_choice_bonus(
             self._container_nature(container),
@@ -1064,6 +1067,16 @@ class TvPlayoutGenerationService:
                     values.add(value)
         return values
 
+    @classmethod
+    def _container_axis_values(cls, container: MediaContainer, axis: str) -> set[str]:
+        if axis == "categories":
+            return cls._container_categories(container)
+        return {
+            value
+            for value in (getattr(container, axis) or [])
+            if isinstance(value, str) and value
+        }
+
     @staticmethod
     def _container_nature(container: MediaContainer):
         return getattr(container.media_collection, "nature", None)
@@ -1073,20 +1086,20 @@ class TvPlayoutGenerationService:
         return getattr(container.media_collection, "container_kind", None)
 
     @staticmethod
-    def _passes_allowed_categories(container_categories: set[str], allowed_categories: list[str]) -> bool:
-        allowed = {value for value in (allowed_categories or []) if isinstance(value, str)}
+    def _passes_allowed_values(container_values: set[str], allowed_values: list[str]) -> bool:
+        allowed = {value for value in (allowed_values or []) if isinstance(value, str)}
         if not allowed:
             return True
-        return bool(container_categories.intersection(allowed))
+        return bool(container_values.intersection(allowed))
 
     @staticmethod
     def _intersects(left: set[str], right: list[str]) -> bool:
         values = {value for value in (right or []) if isinstance(value, str)}
         return bool(left.intersection(values))
 
-    def _preferred_category_bonus(self, *, categories: set[str], preferred_values: list[str]) -> float:
+    def _preferred_values_bonus(self, *, values: set[str], preferred_values: list[str]) -> float:
         preferred = {value for value in preferred_values if isinstance(value, str)}
-        return float(len(categories.intersection(preferred)))
+        return float(len(values.intersection(preferred)))
 
     def _preferred_choice_bonus(self, value, preferred_values: list) -> float:
         preferred = self._choice_values(preferred_values or [])
