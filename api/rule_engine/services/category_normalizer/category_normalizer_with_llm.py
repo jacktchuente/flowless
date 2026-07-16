@@ -5,8 +5,7 @@ import re
 from django.conf import settings
 
 from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
-from rule_engine.models import Category
+from rule_engine.services import category_service
 from utils.format_with_jinja import format_with_jinja
 from utils.llm_service import LLMService
 
@@ -34,11 +33,7 @@ class CategoryNormalizerWithLlm:
         return getattr(collection, "container_kind", None) in MUSIC_CONTAINER_KINDS
 
     def _get_general_categories(self) -> list[str]:
-        available_categories = [
-            category
-            for category in Category.objects.values_list("category", flat=True)
-            if category not in MUSIC_GENRE_CATEGORIES
-        ]
+        available_categories = category_service.get_general_category_names()
         if not available_categories:
             return []
 
@@ -71,11 +66,7 @@ class CategoryNormalizerWithLlm:
 
     def _get_music_categories(self) -> list[str]:
         # Genres uniquement: "music" serait redondant avec le kind du container.
-        available_categories = [
-            category
-            for category in Category.objects.values_list("category", flat=True)
-            if category in MUSIC_GENRE_CATEGORIES
-        ]
+        available_categories = sorted(category_service.get_music_category_names())
         if not available_categories:
             return []
 

@@ -5,8 +5,8 @@ import unicodedata
 from typing import Any, TypedDict
 
 from media_source.constants import MUSIC_CONTAINER_KINDS
-from project_ops.built_in_data.category_rule import MUSIC_GENRE_CATEGORIES
 from rule_engine.models import CategoryRule as CategoryRuleModel
+from rule_engine.services import category_service
 
 
 class RulePayload(TypedDict, total=False):
@@ -39,6 +39,7 @@ class CategoryNormalizerWithoutLlm:
         category_rules = CategoryRuleModel.objects.select_related(
             "category",
         ).all()
+        music_categories = category_service.get_music_category_names()
 
         for category_rule in category_rules:
             category_name = category_rule.category.category
@@ -46,9 +47,9 @@ class CategoryNormalizerWithoutLlm:
             # recoit que des genres musicaux ("music" serait redondant avec son
             # kind), les autres containers jamais un genre (mais "music" reste
             # possible: concerts filmes, biopics...).
-            if is_music and category_name not in MUSIC_GENRE_CATEGORIES:
+            if is_music and category_name not in music_categories:
                 continue
-            if not is_music and category_name in MUSIC_GENRE_CATEGORIES:
+            if not is_music and category_name in music_categories:
                 continue
             rules = category_rule.rules or []
 
