@@ -16,7 +16,7 @@ from rule_engine.services.category_normalizer.category_normalizer_without_llm im
 class MusicCategoryFixtureMixin:
     @classmethod
     def setUpTestData(cls):
-        Initializer.init_categories_and_category_rules()
+        Initializer.init_categories()
         cls.media_source = MediaSource.objects.create(name="jellyfin", is_active=True)
         cls.music_collection = MediaCollection.objects.create(
             name="Music videos",
