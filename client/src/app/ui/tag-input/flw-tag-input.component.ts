@@ -94,6 +94,10 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
   searchResults: FlwTagOption[] = [];
   readonly listId = `flw-tags-${Math.random().toString(36).slice(2)}`;
   private search$ = new Subject<string>();
+  // Options deja proposees pendant la saisie : elles restent selectionnables
+  // meme quand une frappe ulterieure (ex. selection datalist) vide les
+  // resultats courants.
+  private seenSearchOptions = new Map<string | number, FlwTagOption>();
   private searchSubscription = this.search$
     .pipe(
       debounceTime(SEARCH_DEBOUNCE_MS),
@@ -103,14 +107,18 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
           : of([] as FlwTagOption[]),
       ),
     )
-    .subscribe((results) => (this.searchResults = results));
+    .subscribe((results) => {
+      this.searchResults = results;
+      for (const option of results)
+        this.seenSearchOptions.set(option.value, option);
+    });
   private change = (v: Array<string | number>) => {};
   touched = () => {};
-  private get allOptions() {
-    return [...this.options, ...this.searchResults];
+  private get matchableOptions() {
+    return [...this.options, ...this.seenSearchOptions.values()];
   }
   get filteredOptions() {
-    return this.allOptions.filter(
+    return [...this.options, ...this.searchResults].filter(
       (o) =>
         !this.values.includes(o.value) &&
         (!this.draft ||
@@ -119,7 +127,7 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
   }
   labelFor(value: string | number) {
     return (
-      this.allOptions.find((o) => o.value === value)?.label ??
+      this.matchableOptions.find((o) => o.value === value)?.label ??
       this.labelFormatter?.(value) ??
       String(value)
     );
@@ -131,9 +139,7 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
   addDraft(event?: Event) {
     event?.preventDefault();
     const text = this.draft.trim();
-    const option = this.allOptions.find(
-      (o) => o.label.toLowerCase() === text.toLowerCase(),
-    );
+    const option = this.findOption(text);
     const canAdd =
       (option || (this.freeText && text)) &&
       !this.values.includes(option?.value ?? text);
@@ -145,6 +151,18 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
     }
     if (canAdd) this.draft = "";
     this.touched();
+  }
+  // Accepte le label complet ("Studio=Warner Bros.") ou la valeur seule
+  // ("Warner Bros.") telle que l'utilisateur la tape naturellement.
+  private findOption(text: string) {
+    const query = text.toLowerCase();
+    if (!query) return undefined;
+    return this.matchableOptions.find((o) => {
+      const label = o.label.toLowerCase();
+      if (label === query) return true;
+      const separator = label.indexOf("=");
+      return separator >= 0 && label.slice(separator + 1) === query;
+    });
   }
   remove(value: string | number) {
     this.values = this.values.filter((v) => v !== value);
