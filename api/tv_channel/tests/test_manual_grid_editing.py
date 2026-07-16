@@ -4,6 +4,7 @@ from unittest import mock
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
+from rule_engine.models import Category
 from tv_channel.models import (
     Catalog,
     EditorialLine,
@@ -18,6 +19,11 @@ from utils.llm_service import LLMResponse
 
 class ManualGridApiTests(APITestCase):
     def setUp(self):
+        # Le vocabulaire de categories vient de la BDD.
+        self.category_names = ["emotion", "family", "horror", "humor"]
+        Category.objects.bulk_create(
+            [Category(category=name) for name in self.category_names]
+        )
         self.catalog = Catalog.objects.create(name="Manual catalog")
         self.channel = TvChannel.objects.create(
             name="Manual channel", catalog=self.catalog
@@ -56,6 +62,7 @@ class ManualGridApiTests(APITestCase):
     def test_form_options_and_editorial_line_create(self):
         options = self.client.get("/api/tv-channel/form-options/")
         self.assertEqual(options.status_code, 200)
+        self.assertEqual(options.data["categories"], self.category_names)
         self.assertIn({"value": 1, "label": "fiction"}, options.data["natures"])
         self.assertEqual(options.data["filler_policies"][0]["name"], "Short ident")
 
@@ -63,7 +70,7 @@ class ManualGridApiTests(APITestCase):
             f"/api/tv-channel/{self.channel.id}/editorial-line/",
             {
                 "allowed_natures": ["fiction", 1],
-                "forbidden_categories": ["kids"],
+                "forbidden_categories": ["family"],
                 "start_at": "06:00",
                 "end_at": "23:00",
             },
@@ -75,7 +82,7 @@ class ManualGridApiTests(APITestCase):
             self.client.get(f"/api/tv-channel/{self.channel.id}/").data[
                 "editorial_line_data"
             ]["forbidden_categories"],
-            ["kids"],
+            ["family"],
         )
 
     def test_editorial_validation_rejects_overlap_and_bad_window(self):
@@ -129,22 +136,22 @@ class ManualGridApiTests(APITestCase):
             grid_layout=self.layout,
             starts_at=time(12),
             ends_at=time(13),
-            allowed_categories=["drama"],
+            allowed_categories=["emotion"],
         )
 
         response = self.client.post(
             f"/api/grid-block/{block.id}/available-media-count/",
-            {"allowed_categories": ["comedy"], "min_duration_seconds_per_item": 600},
+            {"allowed_categories": ["humor"], "min_duration_seconds_per_item": 600},
             format="json",
         )
 
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(response.data, {"count": 12})
         preview = service_class.call_args.kwargs["grid_block"]
-        self.assertEqual(preview.allowed_categories, ["comedy"])
+        self.assertEqual(preview.allowed_categories, ["humor"])
         self.assertEqual(preview.min_duration_seconds_per_item, 600)
         block.refresh_from_db()
-        self.assertEqual(block.allowed_categories, ["drama"])
+        self.assertEqual(block.allowed_categories, ["emotion"])
 
     def test_flexible_grid_writes_are_rejected(self):
         self.layout.mode = GridLayoutMode.FLEXIBLE

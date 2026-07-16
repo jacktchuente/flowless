@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 from tv_channel.models import GridLayout, GridLayoutMode
 
 
@@ -67,7 +67,7 @@ def compute_grid_warnings(grid_layout) -> list[str]:
             warnings.append("The last block ends before the editorial window.")
 
     complete_values = {
-        "categories": set(categories),
+        "categories": set(category_service.get_all_category_names()),
         "natures": {choice.value for choice in MediaNature},
         "container_kinds": {choice.value for choice in MediaContainerKind},
     }

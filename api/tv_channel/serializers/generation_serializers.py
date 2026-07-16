@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from datetime import time
+from functools import cached_property
 
 from django.conf import settings
 from rest_framework import serializers
 
 from media_source.constants import MediaContainerKind, MediaNature
-from media_source.data import categories
+from rule_engine.services import category_service
 
 
 class GenerationBaseSerializer(serializers.Serializer):
@@ -72,7 +73,10 @@ class EditorialLineGenerationSerializer(GenerationBaseSerializer):
     end_at = serializers.TimeField()
     allow_filler = serializers.BooleanField(default=True)
 
-    allowed_categories_set = set(categories)
+    @cached_property
+    def allowed_categories_set(self) -> set[str]:
+        # Lu en BDD au moment de la validation, pas fige a l'import du module.
+        return set(category_service.get_all_category_names())
 
     def validate_allowed_categories(self, value: list[str]) -> list[str]:
         return self._validate_choice_list(value, self.allowed_categories_set, "allowed_categories")
@@ -166,7 +170,10 @@ class GridBlockGenerationSerializer(GenerationBaseSerializer):
     forbidden_container_kinds = serializers.ListField(child=serializers.JSONField(), required=False, default=list)
     preferred_container_kinds = serializers.ListField(child=serializers.JSONField(), required=False, default=list)
 
-    allowed_categories_set = set(categories)
+    @cached_property
+    def allowed_categories_set(self) -> set[str]:
+        # Lu en BDD au moment de la validation, pas fige a l'import du module.
+        return set(category_service.get_all_category_names())
 
     def validate_allowed_categories(self, value: list[str]) -> list[str]:
         return self._validate_choice_list(value, self.allowed_categories_set, "allowed_categories")
