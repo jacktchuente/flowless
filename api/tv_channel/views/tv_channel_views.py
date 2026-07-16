@@ -227,35 +227,35 @@ class TvChannelViewSet(
         serializer = TvChannelResetRulesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        type_to_suffix = {
+        type_to_axis = {
             "category": "categories",
             "nature": "natures",
             "kind": "container_kinds",
         }
         levels = serializer.validated_data["levels"]
-        types = serializer.validated_data["types"]
-        fields_to_reset = [
-            f"{level}_{type_to_suffix[item_type]}"
-            for level in levels
-            for item_type in types
-        ]
+        axes = [type_to_axis[item_type] for item_type in serializer.validated_data["types"]]
+
+        def reset_rule_axes(target):
+            for level in levels:
+                rules = dict(getattr(target, level) or {})
+                for axis in axes:
+                    rules[axis] = []
+                setattr(target, level, rules)
 
         with transaction.atomic():
             editorial_line = getattr(instance, "editorialline", None)
             if editorial_line is not None:
-                for field_name in fields_to_reset:
-                    setattr(editorial_line, field_name, [])
-                editorial_line.save(update_fields=[*fields_to_reset])
+                reset_rule_axes(editorial_line)
+                editorial_line.save(update_fields=[*levels])
 
             blocks = list(
                 GridBlock.objects
                 .filter(grid_layout__tv_channel=instance)
             )
             for block in blocks:
-                for field_name in fields_to_reset:
-                    setattr(block, field_name, [])
+                reset_rule_axes(block)
             if blocks:
-                GridBlock.objects.bulk_update(blocks, fields=fields_to_reset)
+                GridBlock.objects.bulk_update(blocks, fields=levels)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
