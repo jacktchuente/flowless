@@ -19,6 +19,7 @@ class MusicCategoryFixtureMixin:
     def setUpTestData(cls):
         Initializer.init_categories()
         cls.media_source = MediaSource.objects.create(name="jellyfin", is_active=True)
+        # Nature volontairement absente: le kind musical doit suffire.
         cls.music_collection = MediaCollection.objects.create(
             name="Music videos",
             external_id="col-mv",
@@ -33,6 +34,7 @@ class MusicCategoryFixtureMixin:
             media_source=cls.media_source,
             is_active=True,
             container_kind=MediaContainerKind.SERIES,
+            nature=MediaNature.FICTION,
             hash_data="x",
         )
 
@@ -199,10 +201,17 @@ class LlmNormalizerVocabularySplitTests(MusicCategoryFixtureMixin, TestCase):
         self.assertNotIn("western", prompt)
         self.assertEqual(categories, ["biopic"])
 
-    def test_unknown_collection_nature_falls_back_to_full_general_vocabulary(self):
-        self.assertIsNone(self.series_collection.nature)
+    def test_unknown_collection_nature_exposes_full_vocabulary(self):
+        untagged_collection = MediaCollection.objects.create(
+            name="Misc",
+            external_id="col-misc",
+            media_source=self.media_source,
+            is_active=True,
+            container_kind=MediaContainerKind.SERIES,
+            hash_data="x",
+        )
         container = self._container(
-            collection=self.series_collection,
+            collection=untagged_collection,
             title="Frontier tales",
             genres=["Western"],
         )
@@ -211,7 +220,8 @@ class LlmNormalizerVocabularySplitTests(MusicCategoryFixtureMixin, TestCase):
         with patcher:
             categories = CategoryNormalizerWithLlm(container).get_categories()
 
+        # Nature inconnue: aucun filtre, toutes les categories sont proposees.
         prompt = fake_service.complete.call_args.kwargs["prompt"]
         self.assertIn("western", prompt)
-        self.assertNotIn("hip-hop", prompt)
+        self.assertIn("hip-hop", prompt)
         self.assertEqual(categories, ["western"])

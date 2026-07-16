@@ -6,7 +6,6 @@ appel relit les tables pour voir les editions utilisateur immediatement.
 
 from django.db.models import Q
 
-from media_source.constants import MediaNature
 from rule_engine.models import Category
 
 
@@ -24,18 +23,3 @@ def get_category_names_for_nature(nature: int) -> list[str]:
         .order_by("category")
         .values_list("category", flat=True)
     )
-
-
-def get_music_category_names() -> set[str]:
-    # Lien strict uniquement (pas de repli "0 lien = toutes") : seules les
-    # categories explicitement musicales forment le vocabulaire musical.
-    return set(
-        Category.objects
-        .filter(nature_links__nature=MediaNature.MUSIC)
-        .values_list("category", flat=True)
-    )
-
-
-def get_general_category_names() -> list[str]:
-    music = get_music_category_names()
-    return [name for name in get_all_category_names() if name not in music]

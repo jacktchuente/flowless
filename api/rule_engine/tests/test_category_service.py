@@ -44,11 +44,8 @@ class CategoryServiceTests(TestCase):
             ["archive"],
         )
 
-    def test_get_music_category_names_strict_link_only(self):
-        self.assertEqual(category_service.get_music_category_names(), {"pop", "rock"})
-
-    def test_get_general_category_names_excludes_music(self):
+    def test_get_category_names_for_music_nature(self):
         self.assertEqual(
-            category_service.get_general_category_names(),
-            ["action", "archive", "biopic"],
+            category_service.get_category_names_for_nature(MediaNature.MUSIC),
+            ["archive", "pop", "rock"],
         )
