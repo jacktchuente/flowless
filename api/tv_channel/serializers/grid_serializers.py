@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from tv_channel.models import GridBlock, GridLayout
+from tv_channel.serializers.marathon_serializers import MarathonKindPolicySerializer
 
 
 class GridBlockSerializer(serializers.ModelSerializer):
@@ -27,6 +28,7 @@ class GridBlockSerializer(serializers.ModelSerializer):
 
 class GridSerializer(serializers.ModelSerializer):
     blocks = serializers.SerializerMethodField()
+    marathon_config = serializers.SerializerMethodField()
 
     class Meta:
         model = GridLayout
@@ -37,11 +39,20 @@ class GridSerializer(serializers.ModelSerializer):
             "mode",
             "post_filler_policy",
             "blocks",
+            "marathon_config",
         )
 
     def get_blocks(self, obj):
         queryset = obj.gridblock_set.all().order_by("starts_at", "id")
         return GridBlockSerializer(queryset, many=True).data
+
+    def get_marathon_config(self, obj):
+        config = getattr(obj, "marathon_config", None)
+        if config is None:
+            return None
+        return {
+            "kind_policies": MarathonKindPolicySerializer(config.kind_policies.all(), many=True).data,
+        }
 
 
 class GridWriteSerializer(serializers.ModelSerializer):

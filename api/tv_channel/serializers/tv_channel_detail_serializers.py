@@ -29,6 +29,7 @@ class TvChannelDetailSerializer(serializers.ModelSerializer):
             "analyze_status",
             "catalog",
             "catalog_name",
+            "programming_mode",
             "is_enabled",
             "external_playout_id",
             "logo",
