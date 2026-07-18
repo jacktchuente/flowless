@@ -58,6 +58,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "channel-images",
+        loadComponent: () =>
+          import("./pages/channel_images/channel-images.component").then(
+            (m) => m.ChannelImagesComponent,
+          ),
+      },
+      {
         path: "settings",
         loadComponent: () =>
           import("./pages/settings/settings.component").then(

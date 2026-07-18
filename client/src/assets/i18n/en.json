@@ -11,7 +11,8 @@
     "ALL_CHANNELS_ON_AIR": "All active channels are on air",
     "LANGUAGE": "Language",
     "SETTINGS": "Settings",
-    "ADMIN": "Admin"
+    "ADMIN": "Admin",
+    "CHANNEL_IMAGES": "Channel images"
   },
   "SETTINGS": {
     "EYEBROW": "Configuration",
@@ -675,5 +676,36 @@
       "MIN_ABOVE_MAX": "The minimum must be lower than or equal to the maximum.",
       "NOTIFY_SAVE_FAILED": "Failed to save the rotation."
     }
+  },
+  "CHANNEL_IMAGES": {
+    "EYEBROW": "Visual identity",
+    "TITLE": "Channel images",
+    "SUBTITLE": "Image suggestions driven by the editorial line: pick one, it becomes the channel logo.",
+    "CHANNELS": "Channels",
+    "QUERY_TITLE": "Query",
+    "QUERY_PLACEHOLDER": "Studio, actor or theme…",
+    "QUERY_HINT": "Prefilled from the editorial axes when available. Edit it and search again.",
+    "SOURCE_AXES": "From the editorial line",
+    "SEARCH": "Search",
+    "SEARCHING": "Searching…",
+    "SUGGESTIONS": "Suggestions",
+    "USE": "Use",
+    "NO_SUGGESTION": "No image found for this query.",
+    "NO_RUN": "No search for this channel yet. Launch one above.",
+    "HISTORY": "{{count}} previous search(es)",
+    "STATUS_RUNNING": "Running",
+    "STATUS_WARNINGS": "Warnings",
+    "STATUS_DONE": "Done",
+    "ENTITY": {
+      "STUDIO": "Studio",
+      "PERSON": "Person",
+      "THEME": "Theme"
+    },
+    "CONFIRM_TITLE": "Apply this image",
+    "CONFIRM_MESSAGE": "Use this image as the logo of “{{channel}}”?",
+    "CONFIRM_APPLY": "Apply",
+    "NOTIFY_APPLIED": "Image applied as the channel logo.",
+    "NOTIFY_APPLY_FAILED": "Failed to apply the image.",
+    "NOTIFY_SEARCH_FAILED": "Failed to launch the search."
   }
 }
