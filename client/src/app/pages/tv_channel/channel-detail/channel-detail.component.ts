@@ -18,6 +18,7 @@ import {
   GRID_MODE_MARATHON,
   MarathonKindPolicy,
   PlayoutGenerationReport,
+  PROGRAMMING_MODE_MARATHON,
   RuleValuesByAxis,
   ScheduledMediaItem,
   TvChannel,
@@ -110,6 +111,15 @@ export class ChannelDetailComponent {
     return this.channel?.grid_data?.mode === GRID_MODE_FLEXIBLE;
   }
   get isMarathon() {
+    // Avant le premier blueprint la chaine marathon n'a pas encore de grille:
+    // le mode de programmation fait foi.
+    return (
+      this.channel?.grid_data?.mode === GRID_MODE_MARATHON ||
+      (this.channel?.programming_mode === PROGRAMMING_MODE_MARATHON &&
+        !this.channel?.grid_data)
+    );
+  }
+  get hasMarathonGrid() {
     return this.channel?.grid_data?.mode === GRID_MODE_MARATHON;
   }
   get hasBlockGrid() {
@@ -246,6 +256,7 @@ export class ChannelDetailComponent {
         channelId: this.channel!.id,
         channelName: this.channel!.name,
         kind,
+        isMarathon: this.isMarathon,
       },
     });
   }

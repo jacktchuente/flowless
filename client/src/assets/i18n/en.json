@@ -366,7 +366,8 @@
     "MARATHON_RUN": "{{min}}–{{max}} in a row",
     "MARATHON_QUOTA": "Quota {{quota}}",
     "MARATHON_DISABLED": "Disabled",
-    "MARATHON_NO_POLICY": "No kind configured: the rotation is empty."
+    "MARATHON_NO_POLICY": "No kind configured: the rotation is empty.",
+    "MARATHON_NEEDS_BLUEPRINT": "Generate the blueprint first: it creates the editorial line and initializes the rotation."
   },
   "MANUAL_EDIT": {
     "EDIT_EDITORIAL_LINE": "Edit editorial line",

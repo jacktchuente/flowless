@@ -366,7 +366,8 @@
     "MARATHON_RUN": "{{min}}–{{max}} à la suite",
     "MARATHON_QUOTA": "Quota {{quota}}",
     "MARATHON_DISABLED": "Désactivé",
-    "MARATHON_NO_POLICY": "Aucun type configuré : la rotation est vide."
+    "MARATHON_NO_POLICY": "Aucun type configuré : la rotation est vide.",
+    "MARATHON_NEEDS_BLUEPRINT": "Générez d'abord le blueprint : il crée la ligne éditoriale et initialise la rotation."
   },
   "MANUAL_EDIT": {
     "EDIT_EDITORIAL_LINE": "Modifier la ligne éditoriale",

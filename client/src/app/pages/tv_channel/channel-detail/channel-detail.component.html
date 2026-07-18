@@ -99,9 +99,17 @@
       <div class="card-head">
         <h2>{{ "CHANNEL_DETAIL.EDITORIAL_LINE" | translate }}</h2>
         <div>
-          <button class="btn sm ghost" (click)="openEditorialLine()">
+          <button
+            class="btn sm ghost"
+            [disabled]="!c.editorial_line_data"
+            (click)="openEditorialLine()"
+          >
             {{ "COMMON.EDIT" | translate }}</button
-          ><button class="btn sm danger-ghost" (click)="openResetRules()">
+          ><button
+            class="btn sm danger-ghost"
+            [disabled]="!c.editorial_line_data"
+            (click)="openResetRules()"
+          >
             {{ "COMMON.RESET" | translate }}
           </button>
         </div>
@@ -146,14 +154,28 @@
         </p>
       </div>
       <div>
-        <button class="btn" (click)="newVersion()">
+        <button
+          class="btn ghost"
+          [disabled]="!hasMarathonGrid"
+          (click)="openGridSettings()"
+        >
+          {{ "CHANNEL_DIALOGS.GRID.SETTINGS" | translate }}</button
+        ><button
+          class="btn"
+          [disabled]="!hasMarathonGrid"
+          (click)="newVersion()"
+        >
           {{ "MANUAL_EDIT.NEW_VERSION" | translate }}</button
-        ><button class="btn primary" (click)="openMarathonConfig()">
+        ><button
+          class="btn primary"
+          [disabled]="!hasMarathonGrid"
+          (click)="openMarathonConfig()"
+        >
           {{ "CHANNEL_DETAIL.MARATHON_CONFIGURE" | translate }}
         </button>
       </div>
     </div>
-    <div class="blocks">
+    <div class="blocks" *ngIf="hasMarathonGrid">
       <div class="block-row static" *ngFor="let policy of marathonPolicies">
         <strong>{{ marathonPolicyLabel(policy) }}</strong>
         <div class="tags">
@@ -173,6 +195,9 @@
       <div class="empty" *ngIf="!marathonPolicies.length">
         {{ "CHANNEL_DETAIL.MARATHON_NO_POLICY" | translate }}
       </div>
+    </div>
+    <div class="empty" *ngIf="!hasMarathonGrid">
+      {{ "CHANNEL_DETAIL.MARATHON_NEEDS_BLUEPRINT" | translate }}
     </div>
   </section>
   <section class="card" *ngIf="hasBlockGrid">

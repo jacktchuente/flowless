@@ -135,6 +135,9 @@ export class ChannelManagementComponent {
   isFlexible(c: TvChannel) {
     return c.grid_data?.mode === 2;
   }
+  isMarathon(c: TvChannel) {
+    return c.grid_data?.mode === 3 || (c.programming_mode === 2 && !c.grid_data);
+  }
   status(c: TvChannel) {
     const counts = c.latest_generation_report?.issue_counts;
     if ((counts?.error ?? 0) > 0)
@@ -209,12 +212,22 @@ export class ChannelManagementComponent {
   }
   generateBlueprint(c: TvChannel) {
     this.dialogs.open(GenerationDialogComponent, {
-      data: { channelId: c.id, channelName: c.name, kind: "blueprint" },
+      data: {
+        channelId: c.id,
+        channelName: c.name,
+        kind: "blueprint",
+        isMarathon: this.isMarathon(c),
+      },
     });
   }
   generatePlayout(c: TvChannel) {
     this.dialogs.open(GenerationDialogComponent, {
-      data: { channelId: c.id, channelName: c.name, kind: "playout" },
+      data: {
+        channelId: c.id,
+        channelName: c.name,
+        kind: "playout",
+        isMarathon: this.isMarathon(c),
+      },
     });
   }
   push(c: TvChannel) {

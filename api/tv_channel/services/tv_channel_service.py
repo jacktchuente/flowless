@@ -124,6 +124,15 @@ class TvChannelService:
 
     def _create_active_marathon_grid_layout(self, editorial_line: EditorialLine, *, reboot: bool) -> GridLayout:
         with transaction.atomic():
+            # Une regeneration de blueprint ne doit pas perdre la rotation
+            # personnalisee: la config du layout marathon precedent est clonee.
+            previous_policies = list(
+                MarathonKindPolicy.objects.filter(
+                    config__grid_layout__tv_channel=self.tv_channel,
+                    config__grid_layout__is_active=True,
+                    config__grid_layout__mode=GridLayoutMode.MARATHON,
+                ).values("container_kind", "min_run", "max_run", "quota")
+            )
             self._deactivate_active_layouts_and_playouts(reboot=reboot)
             post_filler_policy = None
             if editorial_line.allow_filler:
@@ -135,8 +144,9 @@ class TvChannelService:
                 post_filler_policy=post_filler_policy,
             )
             config = MarathonConfig.objects.create(grid_layout=grid_layout)
+            policies = previous_policies or [dict(policy) for policy in self.DEFAULT_MARATHON_POLICIES]
             MarathonKindPolicy.objects.bulk_create(
-                [MarathonKindPolicy(config=config, **policy) for policy in self.DEFAULT_MARATHON_POLICIES]
+                [MarathonKindPolicy(config=config, **policy) for policy in policies]
             )
         return grid_layout
 

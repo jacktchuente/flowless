@@ -61,6 +61,25 @@ class MarathonBlueprintTests(APITestCase):
         self.assertTrue(second["grid_layout"].is_active)
         self.assertEqual(second["grid_layout"].marathon_config.kind_policies.count(), 2)
 
+    def test_blueprint_regeneration_preserves_customized_rotation(self):
+        first = TvChannelService(tv_channel=self.channel).generate_editorial_line_and_grid()
+        config = first["grid_layout"].marathon_config
+        config.kind_policies.all().delete()
+        MarathonKindPolicy.objects.create(
+            config=config,
+            container_kind=MediaContainerKind.MUSIC_VIDEO_RELEASE,
+            min_run=3,
+            max_run=5,
+            quota=4,
+        )
+
+        second = TvChannelService(tv_channel=self.channel).generate_editorial_line_and_grid(reboot=True)
+
+        policies = list(second["grid_layout"].marathon_config.kind_policies.all())
+        self.assertEqual(len(policies), 1)
+        self.assertEqual(policies[0].container_kind, MediaContainerKind.MUSIC_VIDEO_RELEASE)
+        self.assertEqual((policies[0].min_run, policies[0].max_run, policies[0].quota), (3, 5, 4))
+
     def test_blueprint_without_filler_skips_grid_policy(self):
         self.editorial_line.allow_filler = False
         self.editorial_line.save(update_fields=["allow_filler"])
