@@ -263,7 +263,12 @@
   <section class="card timelines">
     <div class="card-head">
       <div>
-        <h2>{{ "CHANNEL_DETAIL.GRID_AND_SCHEDULE" | translate }}</h2>
+        <h2>
+          {{
+            (hasBlockGrid ? "CHANNEL_DETAIL.GRID_AND_SCHEDULE" : "CHANNELS.SCHEDULE")
+              | translate
+          }}
+        </h2>
       </div>
       <div class="group">
         <flw-segmented
@@ -275,13 +280,15 @@
         }}</strong>
       </div>
     </div>
-    <div class="timeline-grid">
+    <div class="timeline-grid" [class.single]="!hasBlockGrid">
       <div *ngIf="hasBlockGrid">
         <span class="section-label">{{ "CHANNELS.GRID" | translate }}</span
         ><flw-timeline [blocks]="gridBlocks()" [pxPerHour]="52" />
       </div>
       <div>
-        <span class="section-label">{{ "CHANNELS.SCHEDULE" | translate }}</span
+        <span class="section-label" *ngIf="hasBlockGrid">{{
+          "CHANNELS.SCHEDULE" | translate
+        }}</span
         ><flw-timeline
           [blocks]="scheduleBlocks()"
           [pxPerHour]="52"

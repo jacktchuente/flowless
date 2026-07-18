@@ -126,6 +126,9 @@
 .gap .btn {
   margin-left: auto;
 }
+.timeline-grid.single {
+  grid-template-columns: 1fr;
+}
 .timeline-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
