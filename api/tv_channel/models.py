@@ -191,3 +191,77 @@ class FillerPolicy(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ChannelImageKind(models.IntegerChoices):
+    LOGO = 1, "logo"
+
+
+class ChannelImageEntityType(models.TextChoices):
+    STUDIO = "studio", "studio"
+    PERSON = "person", "person"
+    THEME = "theme", "theme"
+
+
+class ChannelImageQuerySource(models.TextChoices):
+    AXES = "axes", "axes"
+    LLM = "llm", "llm"
+    USER = "user", "user"
+
+
+class ChannelImageSuggestionRun(models.Model):
+    tv_channel = models.ForeignKey(
+        "TvChannel",
+        on_delete=models.CASCADE,
+        related_name="image_suggestion_runs",
+    )
+    kind = models.IntegerField(choices=ChannelImageKind, default=ChannelImageKind.LOGO)
+    status = models.IntegerField(choices=AnalyzeStatus, default=AnalyzeStatus.IDLE)
+
+    entity_type = models.CharField(max_length=16, choices=ChannelImageEntityType, blank=True)
+    query = models.CharField(max_length=255, blank=True)
+    query_source = models.CharField(max_length=16, choices=ChannelImageQuerySource, blank=True)
+    diagnostics = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+        indexes = [
+            models.Index(fields=("tv_channel", "-created_at")),
+        ]
+
+    def __str__(self):
+        return f"{self.tv_channel.name} / image run #{self.id}"
+
+
+class ChannelImageSuggestion(models.Model):
+    run = models.ForeignKey(
+        "ChannelImageSuggestionRun",
+        on_delete=models.CASCADE,
+        related_name="suggestions",
+    )
+    position = models.PositiveIntegerField()
+    provider = models.CharField(max_length=16)
+    # URL pleine resolution; pour Jellyfin c'est un chemin interne
+    # (/Items/{id}/Images/...) resolu cote serveur avec le token au moment
+    # du telechargement — jamais de credentials en base ni cote client.
+    source_url = models.URLField(max_length=1000)
+    thumbnail = models.FileField(upload_to="data/image_suggestions/")
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
+    attribution = models.CharField(max_length=255, blank=True)
+    is_chosen = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ("run", "position")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("run", "position"),
+                name="unique_channel_image_suggestion_position",
+            ),
+        ]
+
+    def __str__(self):
+        return f"run #{self.run_id} / #{self.position} ({self.provider})"
