@@ -211,7 +211,9 @@
       "SUBMIT": "Test connection and save",
       "SUBMITTING": "Verifying…",
       "CONNECTION_FAILED": "Connection to the source failed."
-    }
+    },
+    "COLUMN_ACTIVE": "Active",
+    "NOTIFY_ACTIVE_FAILED": "Failed to change the source state."
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",

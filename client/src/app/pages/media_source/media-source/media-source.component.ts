@@ -9,11 +9,12 @@ import { FlwDialogService } from "../../../ui/dialog.service";
 import { FlwIconComponent } from "../../../ui/icon/flw-icon.component";
 import { TimeAgoPipe } from "../../../ui/pipes/time-ago.pipe";
 import { FlwConfirmComponent } from "../../../ui/confirm/flw-confirm.component";
+import { FlwSwitchComponent } from "../../../ui/switch/flw-switch.component";
 import { MediaSourceDialogComponent } from "../media-source-dialog/media-source-dialog.component";
 @Component({
   selector: "app-media-source",
   standalone: true,
-  imports: [NgFor, NgIf, TranslateModule, FlwIconComponent, TimeAgoPipe],
+  imports: [NgFor, NgIf, TranslateModule, FlwIconComponent, FlwSwitchComponent, TimeAgoPipe],
   templateUrl: "./media-source.component.html",
   styleUrl: "./media-source.component.css",
 })
@@ -79,6 +80,16 @@ export class MediaSourceComponent {
               this.notification.notify("MEDIA_SOURCE.NOTIFY_DELETE_FAILED");
           });
       });
+  }
+  toggleActive(source: MediaSource, isActive: boolean) {
+    this.service.setActive(source.id, isActive).subscribe((r) => {
+      if (!r.isOk) {
+        source.is_active = !isActive;
+        this.notification.notify("MEDIA_SOURCE.NOTIFY_ACTIVE_FAILED");
+        return;
+      }
+      source.is_active = isActive;
+    });
   }
   syncCollections(source: MediaSource, e?: Event) {
     e?.stopPropagation();

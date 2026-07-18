@@ -39,6 +39,15 @@ class MediaSourceViewSet(
         analyze_media_source_data.delay(instance.id)
         return Response(status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=('post',), url_name='set-active', url_path='set-active')
+    def set_active(self, request, pk):
+        # Toggle dedie: le PATCH standard passe par le serializer de creation
+        # (credentials revalides), inadapte pour ce seul flag.
+        instance = self.get_object()
+        instance.is_active = str(request.data.get("is_active", "")).lower() in {"1", "true", "yes", "on"}
+        instance.save(update_fields=["is_active"])
+        return Response(MediaSourceSerializer(instance).data)
+
     @action(detail=True, methods=('post',), url_name='verify', url_path='verify')
     def verify(self, request, pk):
         instance = self.get_object()

@@ -211,7 +211,9 @@
       "SUBMIT": "Tester la connexion et enregistrer",
       "SUBMITTING": "Vérification…",
       "CONNECTION_FAILED": "La connexion à la source a échoué."
-    }
+    },
+    "COLUMN_ACTIVE": "Active",
+    "NOTIFY_ACTIVE_FAILED": "Impossible de changer l'état de la source."
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",
