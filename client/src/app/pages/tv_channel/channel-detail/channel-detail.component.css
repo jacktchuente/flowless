@@ -105,6 +105,9 @@
   text-align: left;
   cursor: pointer;
 }
+.block-row.static {
+  cursor: default;
+}
 .gap {
   display: flex;
   align-items: center;

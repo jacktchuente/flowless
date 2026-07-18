@@ -14,6 +14,9 @@ import {
   EditorialLineData,
   GridBlock,
   FormOptions,
+  GRID_MODE_FLEXIBLE,
+  GRID_MODE_MARATHON,
+  MarathonKindPolicy,
   PlayoutGenerationReport,
   RuleValuesByAxis,
   ScheduledMediaItem,
@@ -42,6 +45,7 @@ import { ReportDialogComponent } from "../channel-dialogs/report-dialog.componen
 import { ResetRulesDialogComponent } from "../channel-dialogs/reset-rules-dialog.component";
 import { ScheduleDetailDialogComponent } from "../channel-dialogs/schedule-detail-dialog.component";
 import { GridSettingsDialogComponent } from "../channel-dialogs/grid-settings-dialog.component";
+import { MarathonConfigDialogComponent } from "../channel-dialogs/marathon-config-dialog.component";
 import { EditorialLineDialogComponent } from "../channel-dialogs/editorial-line-dialog.component";
 import { GridBlockDialogComponent } from "../channel-dialogs/grid-block-dialog.component";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
@@ -103,7 +107,16 @@ export class ChannelDetailComponent {
     ];
   }
   get isFlexible() {
-    return this.channel?.grid_data?.mode === 2;
+    return this.channel?.grid_data?.mode === GRID_MODE_FLEXIBLE;
+  }
+  get isMarathon() {
+    return this.channel?.grid_data?.mode === GRID_MODE_MARATHON;
+  }
+  get hasBlockGrid() {
+    return !this.isFlexible && !this.isMarathon;
+  }
+  get marathonPolicies(): MarathonKindPolicy[] {
+    return this.channel?.grid_data?.marathon_config?.kind_policies ?? [];
   }
   get gridRows(): Array<{
     block?: GridBlock;
@@ -329,6 +342,25 @@ export class ChannelDetailComponent {
           if (saved) this.load(String(this.channel!.id));
         }),
     );
+  }
+  openMarathonConfig() {
+    if (!this.channel?.grid_data) return;
+    this.withFormOptions((options) =>
+      this.dialogs
+        .open(MarathonConfigDialogComponent, {
+          data: {
+            channelId: this.channel!.id,
+            policies: this.marathonPolicies,
+            formOptions: options,
+          },
+        })
+        .closed.subscribe((saved) => {
+          if (saved) this.load(String(this.channel!.id));
+        }),
+    );
+  }
+  marathonPolicyLabel(policy: MarathonKindPolicy) {
+    return this.translate.instant(containerKindLabel(policy.container_kind));
   }
   openGridSettings() {
     if (!this.channel?.grid_data) return;

@@ -8,7 +8,11 @@ import {
 } from "@angular/forms";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { Catalog } from "@project-interfaces/catalog";
-import { TvChannel } from "@project-interfaces/tv-channel";
+import {
+  PROGRAMMING_MODE_CLASSIC,
+  PROGRAMMING_MODE_MARATHON,
+  TvChannel,
+} from "@project-interfaces/tv-channel";
 import {
   TvChannelNameSuggestionResponse,
   TvChannelService,
@@ -65,6 +69,15 @@ import { TranslateModule } from "@ngx-translate/core";
         formControlName="is_enabled"
         [label]="'CHANNELS.CHANNEL_ACTIVE' | translate"
       />
+      <div class="field" *ngIf="!data.channel">
+        <flw-switch
+          formControlName="is_marathon"
+          [label]="'TV_CHANNEL_DIALOG.MARATHON_MODE' | translate"
+        />
+        <p class="hint">
+          {{ "TV_CHANNEL_DIALOG.MARATHON_MODE_HINT" | translate }}
+        </p>
+      </div>
     </form>
     <div modal-footer>
       <span></span>
@@ -91,6 +104,11 @@ import { TranslateModule } from "@ngx-translate/core";
       .name-row input {
         flex: 1;
       }
+      .hint {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: var(--text-muted, #888);
+      }
     `,
   ],
 })
@@ -113,6 +131,8 @@ export class TvChannelDialogComponent {
     is_enabled: new FormControl(this.data.channel?.is_enabled ?? true, {
       nonNullable: true,
     }),
+    // Uniquement a la creation: le mode de programmation est irreversible.
+    is_marathon: new FormControl(false, { nonNullable: true }),
   });
   constructor(
     private service: TvChannelService,
@@ -144,12 +164,15 @@ export class TvChannelDialogComponent {
   }
   save() {
     if (this.form.invalid) return;
+    const { is_marathon, ...values } = this.form.getRawValue();
     const req = this.data.channel
-      ? this.service.patchObject(
-          String(this.data.channel.id),
-          this.form.getRawValue(),
-        )
-      : this.service.createObject(this.form.getRawValue());
+      ? this.service.patchObject(String(this.data.channel.id), values)
+      : this.service.createObject({
+          ...values,
+          programming_mode: is_marathon
+            ? PROGRAMMING_MODE_MARATHON
+            : PROGRAMMING_MODE_CLASSIC,
+        });
     req.subscribe((r) => {
       if (r.isOk) this.ref.close(true);
     });

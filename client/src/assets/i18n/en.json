@@ -358,7 +358,15 @@
     "PREFERRED": "Preferred",
     "FORBIDDEN": "Forbidden",
     "UNCOVERED_SLOT": "No block covers this slot",
-    "ADD_BLOCK_HERE": "Add a block here"
+    "ADD_BLOCK_HERE": "Add a block here",
+    "MARATHON_MODE": "Marathon",
+    "MARATHON_ROTATION": "Marathon rotation",
+    "MARATHON_ROTATION_DESC": "Content chains in a loop following the editorial line and per-kind quotas.",
+    "MARATHON_CONFIGURE": "Configure rotation",
+    "MARATHON_RUN": "{{min}}–{{max}} in a row",
+    "MARATHON_QUOTA": "Quota {{quota}}",
+    "MARATHON_DISABLED": "Disabled",
+    "MARATHON_NO_POLICY": "No kind configured: the rotation is empty."
   },
   "MANUAL_EDIT": {
     "EDIT_EDITORIAL_LINE": "Edit editorial line",
@@ -471,7 +479,9 @@
   },
   "TV_CHANNEL_DIALOG": {
     "SUGGEST_NAME": "Suggest a name",
-    "NOTIFY_SUGGEST_NAME_FAILED": "Name suggestion failed."
+    "NOTIFY_SUGGEST_NAME_FAILED": "Name suggestion failed.",
+    "MARATHON_MODE": "Marathon mode",
+    "MARATHON_MODE_HINT": "Programming chains content in a loop without a block grid. This choice is permanent."
   },
   "UI": {
     "CATEGORIES": {
@@ -650,6 +660,19 @@
       "SELECTION": "Selection",
       "ROLE": "Role",
       "NO_DESCRIPTION": "No description."
+    },
+    "MARATHON": {
+      "TITLE": "Marathon rotation",
+      "DESC": "A kind missing from the list (or with a maximum of 0) is excluded from the rotation even if the editorial line allows it.",
+      "KIND": "Kind",
+      "MIN_RUN": "Min in a row",
+      "MAX_RUN": "Max in a row",
+      "QUOTA": "Quota",
+      "ADD_KIND": "Add a kind",
+      "REMOVE_KIND": "Remove this kind",
+      "NO_KIND": "No kind in the rotation.",
+      "MIN_ABOVE_MAX": "The minimum must be lower than or equal to the maximum.",
+      "NOTIFY_SAVE_FAILED": "Failed to save the rotation."
     }
   }
 }

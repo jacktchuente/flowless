@@ -358,7 +358,15 @@
     "PREFERRED": "Préféré",
     "FORBIDDEN": "Interdit",
     "UNCOVERED_SLOT": "Aucun bloc ne couvre ce créneau",
-    "ADD_BLOCK_HERE": "Ajouter un bloc ici"
+    "ADD_BLOCK_HERE": "Ajouter un bloc ici",
+    "MARATHON_MODE": "Marathon",
+    "MARATHON_ROTATION": "Rotation marathon",
+    "MARATHON_ROTATION_DESC": "Les contenus s'enchaînent en boucle selon la ligne éditoriale et les quotas par type.",
+    "MARATHON_CONFIGURE": "Configurer la rotation",
+    "MARATHON_RUN": "{{min}}–{{max}} à la suite",
+    "MARATHON_QUOTA": "Quota {{quota}}",
+    "MARATHON_DISABLED": "Désactivé",
+    "MARATHON_NO_POLICY": "Aucun type configuré : la rotation est vide."
   },
   "MANUAL_EDIT": {
     "EDIT_EDITORIAL_LINE": "Modifier la ligne éditoriale",
@@ -471,7 +479,9 @@
   },
   "TV_CHANNEL_DIALOG": {
     "SUGGEST_NAME": "Suggérer un nom",
-    "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué."
+    "NOTIFY_SUGGEST_NAME_FAILED": "La suggestion de nom a échoué.",
+    "MARATHON_MODE": "Mode marathon",
+    "MARATHON_MODE_HINT": "La programmation enchaîne les contenus en boucle sans grille de blocs. Ce choix est définitif."
   },
   "UI": {
     "CATEGORIES": {
@@ -650,6 +660,19 @@
       "SELECTION": "Sélection",
       "ROLE": "Rôle",
       "NO_DESCRIPTION": "Aucune description."
+    },
+    "MARATHON": {
+      "TITLE": "Rotation marathon",
+      "DESC": "Un type absent de la liste (ou avec un maximum à 0) est exclu de la rotation même si la ligne éditoriale l'autorise.",
+      "KIND": "Type",
+      "MIN_RUN": "Min à la suite",
+      "MAX_RUN": "Max à la suite",
+      "QUOTA": "Quota",
+      "ADD_KIND": "Ajouter un type",
+      "REMOVE_KIND": "Retirer ce type",
+      "NO_KIND": "Aucun type dans la rotation.",
+      "MIN_ABOVE_MAX": "Le minimum doit être inférieur ou égal au maximum.",
+      "NOTIFY_SAVE_FAILED": "Échec de l'enregistrement de la rotation."
     }
   }
 }
