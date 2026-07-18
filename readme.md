@@ -90,6 +90,10 @@ Flowless can currently:
     - promote a candidate into a flexible channel
     - generate flexible playouts from the segment path
     - match newly imported media to existing segments
+- Program marathon channels (no fixed blocks)
+    - the editorial line alone selects the pool, content chains in a loop
+    - per-kind rotation policies (episodes in a row, quotas), strict least-recently-aired rotation
+    - runs resume the next morning instead of being truncated by the daily window
 - Generate channel logos from the channel theme (local ComfyUI or OpenAI-compatible API)
 - Create channels in an IPTV app
     - currently only ErsatzTV is supported
