@@ -11,7 +11,8 @@
     "ALL_CHANNELS_ON_AIR": "Toutes les chaînes actives émettent",
     "LANGUAGE": "Langue",
     "SETTINGS": "Paramètres",
-    "ADMIN": "Admin"
+    "ADMIN": "Admin",
+    "CHANNEL_IMAGES": "Images de chaînes"
   },
   "SETTINGS": {
     "EYEBROW": "Configuration",
@@ -210,7 +211,9 @@
       "SUBMIT": "Tester la connexion et enregistrer",
       "SUBMITTING": "Vérification…",
       "CONNECTION_FAILED": "La connexion à la source a échoué."
-    }
+    },
+    "COLUMN_ACTIVE": "Active",
+    "NOTIFY_ACTIVE_FAILED": "Impossible de changer l'état de la source."
   },
   "MEDIA_COLLECTION": {
     "EYEBROW": "Collections",
@@ -597,7 +600,8 @@
       "LOCAL": "Générer localement",
       "CLOUD": "Générer avec l’IA",
       "HINT": "Le prompt utilisé reste disponible après la génération.",
-      "DOWNLOAD": "Télécharger le prompt"
+      "DOWNLOAD": "Télécharger le prompt",
+      "SUGGESTIONS": "Suggestions depuis la bibliothèque"
     },
     "REPORT": {
       "TITLE": "Rapports de génération",
@@ -675,5 +679,36 @@
       "MIN_ABOVE_MAX": "Le minimum doit être inférieur ou égal au maximum.",
       "NOTIFY_SAVE_FAILED": "Échec de l'enregistrement de la rotation."
     }
+  },
+  "CHANNEL_IMAGES": {
+    "EYEBROW": "Identité visuelle",
+    "TITLE": "Images de chaînes",
+    "SUBTITLE": "Suggestions d'images basées sur la ligne éditoriale : choisissez, l'image devient le logo de la chaîne.",
+    "CHANNELS": "Chaînes",
+    "QUERY_TITLE": "Requête",
+    "QUERY_PLACEHOLDER": "Studio, acteur ou thème…",
+    "QUERY_HINT": "Préremplie depuis les axes éditoriaux quand ils existent. Modifiez-la puis relancez la recherche.",
+    "SOURCE_AXES": "Depuis la ligne édito",
+    "SEARCH": "Rechercher",
+    "SEARCHING": "Recherche en cours…",
+    "SUGGESTIONS": "Suggestions",
+    "USE": "Utiliser",
+    "NO_SUGGESTION": "Aucune image trouvée pour cette requête.",
+    "NO_RUN": "Aucune recherche pour cette chaîne. Lancez-en une ci-dessus.",
+    "HISTORY": "{{count}} recherche(s) précédente(s)",
+    "STATUS_RUNNING": "En cours",
+    "STATUS_WARNINGS": "Avertissements",
+    "STATUS_DONE": "Terminée",
+    "ENTITY": {
+      "STUDIO": "Studio",
+      "PERSON": "Personne",
+      "THEME": "Thème"
+    },
+    "CONFIRM_TITLE": "Appliquer cette image",
+    "CONFIRM_MESSAGE": "Utiliser cette image comme logo de « {{channel}} » ?",
+    "CONFIRM_APPLY": "Appliquer",
+    "NOTIFY_APPLIED": "Image appliquée au logo de la chaîne.",
+    "NOTIFY_APPLY_FAILED": "Échec de l'application de l'image.",
+    "NOTIFY_SEARCH_FAILED": "Échec du lancement de la recherche."
   }
 }

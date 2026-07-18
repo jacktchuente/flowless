@@ -1,0 +1,142 @@
+<header class="topline">
+  <div>
+    <span class="eyebrow">{{ "CHANNEL_IMAGES.EYEBROW" | translate }}</span>
+    <h1>{{ "CHANNEL_IMAGES.TITLE" | translate }}</h1>
+    <p class="sub">{{ "CHANNEL_IMAGES.SUBTITLE" | translate }}</p>
+  </div>
+</header>
+<div class="content">
+  <div class="layout">
+    <section class="card channels">
+      <div class="card-head">
+        <h2>{{ "CHANNEL_IMAGES.CHANNELS" | translate }}</h2>
+      </div>
+      <div class="channel-list">
+        <button
+          type="button"
+          class="channel-row"
+          *ngFor="let channel of channels"
+          [class.selected]="isSelected(channel)"
+          (click)="select(channel)"
+        >
+          <span class="logo">
+            <img *ngIf="channel.logo" [src]="channel.logo" [alt]="channel.name" />
+            <span *ngIf="!channel.logo">{{ channel.name.charAt(0) }}</span>
+          </span>
+          <span class="meta">
+            <strong>{{ channel.name }}</strong>
+            <small>{{ channel.catalog_name }}</small>
+          </span>
+        </button>
+        <div class="empty" *ngIf="!channels.length">
+          {{ "CHANNELS.NO_CHANNEL" | translate }}
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" *ngIf="selectedChannel as channel">
+      <div class="card">
+        <div class="card-head">
+          <h2>{{ "CHANNEL_IMAGES.QUERY_TITLE" | translate }}</h2>
+          <span class="pill neutral" *ngIf="querySourceHint === 'axes'">{{
+            "CHANNEL_IMAGES.SOURCE_AXES" | translate
+          }}</span>
+        </div>
+        <div class="query-row">
+          <flw-select
+            [(ngModel)]="entityType"
+            [options]="entityOptions"
+          />
+          <input
+            type="text"
+            [(ngModel)]="query"
+            [placeholder]="'CHANNEL_IMAGES.QUERY_PLACEHOLDER' | translate"
+            (keyup.enter)="search()"
+          />
+          <button class="btn primary" [disabled]="isRunning" (click)="search()">
+            {{
+              (isRunning
+                ? "CHANNEL_IMAGES.SEARCHING"
+                : "CHANNEL_IMAGES.SEARCH"
+              ) | translate
+            }}
+          </button>
+        </div>
+        <p class="hint">{{ "CHANNEL_IMAGES.QUERY_HINT" | translate }}</p>
+      </div>
+
+      <div class="card" *ngIf="latestRun as run">
+        <div class="card-head">
+          <div>
+            <h2>{{ "CHANNEL_IMAGES.SUGGESTIONS" | translate }}</h2>
+            <p class="desc">
+              {{ run.entity_type }} · «&nbsp;{{ run.query }}&nbsp;» ·
+              {{ run.created_at | flwTimeAgo }}
+            </p>
+          </div>
+          <span class="pill" [ngClass]="statusPill(run).kind"
+            ><span class="dot"></span>{{ statusPill(run).label }}</span
+          >
+        </div>
+        <div class="suggestion-grid" *ngIf="run.suggestions.length">
+          <figure
+            class="suggestion"
+            *ngFor="let suggestion of run.suggestions"
+            [class.chosen]="suggestion.is_chosen"
+          >
+            <img
+              *ngIf="suggestion.thumbnail"
+              [src]="suggestion.thumbnail"
+              [alt]="suggestion.attribution"
+            />
+            <figcaption>
+              <span class="attribution">{{ suggestion.attribution || "—" }}</span>
+              <span class="provider">{{ suggestion.provider }}</span>
+            </figcaption>
+            <button
+              class="btn sm primary"
+              [disabled]="isChoosing"
+              (click)="choose(run, suggestion)"
+            >
+              <flw-icon name="check" />{{ "CHANNEL_IMAGES.USE" | translate }}
+            </button>
+          </figure>
+        </div>
+        <div class="empty" *ngIf="!run.suggestions.length">
+          {{ "CHANNEL_IMAGES.NO_SUGGESTION" | translate }}
+        </div>
+        <ul class="warnings" *ngIf="runWarnings(run).length">
+          <li *ngFor="let warning of runWarnings(run)">
+            <flw-icon name="warning" />{{ warning }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" *ngIf="!latestRun && !isRunning">
+        <div class="empty">
+          {{ "CHANNEL_IMAGES.NO_RUN" | translate }}
+        </div>
+      </div>
+
+      <details class="card history" *ngIf="previousRuns.length">
+        <summary>
+          {{
+            "CHANNEL_IMAGES.HISTORY" | translate: { count: previousRuns.length }
+          }}
+        </summary>
+        <div class="history-row" *ngFor="let run of previousRuns">
+          <span class="mono">{{ run.created_at | flwTimeAgo }}</span>
+          <span>{{ run.entity_type }} · «&nbsp;{{ run.query }}&nbsp;»</span>
+          <span class="count">{{ run.suggestions.length }} img</span>
+          <button
+            class="btn sm icon-only ghost"
+            (click)="deleteRun(run)"
+            [attr.aria-label]="'COMMON.DELETE' | translate"
+          >
+            <flw-icon name="trash" />
+          </button>
+        </div>
+      </details>
+    </section>
+  </div>
+</div>

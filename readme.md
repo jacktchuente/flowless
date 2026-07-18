@@ -95,6 +95,10 @@ Flowless can currently:
     - per-kind rotation policies (episodes in a row, quotas), strict least-recently-aired rotation
     - runs resume the next morning instead of being truncated by the daily window
 - Generate channel logos from the channel theme (local ComfyUI or OpenAI-compatible API)
+- Suggest channel images from the editorial line (near-deterministic)
+    - query built from the studios/actors editorial axes without any LLM (LLM only as fallback, user-editable)
+    - images searched in the local Jellyfin library first, TMDB as a complement
+    - top-5 picker page; the chosen image is normalized and becomes the channel logo
 - Create channels in an IPTV app
     - currently only ErsatzTV is supported
 

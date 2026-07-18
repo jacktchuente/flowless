@@ -28,6 +28,11 @@ export class BaseComponent {
     { label: "NAV.MEDIAS", route: "medias", icon: "medias" },
     { label: "NAV.CHANNELS", route: "channels", icon: "channels" },
     {
+      label: "NAV.CHANNEL_IMAGES",
+      route: "channel-images",
+      icon: "image",
+    },
+    {
       label: "NAV.EDITORIAL_PLANNING",
       route: "editorial-planning",
       icon: "planning",

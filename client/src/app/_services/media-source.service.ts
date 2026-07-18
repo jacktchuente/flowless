@@ -36,6 +36,12 @@ export class MediaSourceApiService extends BaseApiService {
   syncCollections(id: string | number): Observable<null> {
     return this.http.post<null>(`${this.getFullUrl()}${id}/analyze/`, {});
   }
+
+  setActive(id: string | number, isActive: boolean): Observable<MediaSource> {
+    return this.http.post<MediaSource>(`${this.getFullUrl()}${id}/set-active/`, {
+      is_active: isActive,
+    });
+  }
 }
 
 @Injectable({
@@ -86,6 +92,15 @@ export class MediaSourceService extends ObjectApiService {
   syncCollections(id: string | number): Subject<RequestResponseLike> {
     const subject = new Subject<RequestResponseLike>();
     this.api.syncCollections(id).subscribe({
+      next: (body) => subject.next({ isOk: true, body }),
+      error: (body) => subject.next({ isOk: false, body }),
+    });
+    return subject;
+  }
+
+  setActive(id: string | number, isActive: boolean): Subject<RequestResponseLike> {
+    const subject = new Subject<RequestResponseLike>();
+    this.api.setActive(id, isActive).subscribe({
       next: (body) => subject.next({ isOk: true, body }),
       error: (body) => subject.next({ isOk: false, body }),
     });

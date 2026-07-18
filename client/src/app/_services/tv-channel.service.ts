@@ -17,6 +17,7 @@ import {
   TvChannel,
 } from "../_interfaces/tv-channel";
 import { Observable, Subject } from "rxjs";
+import { ChannelImageQueryPreview } from "@project-interfaces/channel-image";
 
 interface RequestResponseLike {
   isOk: boolean;
@@ -203,6 +204,11 @@ export class TvChannelApiService extends BaseApiService {
   getMarathonConfig(id: string | number): Observable<MarathonConfigData> {
     return this.http.get<MarathonConfigData>(
       `${this.getFullUrl()}${id}/marathon-config/`,
+    );
+  }
+  getImageQueryPreview(id: string | number): Observable<ChannelImageQueryPreview> {
+    return this.http.get<ChannelImageQueryPreview>(
+      `${this.getFullUrl()}${id}/image-query-preview/`,
     );
   }
   updateMarathonConfig(
@@ -394,6 +400,9 @@ export class TvChannelService extends ObjectApiService {
   }
   getMarathonConfig(id: string | number) {
     return this.wrap(this.api.getMarathonConfig(id));
+  }
+  getImageQueryPreview(id: string | number) {
+    return this.wrap(this.api.getImageQueryPreview(id));
   }
   updateMarathonConfig(id: string | number, payload: MarathonConfigData) {
     return this.wrap(this.api.updateMarathonConfig(id, payload));

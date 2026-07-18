@@ -20,6 +20,7 @@
             <th>{{ "COMMON.TYPE" | translate }}</th>
             <th>{{ "MEDIA_SOURCE.COLUMN_USERNAME" | translate }}</th>
             <th>{{ "COMMON.STATUS_LABEL" | translate }}</th>
+            <th>{{ "MEDIA_SOURCE.COLUMN_ACTIVE" | translate }}</th>
             <th>{{ "MEDIA_SOURCE.LAST_SYNC" | translate }}</th>
             <th>{{ "COMMON.ACTIONS" | translate }}</th>
           </tr>
@@ -39,6 +40,12 @@
                 ><span class="dot"></span
                 >{{ status(source).label | translate }}</span
               >
+            </td>
+            <td>
+              <flw-switch
+                [value]="source.is_active"
+                (valueChange)="toggleActive(source, $event)"
+              />
             </td>
             <td class="mono">{{ source.analyzed_at | flwTimeAgo }}</td>
             <td class="actions">

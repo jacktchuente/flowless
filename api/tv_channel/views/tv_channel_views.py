@@ -25,6 +25,7 @@ from tv_channel.serializers.form_suggestion_serializers import FormSuggestionReq
 from tv_channel.serializers.grid_serializers import GridSerializer, GridWriteSerializer
 from tv_channel.serializers.marathon_serializers import MarathonConfigWriteSerializer, MarathonKindPolicySerializer
 from tv_channel.services.grid_editing import GridNotEditableError, compute_grid_warnings, get_editable_grid_layout
+from tv_channel.services.image_suggestion.query_service import ChannelImageQueryService
 from tv_channel.services.form_suggestion_service import FormSuggestionError, FormSuggestionService
 from tv_channel.serializers.tv_channel_serializers import (
     TvChannelCreateSerializer,
@@ -157,6 +158,20 @@ class TvChannelViewSet(
                     for policy in source_config.kind_policies.all()
                 ])
         return Response(GridSerializer(copy).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=("get",), url_path="image-query-preview")
+    def image_query_preview(self, request, pk=None):
+        # Requete deterministe (axes edito seulement, jamais de LLM ici)
+        # pour preremplir le champ editable de la page Images.
+        channel = self.get_object()
+        image_query = ChannelImageQueryService(channel).resolve_from_axes()
+        if image_query is None:
+            return Response({"entity_type": None, "query": None, "source": None})
+        return Response({
+            "entity_type": image_query.entity_type,
+            "query": image_query.query,
+            "source": image_query.source,
+        })
 
     @action(detail=True, methods=("get", "put"), url_path="marathon-config")
     def marathon_config(self, request, pk=None):

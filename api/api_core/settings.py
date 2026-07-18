@@ -317,6 +317,17 @@ OPENAI_IMAGE_API_KEY = os.getenv("OPENAI_IMAGE_API_KEY")
 OPENAI_IMAGE_URL = os.getenv("OPENAI_IMAGE_URL")  # None = API OpenAI officielle
 OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
 
+# Suggestions d'images de chaine (Jellyfin prioritaire, TMDB en complement)
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+CHANNEL_IMAGE_SUGGESTION_COUNT = int(os.getenv("CHANNEL_IMAGE_SUGGESTION_COUNT", "5"))
+CHANNEL_IMAGE_MAX_WIDTH = int(os.getenv("CHANNEL_IMAGE_MAX_WIDTH", "1000"))
+CHANNEL_IMAGE_MAX_HEIGHT = int(os.getenv("CHANNEL_IMAGE_MAX_HEIGHT", "1000"))
+# En mode theme: nb de containers les mieux scores (preferred_bonus) parmi
+# lesquels piocher les backdrops
+CHANNEL_IMAGE_THEME_POOL_SIZE = int(os.getenv("CHANNEL_IMAGE_THEME_POOL_SIZE", "25"))
+CHANNEL_IMAGE_RUNS_KEPT = int(os.getenv("CHANNEL_IMAGE_RUNS_KEPT", "5"))
+LLM_RETRY_IMAGE_QUERY = int(os.getenv("LLM_RETRY_IMAGE_QUERY", 3))
+
 
 GREEDY_MODE_NATURES = True
 GREEDY_MODE_KINDS = True
