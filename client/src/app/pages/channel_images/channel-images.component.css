@@ -93,16 +93,21 @@
   border-radius: 6px;
   background: var(--slate-100);
 }
+.suggestion {
+  min-width: 0;
+}
 .suggestion figcaption {
   display: flex;
   justify-content: space-between;
   gap: 8px;
   font-size: 13px;
+  min-width: 0;
 }
 .suggestion .attribution {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 .suggestion .provider {
   color: var(--slate-500);
