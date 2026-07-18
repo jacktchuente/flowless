@@ -79,6 +79,34 @@ class JellyfinImageProviderTests(ImageProviderFixtureMixin, TestCase):
 
     @patch(REQUEST_PATCH)
     @patch(AUTH_PATCH, return_value=("tok", "uid"))
+    def test_item_images_prefer_logo_then_thumb_then_backdrop(self, _auth, request_mock):
+        def fake_request(token, path, params, **kwargs):
+            if path == "/Studios":
+                return {"Items": [{"Id": "st1", "Name": "Ghibli", "ImageTags": {}}]}
+            if path == "/Items":
+                self.assertIn("ImageTags", params["fields"])
+                return {"Items": [
+                    {"Id": "m1", "Name": "Backdrop only", "BackdropImageTags": ["a"], "ImageTags": {}},
+                    {"Id": "m2", "Name": "With thumb", "BackdropImageTags": ["a"], "ImageTags": {"Thumb": "t"}},
+                    {"Id": "m3", "Name": "With logo", "BackdropImageTags": ["a"], "ImageTags": {"Logo": "l", "Thumb": "t"}},
+                    {"Id": "m4", "Name": "No image", "BackdropImageTags": [], "ImageTags": {}},
+                ]}
+            raise AssertionError(path)
+
+        request_mock.side_effect = fake_request
+        results = JellyfinImageProvider(self.channel).search(ImageQuery("studio", "Ghibli", "axes"), limit=5)
+
+        self.assertEqual(
+            [result.source_url for result in results],
+            [
+                "http://jf:8096/Items/m3/Images/Logo",
+                "http://jf:8096/Items/m2/Images/Thumb",
+                "http://jf:8096/Items/m1/Images/Backdrop/0",
+            ],
+        )
+
+    @patch(REQUEST_PATCH)
+    @patch(AUTH_PATCH, return_value=("tok", "uid"))
     def test_person_query_uses_persons_endpoint(self, _auth, request_mock):
         def fake_request(token, path, params, **kwargs):
             if path == "/Persons":

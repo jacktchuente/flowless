@@ -75,7 +75,7 @@ class JellyfinImageProvider(ImageSearchProvider):
             if (entity.get("ImageTags") or {}).get("Primary"):
                 results.append(self._image_result(entity, image_type="Primary", attribution=entity.get("Name", "")))
 
-        # 2. Backdrops des titres rattaches a la premiere entite trouvee
+        # 2. Images des titres rattaches a la premiere entite trouvee
         if entities:
             entity_id = entities[0].get("Id")
             items = self._service._request(
@@ -85,12 +85,12 @@ class JellyfinImageProvider(ImageSearchProvider):
                     items_filter: entity_id,
                     "recursive": "true",
                     "includeItemTypes": "Movie,Series",
-                    "fields": "BackdropImageTags",
+                    "fields": "ImageTags,BackdropImageTags",
                     "limit": max(1, limit * self.ITEMS_FETCH_FACTOR),
                     "userId": self._user_id,
                 },
             ).get("Items") or []
-            results.extend(self._backdrop_results(items, limit - len(results)))
+            results.extend(self._item_image_results(items, limit - len(results)))
         return results
 
     def _search_theme(self, limit: int) -> list[ImageResult]:
@@ -125,22 +125,41 @@ class JellyfinImageProvider(ImageSearchProvider):
             "/Items",
             {
                 "ids": ",".join(pool_ids),
-                "fields": "BackdropImageTags",
+                "fields": "ImageTags,BackdropImageTags",
                 "userId": self._user_id,
             },
         ).get("Items") or []
-        return self._backdrop_results(items, limit)
+        return self._item_image_results(items, limit)
 
-    def _backdrop_results(self, items: list[dict], limit: int) -> list[ImageResult]:
-        results: list[ImageResult] = []
-        for item in items:
-            if len(results) >= max(limit, 0):
-                break
-            if item.get("BackdropImageTags"):
-                results.append(
-                    self._image_result(item, image_type="Backdrop/0", attribution=item.get("Name", ""))
-                )
-        return results
+    # Types d'image par ordre de preference pour une identite de chaine:
+    # le logo du titre, puis la miniature paysage, puis un backdrop.
+    ITEM_IMAGE_TYPE_PREFERENCE = ("Logo", "Thumb", "Backdrop/0")
+
+    def _item_image_results(self, items: list[dict], limit: int) -> list[ImageResult]:
+        ranked: list[tuple[int, int, dict, str]] = []
+        for index, item in enumerate(items):
+            image_type = self._preferred_image_type(item)
+            if image_type is None:
+                continue
+            ranked.append(
+                (self.ITEM_IMAGE_TYPE_PREFERENCE.index(image_type), index, item, image_type)
+            )
+        ranked.sort(key=lambda entry: (entry[0], entry[1]))
+        return [
+            self._image_result(item, image_type=image_type, attribution=item.get("Name", ""))
+            for _, _, item, image_type in ranked[:max(limit, 0)]
+        ]
+
+    @staticmethod
+    def _preferred_image_type(item: dict) -> str | None:
+        image_tags = item.get("ImageTags") or {}
+        if image_tags.get("Logo"):
+            return "Logo"
+        if image_tags.get("Thumb"):
+            return "Thumb"
+        if item.get("BackdropImageTags"):
+            return "Backdrop/0"
+        return None
 
     def _image_result(self, item: dict, *, image_type: str, attribution: str) -> ImageResult:
         base_url = JellyfinService.normalize_url(self.media_source.credentials["application_url"])
