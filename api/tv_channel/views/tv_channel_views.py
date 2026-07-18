@@ -10,10 +10,20 @@ from grid_schedule.serializers.playout_report_serializers import PlayoutGenerati
 from django.utils.timezone import now
 from media_source.constants import MediaContainerKind, MediaNature, MediaProgrammingRole
 from rule_engine.services import category_service, vocabulary_service
-from tv_channel.models import EditorialLine, FillerPolicy, GridBlock, GridLayout, GridLayoutMode, TvChannel
+from tv_channel.models import (
+    EditorialLine,
+    FillerPolicy,
+    GridBlock,
+    GridLayout,
+    GridLayoutMode,
+    MarathonConfig,
+    MarathonKindPolicy,
+    TvChannel,
+)
 from tv_channel.serializers.editorial_line_serializers import EditorialLineSerializer, EditorialLineWriteSerializer
 from tv_channel.serializers.form_suggestion_serializers import FormSuggestionRequestSerializer
 from tv_channel.serializers.grid_serializers import GridSerializer, GridWriteSerializer
+from tv_channel.serializers.marathon_serializers import MarathonConfigWriteSerializer, MarathonKindPolicySerializer
 from tv_channel.services.grid_editing import GridNotEditableError, compute_grid_warnings, get_editable_grid_layout
 from tv_channel.services.form_suggestion_service import FormSuggestionError, FormSuggestionService
 from tv_channel.serializers.tv_channel_serializers import (
@@ -133,7 +143,52 @@ class TvChannelViewSet(
                 GridBlock(grid_layout=copy, **{field: getattr(block, field) for field in fields})
                 for block in source.gridblock_set.all()
             ])
+            source_config = getattr(source, "marathon_config", None)
+            if source_config is not None:
+                copy_config = MarathonConfig.objects.create(grid_layout=copy)
+                MarathonKindPolicy.objects.bulk_create([
+                    MarathonKindPolicy(
+                        config=copy_config,
+                        container_kind=policy.container_kind,
+                        min_run=policy.min_run,
+                        max_run=policy.max_run,
+                        quota=policy.quota,
+                    )
+                    for policy in source_config.kind_policies.all()
+                ])
         return Response(GridSerializer(copy).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=("get", "put"), url_path="marathon-config")
+    def marathon_config(self, request, pk=None):
+        channel = self.get_object()
+        layout = (
+            channel.gridlayout_set.filter(is_active=True)
+            .order_by("-created_at", "-id")
+            .first()
+        )
+        if layout is None or layout.mode != GridLayoutMode.MARATHON:
+            return Response(
+                {"detail": "Channel has no active marathon grid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        config = getattr(layout, "marathon_config", None)
+
+        if request.method == "GET":
+            policies = config.kind_policies.all() if config is not None else []
+            return Response({"kind_policies": MarathonKindPolicySerializer(policies, many=True).data})
+
+        serializer = MarathonConfigWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            if config is None:
+                config = MarathonConfig.objects.create(grid_layout=layout)
+            # Remplacement complet: ce qui n'est pas dans le payload disparait.
+            config.kind_policies.all().delete()
+            MarathonKindPolicy.objects.bulk_create([
+                MarathonKindPolicy(config=config, **policy)
+                for policy in serializer.validated_data["kind_policies"]
+            ])
+        return Response({"kind_policies": MarathonKindPolicySerializer(config.kind_policies.all(), many=True).data})
 
     @action(detail=True, methods=("get",), url_path="grid-warnings")
     def grid_warnings(self, request, pk=None):

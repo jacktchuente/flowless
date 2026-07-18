@@ -16,6 +16,8 @@ export interface GenerationDialogData {
   channelId: string | number;
   channelName: string;
   kind: "blueprint" | "playout";
+  // Marathon: pas de blocs, la methode de generation de grille est ignoree.
+  isMarathon?: boolean;
 }
 
 @Component({
@@ -33,7 +35,7 @@ export interface GenerationDialogData {
     <flw-modal [title]="title" [description]="description">
       <ng-container *ngIf="state === 'idle'">
         <ng-container *ngIf="data.kind === 'blueprint'; else playoutFields">
-          <div class="field">
+          <div class="field" *ngIf="!data.isMarathon">
             <label>{{ "CHANNEL_DIALOGS.GENERATION.METHOD" | translate }}</label
             ><flw-select [(ngModel)]="method" [options]="methods" />
           </div>
@@ -164,7 +166,9 @@ export class GenerationDialogComponent {
   get steps() {
     const steps =
       this.data.kind === "blueprint"
-        ? ["READ_COLLECTIONS", "BUILD_BLOCKS", "CHECK_RULES", "WRITE_GRID"]
+        ? this.data.isMarathon
+          ? ["READ_COLLECTIONS", "CHECK_RULES", "WRITE_GRID"]
+          : ["READ_COLLECTIONS", "BUILD_BLOCKS", "CHECK_RULES", "WRITE_GRID"]
         : ["READ_RULES", "SELECT_MEDIA", "RESOLVE", "WRITE_PLAYOUT"];
     return steps.map((step) =>
       this.translate.instant(`CHANNEL_DIALOGS.GENERATION.STEPS.${step}`),

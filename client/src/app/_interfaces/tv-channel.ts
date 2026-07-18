@@ -65,6 +65,18 @@ export interface ScheduledMediaItem {
   parent_schedule_item?: string | number | null
 }
 
+export interface MarathonKindPolicy {
+  container_kind: number
+  container_kind_label?: string
+  min_run: number
+  max_run: number
+  quota: number
+}
+
+export interface MarathonConfigData {
+  kind_policies: MarathonKindPolicy[]
+}
+
 export interface GridData {
   id: string | number
   created_at: string
@@ -72,6 +84,7 @@ export interface GridData {
   mode: number
   post_filler_policy: string | number | null
   blocks: GridBlock[]
+  marathon_config?: MarathonConfigData | null
 }
 
 export interface PlayoutGenerationIssue {
@@ -106,6 +119,7 @@ export interface TvChannel {
   analyze_status: string | number
   catalog: string | number
   catalog_name: string
+  programming_mode?: number
   is_enabled: boolean
   external_playout_id?: string | null
   logo?: string | null
@@ -123,7 +137,14 @@ export interface TvChannelPayload {
   description: string | null
   specification?: string | null
   catalog: string | number
+  programming_mode?: number
 }
+
+export const PROGRAMMING_MODE_CLASSIC = 1
+export const PROGRAMMING_MODE_MARATHON = 2
+export const GRID_MODE_FIXED = 1
+export const GRID_MODE_FLEXIBLE = 2
+export const GRID_MODE_MARATHON = 3
 
 export interface FormOption { value: number; label: string }
 export interface FillerPolicyOption { id: number; name: string; duration_seconds: number }

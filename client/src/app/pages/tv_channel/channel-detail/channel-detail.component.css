@@ -105,6 +105,9 @@
   text-align: left;
   cursor: pointer;
 }
+.block-row.static {
+  cursor: default;
+}
 .gap {
   display: flex;
   align-items: center;
@@ -122,6 +125,9 @@
 }
 .gap .btn {
   margin-left: auto;
+}
+.timeline-grid.single {
+  grid-template-columns: 1fr;
 }
 .timeline-grid {
   display: grid;

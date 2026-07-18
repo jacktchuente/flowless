@@ -1,9 +1,16 @@
 from datetime import time
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
 
+from media_source.constants import MediaContainerKind
 from project_ops.constants import AnalyzeStatus
+
+
+class ChannelProgrammingMode(models.IntegerChoices):
+    CLASSIC = 1, "classic"
+    MARATHON = 2, "marathon"
 
 
 class Catalog(models.Model):
@@ -25,6 +32,7 @@ class TvChannel(models.Model):
     logo = models.FileField(upload_to="data/logos/", null=True, blank=True)
     external_playout_id = models.CharField(max_length=255, null=True, blank=True)
     catalog = models.ForeignKey("Catalog", on_delete=models.CASCADE)
+    programming_mode = models.IntegerField(choices=ChannelProgrammingMode, default=ChannelProgrammingMode.CLASSIC)
     is_enabled = models.BooleanField(default=True)
     analyze_status = models.CharField(max_length=32, choices=AnalyzeStatus, default=AnalyzeStatus.IDLE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -51,6 +59,7 @@ class EditorialLine(models.Model):
 class GridLayoutMode(models.IntegerChoices):
     FIXED = 1, "fixed"
     FLEXIBLE = 2, "flexible"
+    MARATHON = 3, "marathon"
 
 
 class GridLayout(models.Model):
@@ -92,6 +101,54 @@ class GridBlock(models.Model):
     forbidden = models.JSONField(default=dict, blank=True)
 
     post_filler_policy = models.ForeignKey("FillerPolicy", on_delete=models.SET_NULL, blank=True, null=True)
+
+
+class MarathonConfig(models.Model):
+    grid_layout = models.OneToOneField(
+        "GridLayout",
+        on_delete=models.CASCADE,
+        related_name="marathon_config",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Marathon config grid #{self.grid_layout_id}"
+
+
+class MarathonKindPolicy(models.Model):
+    """
+    Rotation contract for one container kind: a kind absent from the config
+    (or with max_run=0) is excluded from the marathon rotation even if the
+    editorial line matches it.
+    """
+    config = models.ForeignKey(
+        "MarathonConfig",
+        on_delete=models.CASCADE,
+        related_name="kind_policies",
+    )
+    container_kind = models.IntegerField(choices=MediaContainerKind)
+    min_run = models.PositiveIntegerField(default=1)  # ne pas lancer un container avec moins de N items
+    max_run = models.PositiveIntegerField(default=1)  # nb d'items enchaines vise; 0 = kind desactive
+    quota = models.PositiveIntegerField(default=1)  # poids de rotation entre kinds
+
+    class Meta:
+        ordering = ("container_kind", "id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("config", "container_kind"),
+                name="unique_marathon_kind_policy_per_config",
+            ),
+        ]
+
+    def clean(self):
+        if self.max_run and self.min_run > self.max_run:
+            raise ValidationError("min_run must be <= max_run.")
+        if self.max_run and self.quota < 1:
+            raise ValidationError("quota must be >= 1 for an enabled kind.")
+
+    def __str__(self):
+        return f"{self.get_container_kind_display()} run {self.min_run}-{self.max_run} quota {self.quota}"
 
 
 class FillerPolicyManager(models.Manager):

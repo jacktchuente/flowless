@@ -11,6 +11,7 @@ import {
   GridData,
   GridPayload,
   GridWarningsResponse,
+  MarathonConfigData,
   PlayoutGenerationReport,
   RuleOptionSearchResponse,
   TvChannel,
@@ -199,6 +200,20 @@ export class TvChannelApiService extends BaseApiService {
       `${this.getFullUrl()}${id}/grid-warnings/`,
     );
   }
+  getMarathonConfig(id: string | number): Observable<MarathonConfigData> {
+    return this.http.get<MarathonConfigData>(
+      `${this.getFullUrl()}${id}/marathon-config/`,
+    );
+  }
+  updateMarathonConfig(
+    id: string | number,
+    payload: MarathonConfigData,
+  ): Observable<MarathonConfigData> {
+    return this.http.put<MarathonConfigData>(
+      `${this.getFullUrl()}${id}/marathon-config/`,
+      payload,
+    );
+  }
   suggestForm(
     id: string | number,
     payload: FormSuggestionRequest,
@@ -376,6 +391,12 @@ export class TvChannelService extends ObjectApiService {
   }
   getGridWarnings(id: string | number) {
     return this.wrap(this.api.getGridWarnings(id));
+  }
+  getMarathonConfig(id: string | number) {
+    return this.wrap(this.api.getMarathonConfig(id));
+  }
+  updateMarathonConfig(id: string | number, payload: MarathonConfigData) {
+    return this.wrap(this.api.updateMarathonConfig(id, payload));
   }
   suggestForm(id: string | number, payload: FormSuggestionRequest) {
     return this.wrap(this.api.suggestForm(id, payload));

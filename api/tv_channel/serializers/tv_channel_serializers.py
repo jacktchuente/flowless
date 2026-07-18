@@ -15,9 +15,11 @@ from tv_channel.serializers.tv_channel_detail_serializers import TvChannelDetail
 
 
 class TvChannelCreateSerializer(serializers.ModelSerializer):
+    # programming_mode se choisit a la creation uniquement (absent du
+    # serializer d'update): irreversible via le client.
     class Meta:
         model = TvChannel
-        fields = ("id", "name", "description", "specification", "catalog")
+        fields = ("id", "name", "description", "specification", "catalog", "programming_mode")
 
     def to_representation(self, instance):
         return TvChannelSerializer().to_representation(instance)
@@ -51,6 +53,7 @@ class TvChannelSerializer(serializers.ModelSerializer):
             "analyze_status",
             "catalog",
             "catalog_name",
+            "programming_mode",
             "is_enabled",
             "external_playout_id",
             "logo",

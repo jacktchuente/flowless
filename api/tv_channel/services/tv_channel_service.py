@@ -11,7 +11,18 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from grid_schedule.models import TvPlayout
-from tv_channel.models import TvChannel, GridLayout, GridBlock, FillerPolicy, EditorialLine
+from media_source.constants import MediaContainerKind
+from tv_channel.models import (
+    ChannelProgrammingMode,
+    EditorialLine,
+    FillerPolicy,
+    GridBlock,
+    GridLayout,
+    GridLayoutMode,
+    MarathonConfig,
+    MarathonKindPolicy,
+    TvChannel,
+)
 
 
 class TvChannelService:
@@ -23,6 +34,14 @@ class TvChannelService:
         GRID_GENERATION_MODE_PRESET_AND_LLM,
         GRID_GENERATION_MODE_RANDOM,
     }
+
+    # Rotation par defaut d'une chaine marathon: 2 episodes de serie a la
+    # suite, films a l'unite, autres kinds exclus tant qu'ils n'ont pas de
+    # policy. Quotas egaux pour alterner les runs (serie x2 -> film x1).
+    DEFAULT_MARATHON_POLICIES = (
+        {"container_kind": MediaContainerKind.SERIES, "min_run": 2, "max_run": 2, "quota": 1},
+        {"container_kind": MediaContainerKind.STANDALONE_VIDEO, "min_run": 1, "max_run": 1, "quota": 1},
+    )
 
     def __init__(self, tv_channel: TvChannel):
         self.tv_channel = tv_channel
@@ -39,6 +58,17 @@ class TvChannelService:
         editorial_line = self._get_or_generate_editorial_line(
             regenerate_editorial_line=regenerate_editorial_line,
         )
+
+        if self.tv_channel.programming_mode == ChannelProgrammingMode.MARATHON:
+            # Pas de blocs en marathon: grid_generation_mode est ignore, la
+            # grille porte la config de rotation.
+            grid_layout = self._create_active_marathon_grid_layout(editorial_line, reboot=reboot)
+            return {
+                "tv_channel": self.tv_channel,
+                "editorial_line": editorial_line,
+                "grid_layout": grid_layout,
+                "blocks": [],
+            }
 
         grid_payload = {
             "name": self.tv_channel.name,
@@ -92,20 +122,49 @@ class TvChannelService:
         editorial_line.save()
         return editorial_line
 
+    def _create_active_marathon_grid_layout(self, editorial_line: EditorialLine, *, reboot: bool) -> GridLayout:
+        with transaction.atomic():
+            # Une regeneration de blueprint ne doit pas perdre la rotation
+            # personnalisee: la config du layout marathon precedent est clonee.
+            previous_policies = list(
+                MarathonKindPolicy.objects.filter(
+                    config__grid_layout__tv_channel=self.tv_channel,
+                    config__grid_layout__is_active=True,
+                    config__grid_layout__mode=GridLayoutMode.MARATHON,
+                ).values("container_kind", "min_run", "max_run", "quota")
+            )
+            self._deactivate_active_layouts_and_playouts(reboot=reboot)
+            post_filler_policy = None
+            if editorial_line.allow_filler:
+                post_filler_policy = FillerPolicy.objects.get_or_create_for_params()
+            grid_layout = GridLayout.objects.create(
+                tv_channel=self.tv_channel,
+                is_active=True,
+                mode=GridLayoutMode.MARATHON,
+                post_filler_policy=post_filler_policy,
+            )
+            config = MarathonConfig.objects.create(grid_layout=grid_layout)
+            policies = previous_policies or [dict(policy) for policy in self.DEFAULT_MARATHON_POLICIES]
+            MarathonKindPolicy.objects.bulk_create(
+                [MarathonKindPolicy(config=config, **policy) for policy in policies]
+            )
+        return grid_layout
+
+    def _deactivate_active_layouts_and_playouts(self, *, reboot: bool) -> None:
+        active_layouts = GridLayout.objects.filter(
+            tv_channel=self.tv_channel,
+            is_active=True,
+        )
+        if reboot or active_layouts.exists():
+            active_layouts.update(is_active=False)
+        TvPlayout.objects.filter(
+            tv_channel=self.tv_channel,
+            is_active=True,
+        ).update(is_active=False)
+
     def _create_active_grid_layout(self, blocks, *, reboot: bool) -> GridLayout:
         with transaction.atomic():
-            active_layouts = GridLayout.objects.filter(
-                tv_channel=self.tv_channel,
-                is_active=True,
-            )
-
-            if reboot or active_layouts.exists():
-                active_layouts.update(is_active=False)
-
-            TvPlayout.objects.filter(
-                tv_channel=self.tv_channel,
-                is_active=True,
-            ).update(is_active=False)
+            self._deactivate_active_layouts_and_playouts(reboot=reboot)
 
             grid_layout = GridLayout.objects.create(
                 tv_channel=self.tv_channel,

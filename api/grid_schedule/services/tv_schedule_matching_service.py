@@ -4,9 +4,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import QuerySet
 
 from project_ops.constants import AnalyzeStatus
+from grid_schedule.services import editorial_matching
 from media_source.models import MediaContainer, MediaItem
 from tv_channel.models import EditorialLine, GridBlock, TvChannel
-from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
 
 
 class TvScheduleMatchingService:
@@ -74,37 +74,7 @@ class TvScheduleMatchingService:
         block: GridBlock,
         container: MediaContainer,
     ) -> bool:
-        for axis in STRING_RULE_AXES:
-            values = self._container_axis_values(container, axis)
-
-            if not self._passes_allowed_values(values, self.editorial_line.allowed.get(axis, [])):
-                return False
-            if not self._passes_allowed_values(values, block.allowed.get(axis, [])):
-                return False
-            if self._intersects(values, self.editorial_line.forbidden.get(axis, [])):
-                return False
-            if self._intersects(values, block.forbidden.get(axis, [])):
-                return False
-
-        container_nature = self._container_nature(container)
-        container_kind = self._container_kind(container)
-
-        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed.get("natures", [])):
-            return False
-        if not self._passes_allowed_choice(container_nature, block.allowed.get("natures", [])):
-            return False
-        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden.get("natures", [])):
-            return False
-        if self._matches_forbidden_choice(container_nature, block.forbidden.get("natures", [])):
-            return False
-
-        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed.get("container_kinds", [])):
-            return False
-        if not self._passes_allowed_choice(container_kind, block.allowed.get("container_kinds", [])):
-            return False
-        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden.get("container_kinds", [])):
-            return False
-        if self._matches_forbidden_choice(container_kind, block.forbidden.get("container_kinds", [])):
+        if not editorial_matching.container_passes_rules(container, (self.editorial_line, block)):
             return False
 
         duration_min = container.duration_min_seconds or container.total_duration_seconds
@@ -119,76 +89,8 @@ class TvScheduleMatchingService:
         return True
 
     @staticmethod
-    def _container_categories(container: MediaContainer) -> set[str]:
-        values: set[str] = set()
-        for source in (container.categories or [], container.genres or [], container.tags or []):
-            for value in source:
-                if isinstance(value, str) and value:
-                    values.add(value)
-        return values
-
-    @classmethod
-    def _container_axis_values(cls, container: MediaContainer, axis: str) -> set[str]:
-        if axis == "categories":
-            return cls._container_categories(container)
-        return {
-            value
-            for value in (getattr(container, axis) or [])
-            if isinstance(value, str) and value
-        }
-
-    @staticmethod
-    def _container_nature(container: MediaContainer):
-        return getattr(container.media_collection, "nature", None)
-
-    @staticmethod
-    def _container_kind(container: MediaContainer):
-        return getattr(container.media_collection, "container_kind", None)
-
-    @staticmethod
     def _get_editorial_line(tv_channel: TvChannel) -> EditorialLine:
         try:
             return tv_channel.editorialline
         except ObjectDoesNotExist as exc:
             raise ValidationError("TvChannel must have an editorial line.") from exc
-
-    @staticmethod
-    def _passes_allowed_values(container_values: set[str], allowed_values: list[str]) -> bool:
-        allowed = {value for value in (allowed_values or []) if isinstance(value, str)}
-        if not allowed:
-            return True
-        return bool(container_values.intersection(allowed))
-
-    @staticmethod
-    def _intersects(left: set[str], right: list[str]) -> bool:
-        values = {value for value in (right or []) if isinstance(value, str)}
-        return bool(left.intersection(values))
-
-    @staticmethod
-    def _passes_allowed_choice(value, allowed_values: list) -> bool:
-        allowed = TvScheduleMatchingService._choice_values(allowed_values or [])
-        if not allowed:
-            return True
-        return bool(TvScheduleMatchingService._choice_values([value]).intersection(allowed))
-
-    @staticmethod
-    def _matches_forbidden_choice(value, forbidden_values: list) -> bool:
-        forbidden = TvScheduleMatchingService._choice_values(forbidden_values or [])
-        if not forbidden:
-            return False
-        return bool(TvScheduleMatchingService._choice_values([value]).intersection(forbidden))
-
-    @staticmethod
-    def _choice_values(values) -> set[str]:
-        normalized: set[str] = set()
-        for value in values:
-            if value is None:
-                continue
-            normalized.add(str(value))
-            enum_value = getattr(value, "value", None)
-            if enum_value is not None:
-                normalized.add(str(enum_value))
-            enum_name = getattr(value, "name", None)
-            if enum_name is not None:
-                normalized.add(str(enum_name))
-        return normalized

@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from grid_schedule.models import PlayoutGenerationReport, ScheduleMediaItem, TvPlayout
 from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayoutGenerationService
+from grid_schedule.services.marathon_tv_schedule_service import MarathonPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import Catalog, GridLayoutMode, TvChannel
@@ -127,6 +128,13 @@ def generate_tv_channel_playout(
         )
         if active_grid is not None and active_grid.mode == GridLayoutMode.FLEXIBLE:
             service = FlexibleTvPlayoutGenerationService(
+                tv_channel=instance,
+                days=days,
+                reset=reset,
+                extend=extend,
+            )
+        elif active_grid is not None and active_grid.mode == GridLayoutMode.MARATHON:
+            service = MarathonPlayoutGenerationService(
                 tv_channel=instance,
                 days=days,
                 reset=reset,

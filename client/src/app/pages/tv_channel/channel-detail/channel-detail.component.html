@@ -25,7 +25,12 @@
           (c.is_enabled ? "COMMON.ACTIVE" : "COMMON.STATUS.IDLE") | translate
         }}</span
         ><span class="pill info">{{
-          (isFlexible ? "NAV.EDITORIAL_PLANNING" : "CHANNELS.GRID") | translate
+          (isFlexible
+            ? "NAV.EDITORIAL_PLANNING"
+            : isMarathon
+              ? "CHANNEL_DETAIL.MARATHON_MODE"
+              : "CHANNELS.GRID"
+          ) | translate
         }}</span>
       </div>
     </div>
@@ -94,9 +99,17 @@
       <div class="card-head">
         <h2>{{ "CHANNEL_DETAIL.EDITORIAL_LINE" | translate }}</h2>
         <div>
-          <button class="btn sm ghost" (click)="openEditorialLine()">
+          <button
+            class="btn sm ghost"
+            [disabled]="!c.editorial_line_data"
+            (click)="openEditorialLine()"
+          >
             {{ "COMMON.EDIT" | translate }}</button
-          ><button class="btn sm danger-ghost" (click)="openResetRules()">
+          ><button
+            class="btn sm danger-ghost"
+            [disabled]="!c.editorial_line_data"
+            (click)="openResetRules()"
+          >
             {{ "COMMON.RESET" | translate }}
           </button>
         </div>
@@ -132,7 +145,62 @@
       </div>
     </section>
   </div>
-  <section class="card" *ngIf="!isFlexible">
+  <section class="card" *ngIf="isMarathon">
+    <div class="card-head">
+      <div>
+        <h2>{{ "CHANNEL_DETAIL.MARATHON_ROTATION" | translate }}</h2>
+        <p class="desc">
+          {{ "CHANNEL_DETAIL.MARATHON_ROTATION_DESC" | translate }}
+        </p>
+      </div>
+      <div>
+        <button
+          class="btn ghost"
+          [disabled]="!hasMarathonGrid"
+          (click)="openGridSettings()"
+        >
+          {{ "CHANNEL_DIALOGS.GRID.SETTINGS" | translate }}</button
+        ><button
+          class="btn"
+          [disabled]="!hasMarathonGrid"
+          (click)="newVersion()"
+        >
+          {{ "MANUAL_EDIT.NEW_VERSION" | translate }}</button
+        ><button
+          class="btn primary"
+          [disabled]="!hasMarathonGrid"
+          (click)="openMarathonConfig()"
+        >
+          {{ "CHANNEL_DETAIL.MARATHON_CONFIGURE" | translate }}
+        </button>
+      </div>
+    </div>
+    <div class="blocks" *ngIf="hasMarathonGrid">
+      <div class="block-row static" *ngFor="let policy of marathonPolicies">
+        <strong>{{ marathonPolicyLabel(policy) }}</strong>
+        <div class="tags">
+          <span class="tag allow">{{
+            "CHANNEL_DETAIL.MARATHON_RUN"
+              | translate: { min: policy.min_run, max: policy.max_run }
+          }}</span
+          ><span class="tag prefer">{{
+            "CHANNEL_DETAIL.MARATHON_QUOTA"
+              | translate: { quota: policy.quota }
+          }}</span
+          ><span class="tag forbid" *ngIf="!policy.max_run">{{
+            "CHANNEL_DETAIL.MARATHON_DISABLED" | translate
+          }}</span>
+        </div>
+      </div>
+      <div class="empty" *ngIf="!marathonPolicies.length">
+        {{ "CHANNEL_DETAIL.MARATHON_NO_POLICY" | translate }}
+      </div>
+    </div>
+    <div class="empty" *ngIf="!hasMarathonGrid">
+      {{ "CHANNEL_DETAIL.MARATHON_NEEDS_BLUEPRINT" | translate }}
+    </div>
+  </section>
+  <section class="card" *ngIf="hasBlockGrid">
     <div class="card-head">
       <div>
         <h2>{{ "MANUAL_EDIT.EDITORIAL_BLOCKS" | translate }}</h2>
@@ -195,7 +263,12 @@
   <section class="card timelines">
     <div class="card-head">
       <div>
-        <h2>{{ "CHANNEL_DETAIL.GRID_AND_SCHEDULE" | translate }}</h2>
+        <h2>
+          {{
+            (hasBlockGrid ? "CHANNEL_DETAIL.GRID_AND_SCHEDULE" : "CHANNELS.SCHEDULE")
+              | translate
+          }}
+        </h2>
       </div>
       <div class="group">
         <flw-segmented
@@ -207,13 +280,15 @@
         }}</strong>
       </div>
     </div>
-    <div class="timeline-grid">
-      <div *ngIf="!isFlexible">
+    <div class="timeline-grid" [class.single]="!hasBlockGrid">
+      <div *ngIf="hasBlockGrid">
         <span class="section-label">{{ "CHANNELS.GRID" | translate }}</span
         ><flw-timeline [blocks]="gridBlocks()" [pxPerHour]="52" />
       </div>
       <div>
-        <span class="section-label">{{ "CHANNELS.SCHEDULE" | translate }}</span
+        <span class="section-label" *ngIf="hasBlockGrid">{{
+          "CHANNELS.SCHEDULE" | translate
+        }}</span
         ><flw-timeline
           [blocks]="scheduleBlocks()"
           [pxPerHour]="52"
