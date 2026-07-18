@@ -15,6 +15,7 @@ from django.utils import timezone  # noqa: F401
 
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import BlockContainerSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.services import editorial_matching
 from grid_schedule.services.base_playout_generation_service import (
     BasePlayoutGenerationService,
     PlayoutGenerationResult,
@@ -434,37 +435,7 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
         return candidates
 
     def _passes_strict_filters(self, tv_channel: TvChannel, block: GridBlock, container: MediaContainer) -> bool:
-        container_nature = self._container_nature(container)
-        container_kind = self._container_kind(container)
-
-        for axis in STRING_RULE_AXES:
-            values = self._container_axis_values(container, axis)
-
-            if not self._passes_allowed_values(values, self.editorial_line.allowed.get(axis, [])):
-                return False
-            if not self._passes_allowed_values(values, block.allowed.get(axis, [])):
-                return False
-            if self._intersects(values, self.editorial_line.forbidden.get(axis, [])):
-                return False
-            if self._intersects(values, block.forbidden.get(axis, [])):
-                return False
-
-        if not self._passes_allowed_choice(container_nature, self.editorial_line.allowed.get("natures", [])):
-            return False
-        if not self._passes_allowed_choice(container_nature, block.allowed.get("natures", [])):
-            return False
-        if self._matches_forbidden_choice(container_nature, self.editorial_line.forbidden.get("natures", [])):
-            return False
-        if self._matches_forbidden_choice(container_nature, block.forbidden.get("natures", [])):
-            return False
-
-        if not self._passes_allowed_choice(container_kind, self.editorial_line.allowed.get("container_kinds", [])):
-            return False
-        if not self._passes_allowed_choice(container_kind, block.allowed.get("container_kinds", [])):
-            return False
-        if self._matches_forbidden_choice(container_kind, self.editorial_line.forbidden.get("container_kinds", [])):
-            return False
-        if self._matches_forbidden_choice(container_kind, block.forbidden.get("container_kinds", [])):
+        if not editorial_matching.container_passes_rules(container, (self.editorial_line, block)):
             return False
 
         duration_min = container.duration_min_seconds or container.total_duration_seconds
@@ -476,21 +447,6 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
             if duration_max > block.max_duration_seconds_per_item:
                 return False
         return True
-
-    @staticmethod
-    def _choice_values(values) -> set[str]:
-        normalized: set[str] = set()
-        for value in values:
-            if value is None:
-                continue
-            normalized.add(str(value))
-            enum_value = getattr(value, "value", None)
-            if enum_value is not None:
-                normalized.add(str(enum_value))
-            enum_name = getattr(value, "name", None)
-            if enum_name is not None:
-                normalized.add(str(enum_name))
-        return normalized
 
     def _has_compatible_item(self, block: GridBlock, container: MediaContainer) -> bool:
         return self._compatible_items_qs(block=block, container=container).exists()
@@ -518,25 +474,22 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
         reasons = {}
 
         for axis in STRING_RULE_AXES:
-            axis_bonus = self._preferred_values_bonus(
-                values=self._container_axis_values(container, axis),
-                preferred_values=(
-                    self.editorial_line.preferred.get(axis, [])
-                    + block.preferred.get(axis, [])
-                ),
+            axis_bonus = editorial_matching.preferred_values_bonus(
+                editorial_matching.container_axis_values(container, axis),
+                self.editorial_line.preferred.get(axis, []) + block.preferred.get(axis, []),
             )
             score += axis_bonus
             reasons[f"preferred_{axis}"] = axis_bonus
 
-        nature_bonus = self._preferred_choice_bonus(
-            self._container_nature(container),
+        nature_bonus = editorial_matching.preferred_choice_bonus(
+            editorial_matching.container_nature(container),
             self.editorial_line.preferred.get("natures", []) + block.preferred.get("natures", []),
         )
         score += nature_bonus
         reasons["preferred_natures"] = nature_bonus
 
-        kind_bonus = self._preferred_choice_bonus(
-            self._container_kind(container),
+        kind_bonus = editorial_matching.preferred_choice_bonus(
+            editorial_matching.container_kind(container),
             (
                 self.editorial_line.preferred.get("container_kinds", [])
                 + block.preferred.get("container_kinds", [])
@@ -905,69 +858,6 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
         history["used_container_ids_by_block"][block_id].add(container_id)
         history["scheduled_in_run"].append(scheduled.id)
         history["scheduled_item_ids_in_run"].add(scheduled.item_id)
-
-    @staticmethod
-    def _container_categories(container: MediaContainer) -> set[str]:
-        values: set[str] = set()
-        for source in (container.categories or [], container.genres or [], container.tags or []):
-            for value in source:
-                if isinstance(value, str) and value:
-                    values.add(value)
-        return values
-
-    @classmethod
-    def _container_axis_values(cls, container: MediaContainer, axis: str) -> set[str]:
-        if axis == "categories":
-            return cls._container_categories(container)
-        return {
-            value
-            for value in (getattr(container, axis) or [])
-            if isinstance(value, str) and value
-        }
-
-    @staticmethod
-    def _container_nature(container: MediaContainer):
-        return getattr(container.media_collection, "nature", None)
-
-    @staticmethod
-    def _container_kind(container: MediaContainer):
-        return getattr(container.media_collection, "container_kind", None)
-
-    @staticmethod
-    def _passes_allowed_values(container_values: set[str], allowed_values: list[str]) -> bool:
-        allowed = {value for value in (allowed_values or []) if isinstance(value, str)}
-        if not allowed:
-            return True
-        return bool(container_values.intersection(allowed))
-
-    @staticmethod
-    def _intersects(left: set[str], right: list[str]) -> bool:
-        values = {value for value in (right or []) if isinstance(value, str)}
-        return bool(left.intersection(values))
-
-    def _preferred_values_bonus(self, *, values: set[str], preferred_values: list[str]) -> float:
-        preferred = {value for value in preferred_values if isinstance(value, str)}
-        return float(len(values.intersection(preferred)))
-
-    def _preferred_choice_bonus(self, value, preferred_values: list) -> float:
-        preferred = self._choice_values(preferred_values or [])
-        if not preferred:
-            return 0.0
-        return 1.0 if self._choice_values([value]).intersection(preferred) else 0.0
-
-    @staticmethod
-    def _passes_allowed_choice(value, allowed_values: list) -> bool:
-        allowed = TvPlayoutGenerationService._choice_values(allowed_values or [])
-        if not allowed:
-            return True
-        return bool(TvPlayoutGenerationService._choice_values([value]).intersection(allowed))
-
-    @staticmethod
-    def _matches_forbidden_choice(value, forbidden_values: list) -> bool:
-        forbidden = TvPlayoutGenerationService._choice_values(forbidden_values or [])
-        if not forbidden:
-            return False
-        return bool(TvPlayoutGenerationService._choice_values([value]).intersection(forbidden))
 
     def _scheduled_occupied_duration_seconds(self, block: GridBlock, item_duration_seconds: int) -> int:
         filler_seconds = 0
