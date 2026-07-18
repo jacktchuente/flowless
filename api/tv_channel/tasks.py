@@ -11,9 +11,10 @@ from grid_schedule.services.flexible_tv_schedule_service import FlexibleTvPlayou
 from grid_schedule.services.marathon_tv_schedule_service import MarathonPlayoutGenerationService
 from grid_schedule.services.tv_schedule_service import TvPlayoutGenerationService
 from project_ops.constants import AnalyzeStatus
-from tv_channel.models import Catalog, GridLayoutMode, TvChannel
+from tv_channel.models import Catalog, ChannelImageKind, GridLayoutMode, TvChannel
 from tv_channel.services.catalog_service import CatalogService
 from tv_channel.services.etv_channel_push_service import EtvChannelPushService
+from tv_channel.services.image_suggestion.suggestion_service import ChannelImageSuggestionService
 from tv_channel.services.logo_generation import LogoGenerationService
 from tv_channel.services.tv_channel_service import TvChannelService
 from utils.task_status_service import broadcast_refresh, save_status_and_broadcast
@@ -346,3 +347,36 @@ def push_tv_channel_to_etv(channel_id: int):
         object_type="TvChannel",
         status=status,
     )
+
+
+@shared_task
+def generate_channel_image_suggestions(
+    channel_id: int,
+    kind: int = ChannelImageKind.LOGO,
+    query: str | None = None,
+    entity_type: str | None = None,
+):
+    try:
+        instance = TvChannel.objects.get(pk=channel_id)
+    except TvChannel.DoesNotExist:
+        logger.warning("generate_channel_image_suggestions skipped unknown channel_id=%s", channel_id)
+        return
+
+    broadcast_refresh("ChannelImageSuggestionRun")
+    try:
+        result = ChannelImageSuggestionService(instance).run(
+            kind=kind,
+            query=query,
+            entity_type=entity_type,
+        )
+    except Exception:
+        logger.exception("generate_channel_image_suggestions failed channel_id=%s", channel_id)
+    else:
+        logger.info(
+            "generate_channel_image_suggestions completed channel_id=%s run_id=%s suggestions=%s warnings=%s",
+            channel_id,
+            result.run.id,
+            result.suggestion_count,
+            len(result.warnings),
+        )
+    broadcast_refresh("ChannelImageSuggestionRun")
