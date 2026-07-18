@@ -1,0 +1,36 @@
+You are helping pick a single image search query for a TV channel identity image.
+
+Channel name:
+{{ channel_name }}
+
+Channel description:
+{{ channel_description }}
+
+{% if channel_specification %}
+Channel profile (content mix, formats, eras, audience):
+{{ channel_specification }}
+
+{% endif %}
+{% if editorial_summary %}
+Editorial line:
+{{ editorial_summary }}
+
+{% endif %}
+{% if catalog_name %}
+Part of the catalog: {{ catalog_name }}.
+
+{% endif %}
+Instructions:
+- Decide what single entity best represents this channel's identity.
+- entity_type must be one of: "studio" (a production company or studio), "person" (an actor, director or host), "theme" (a genre, franchise or mood when no single studio/person applies).
+- query is the exact search term for that entity (a studio name, a person name, or a short theme phrase of at most 5 words).
+- Answer with ONLY the JSON wrapped in the tags below, nothing else.
+
+{% if retry_errors %}
+Previous attempt failed with:
+{% for error in retry_errors %}
+- {{ error }}
+{% endfor %}
+
+{% endif %}
+<image_query>{"entity_type": "studio|person|theme", "query": "..."}</image_query>
