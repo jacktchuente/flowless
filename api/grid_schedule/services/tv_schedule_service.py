@@ -2,24 +2,30 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from enum import Enum
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Max, Q
-from django.utils import timezone
+# Les tests patchent timezone.now via ce module (la plomberie qui l'appelle
+# vit dans BasePlayoutGenerationService, le module django est partage).
+from django.utils import timezone  # noqa: F401
 
 from grid_schedule.constants import ScheduledContainerStatus
 from grid_schedule.models import BlockContainerSelection, ScheduleMediaItem, TvPlayout
+from grid_schedule.services.base_playout_generation_service import (
+    BasePlayoutGenerationService,
+    PlayoutGenerationResult,
+)
 from grid_schedule.services.playout_repair_service import PlayoutRepairService
 from grid_schedule.services.playout_validation_service import PlayoutValidationService
 from grid_schedule.services.post_roll_filler_service import PostRollFillerService
 from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaContainer, MediaItem
 from project_ops.constants import AnalyzeStatus
-from tv_channel.models import EditorialLine, GridBlock, GridLayout, TvChannel
+from tv_channel.models import GridBlock, GridLayout, TvChannel
 from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
 
 logger = logging.getLogger(__name__)
@@ -39,18 +45,7 @@ class BlockOccurrence:
     ends_at: datetime
 
 
-@dataclass
-class GenerationResult:
-    tv_playout: TvPlayout
-    created: bool
-    generated_items: int
-    warnings: list[str]
-    filled_items: int = 0
-    repaired_gaps: int = 0
-    trimmed_overlaps: int = 0
-    issues: list[dict] = field(default_factory=list)
-    window_start: datetime | None = None
-    window_end: datetime | None = None
+GenerationResult = PlayoutGenerationResult
 
 
 class NextItemState(Enum):
@@ -65,22 +60,9 @@ class NextItemResult:
     item: MediaItem | None = None
 
 
-class TvPlayoutGenerationService:
-    LOOKBACK_HOURS = 600
-
-    def __init__(
-        self,
-        *,
-        tv_channel: TvChannel,
-        days: int,
-        reset: bool = False,
-        extend: bool = False,
-    ):
-        self.tv_channel = tv_channel
-        self.days = days
-        self.reset = reset
-        self.extend = extend
-        self.editorial_line = self._get_editorial_line(tv_channel)
+class TvPlayoutGenerationService(BasePlayoutGenerationService):
+    selection_field = "block_container_selection"
+    selection_model = BlockContainerSelection
 
     def generate(self) -> GenerationResult:
         if self.days <= 0:
@@ -268,120 +250,12 @@ class TvPlayoutGenerationService:
             raise ValidationError("TvChannel is disabled.")
         return grid_layout
 
-    def _get_or_create_playout(
-        self,
-        tv_channel: TvChannel,
-        *,
-        grid_layout: GridLayout,
-        reset: bool,
-    ) -> tuple[TvPlayout, bool]:
-        active_qs = TvPlayout.objects.select_for_update().filter(tv_channel=tv_channel, is_active=True)
-
-        if reset:
-            active_qs.update(is_active=False)
-            playout = TvPlayout.objects.create(tv_channel=tv_channel, is_active=True, grid=grid_layout)
-            return playout, True
-
-        existing = active_qs.order_by("-created_at").first()
-        if existing:
-            if existing.grid_id != grid_layout.id:
-                existing.grid = grid_layout
-                existing.save(update_fields=["grid", "updated_at"])
-            return existing, False
-
-        playout = TvPlayout.objects.create(tv_channel=tv_channel, is_active=True, grid=grid_layout)
-        return playout, True
-
-    def _resolve_window_start(self, tv_playout: TvPlayout) -> datetime:
-        now = timezone.now()
-        cycle_anchor = now.replace(
-            hour=self.editorial_line.start_at.hour,
-            minute=self.editorial_line.start_at.minute,
-            second=self.editorial_line.start_at.second,
-            microsecond=0,
-        )
-        if now.time() < self.editorial_line.start_at:
-            cycle_anchor -= timedelta(days=1)
-        if self.extend and not self.reset:
-            last_end = self._get_playout_last_end(tv_playout)
-            if last_end is not None:
-                return max(last_end, now)
-        return cycle_anchor
-
-    def _resolve_window_end(self, start_at: datetime) -> datetime:
-        if self.extend and not self.reset:
-            return timezone.now() + timedelta(days=self.days)
-        return start_at + timedelta(days=self.days)
-
-    @staticmethod
-    def _get_playout_last_end(tv_playout: TvPlayout) -> datetime | None:
-        bounds = ScheduleMediaItem.objects.filter(
-            Q(block_container_selection__tv_playout=tv_playout)
-            | Q(parent_schedule_item__block_container_selection__tv_playout=tv_playout),
-        ).aggregate(
-            ends_at=Max("ends_at"),
-            post_roll_filler_ends_at=Max("post_roll_filler_ends_at"),
-        )
-        values = [value for value in bounds.values() if value is not None]
-        return max(values) if values else None
-
-    def _resolve_post_cleanup_window_start(self, *, tv_playout: TvPlayout, cleanup_start: datetime) -> datetime:
-        if self.reset:
-            return cleanup_start
-        last_end = self._get_playout_last_end(tv_playout)
-        if last_end is None:
-            return cleanup_start
-        return max(cleanup_start, last_end)
-
-    def _delete_future_items_and_rollback_cursors(self, *, tv_playout: TvPlayout, start_at: datetime) -> datetime:
-        cleanup_start = start_at
-        if not self.reset:
-            cleanup_start = max(cleanup_start, timezone.now())
-        # Enfants post-roll dont le parent (avant start_at) est conserve mais dont la
-        # fenetre depasse start_at: le CASCADE ne les couvre pas, suppression explicite.
-        ScheduleMediaItem.objects.filter(
-            parent_schedule_item__block_container_selection__tv_playout=tv_playout,
-            starts_at__gte=cleanup_start,
-        ).delete()
-        future_qs = ScheduleMediaItem.objects.filter(
-            block_container_selection__tv_playout=tv_playout,
-            starts_at__gte=cleanup_start,
-        )
-        affected_selection_ids = set(future_qs.values_list("block_container_selection_id", flat=True).distinct())
-        deleted_count, _ = future_qs.delete()
-        logger.info(
-            "TvPlayoutGenerationService.cleanup playout_id=%s deleted_future_rows=%s affected_selections=%s",
-            tv_playout.id,
-            deleted_count,
-            len(affected_selection_ids),
-        )
-
-        if not affected_selection_ids:
-            return cleanup_start
-
-        selections = (
-            BlockContainerSelection.objects
-            .filter(id__in=affected_selection_ids)
-            .select_related("block", "media_container", "last_scheduled_item")
-        )
-        for selection in selections:
-            last_scheduled = (
-                ScheduleMediaItem.objects
-                .filter(block_container_selection=selection, starts_at__lt=cleanup_start)
-                .order_by("-starts_at", "-id")
-                .select_related("item")
-                .first()
-            )
-
-            selection.last_scheduled_item = last_scheduled.item if last_scheduled else None
-            if self._selection_has_next_item(selection):
-                selection.status = ScheduledContainerStatus.PENDING
-            elif last_scheduled:
-                selection.status = ScheduledContainerStatus.COMPLETED
-            else:
-                selection.status = ScheduledContainerStatus.PENDING
-            selection.save(update_fields=["last_scheduled_item", "status"])
-        return cleanup_start
+    def _rollback_selection_status(self, selection: BlockContainerSelection, last_scheduled) -> int:
+        if self._selection_has_next_item(selection):
+            return ScheduledContainerStatus.PENDING
+        if last_scheduled:
+            return ScheduledContainerStatus.COMPLETED
+        return ScheduledContainerStatus.PENDING
 
     def _build_block_occurrences(
         self,
@@ -1013,37 +887,11 @@ class TvPlayoutGenerationService:
         item_end: datetime,
         occurrence_end: datetime,
     ) -> datetime | None:
-        if not self.editorial_line.allow_filler:
-            return None
-        if block.post_filler_policy_id is None:
-            return None
-
-        filler_seconds = block.post_filler_policy.duration_seconds or 0
-        if filler_seconds <= 0:
-            return None
-
-        filler_end = item_end + timedelta(seconds=filler_seconds)
-        if filler_end > occurrence_end:
-            return None
-        return filler_end
-
-    @staticmethod
-    def _media_item_sort_key(item: MediaItem) -> tuple:
-        is_episode = item.season_number is not None or item.episode_number is not None
-        if is_episode:
-            return (
-                0,
-                item.season_number if item.season_number is not None else 0,
-                item.episode_number if item.episode_number is not None else 0,
-                item.sequence_number if item.sequence_number is not None else 0,
-                item.release_date or date.min,
-                item.id,
-            )
-        return (
-            1,
-            item.sequence_number if item.sequence_number is not None else 0,
-            item.release_date or date.min,
-            item.id,
+        return self._resolve_post_roll_filler_end_for_policy(
+            policy=block.post_filler_policy if block.post_filler_policy_id else None,
+            allow_filler=self.editorial_line.allow_filler,
+            item_end=item_end,
+            window_end=occurrence_end,
         )
 
     def _mark_history_after_schedule(self, history: dict, scheduled: ScheduleMediaItem) -> None:
@@ -1130,10 +978,3 @@ class TvPlayoutGenerationService:
     @staticmethod
     def _block_label(block: GridBlock) -> str:
         return f"{block.starts_at.strftime('%H:%M')}-{block.ends_at.strftime('%H:%M')}#{block.id}"
-
-    @staticmethod
-    def _get_editorial_line(tv_channel: TvChannel) -> EditorialLine:
-        try:
-            return tv_channel.editorialline
-        except ObjectDoesNotExist as exc:
-            raise ValidationError("TvChannel must have an editorial line.") from exc
