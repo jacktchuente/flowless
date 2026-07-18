@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject } from "@angular/core";
 import { NgClass, NgFor, NgIf } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter } from "rxjs";
 import { WebsocketService } from "@kwyxyz/ngx-request";
@@ -55,18 +56,29 @@ export class ChannelImagesComponent {
     private notification: NotificationService,
     private dialogs: FlwDialogService,
     private translate: TranslateService,
+    route: ActivatedRoute,
     websocket: WebsocketService,
   ) {
     this.entityOptions = (["studio", "person", "theme"] as const).map((value) => ({
       label: this.translate.instant(`CHANNEL_IMAGES.ENTITY.${value.toUpperCase()}`),
       value,
     }));
+    // Deep-link depuis le detail chaine: /app/channel-images?channel={id}
+    const requestedChannelId = route.snapshot.queryParamMap.get("channel");
     this.channelsService
       .getObjectBehaviorSubject()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((channels) => {
         this.channels = channels;
-        if (!this.selectedChannelId && channels.length) {
+        if (this.selectedChannelId) return;
+        const requested = requestedChannelId
+          ? channels.find(
+              (channel: TvChannel) => String(channel.id) === requestedChannelId,
+            )
+          : null;
+        if (requested) {
+          this.select(requested);
+        } else if (channels.length) {
           this.select(channels[0]);
         }
       });

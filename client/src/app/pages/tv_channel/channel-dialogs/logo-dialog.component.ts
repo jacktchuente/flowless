@@ -1,4 +1,5 @@
 import { Component, Inject } from "@angular/core";
+import { Router } from "@angular/router";
 import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import { NgIf } from "@angular/common";
 import {
@@ -38,6 +39,11 @@ import { TranslateModule } from "@ngx-translate/core";
         <button class="choice" type="button" (click)="generate('openai')">
           <flw-icon name="image" /><strong>{{
             "CHANNEL_DIALOGS.LOGO.CLOUD" | translate
+          }}</strong>
+        </button>
+        <button class="choice" type="button" (click)="openSuggestions()">
+          <flw-icon name="search" /><strong>{{
+            "CHANNEL_DIALOGS.LOGO.SUGGESTIONS" | translate
           }}</strong>
         </button>
       </div>
@@ -82,7 +88,7 @@ import { TranslateModule } from "@ngx-translate/core";
       }
       .choices {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
       }
       .choice {
@@ -106,6 +112,7 @@ export class LogoDialogComponent {
   changed = false;
   constructor(
     private service: TvChannelService,
+    private router: Router,
     public ref: DialogRef<boolean>,
     @Inject(DIALOG_DATA)
     public data: {
@@ -114,6 +121,12 @@ export class LogoDialogComponent {
       logo: string | null;
     },
   ) {}
+  openSuggestions() {
+    this.ref.close(this.changed);
+    this.router.navigate(["/app/channel-images"], {
+      queryParams: { channel: this.data.channelId },
+    });
+  }
   upload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file)

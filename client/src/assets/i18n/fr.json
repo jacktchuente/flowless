@@ -600,7 +600,8 @@
       "LOCAL": "Générer localement",
       "CLOUD": "Générer avec l’IA",
       "HINT": "Le prompt utilisé reste disponible après la génération.",
-      "DOWNLOAD": "Télécharger le prompt"
+      "DOWNLOAD": "Télécharger le prompt",
+      "SUGGESTIONS": "Suggestions depuis la bibliothèque"
     },
     "REPORT": {
       "TITLE": "Rapports de génération",

@@ -600,7 +600,8 @@
       "LOCAL": "Generate locally",
       "CLOUD": "Generate with AI",
       "HINT": "The prompt remains available after generation.",
-      "DOWNLOAD": "Download prompt"
+      "DOWNLOAD": "Download prompt",
+      "SUGGESTIONS": "Suggestions from the library"
     },
     "REPORT": {
       "TITLE": "Generation reports",

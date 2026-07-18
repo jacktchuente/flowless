@@ -82,9 +82,12 @@
 .suggestion img {
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
+  /* contain: les logos transparents larges ne doivent pas etre rognes */
+  object-fit: contain;
   border-radius: 6px;
   background: var(--slate-100);
+  padding: 6px;
+  box-sizing: border-box;
 }
 .suggestion {
   min-width: 0;
