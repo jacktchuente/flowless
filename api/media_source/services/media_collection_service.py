@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import reset_queries
 from django.utils.timezone import now
 
-from media_source.constants import MediaContainerKind
+from media_source.constants import MediaContainerKind, MediaProgrammingRole
 from media_source.models import MediaCollection, MediaContainer, MediaSource, MediaItem
 from media_source.services.media_container_service import MediaContainerService
 from media_source.services.media_server_services.jellyfin_service import JellyfinService, MediaServerMediaContainer
@@ -404,6 +404,12 @@ class MediaCollectionService:
     def analyze_collection_data(self, use_llm=False, new_data_only=True, batch_size: int | None = None):
         if batch_size is None:
             batch_size = settings.MEDIA_COLLECTION_SYNC_BATCH_SIZE
+
+        # L'etiquetage LLM est reserve aux collections au role principal:
+        # les interstitiels (trailers, fillers...) restent synchronises par
+        # la tache periodique mais ne partent jamais vers le LLM.
+        if self.media_collection.programming_role != MediaProgrammingRole.MAIN:
+            use_llm = False
 
         media_containers_qs = MediaContainer.objects.filter(
             media_collection=self.media_collection

@@ -238,7 +238,8 @@
       "CLASSIFICATION": "Classification",
       "IS_ANIME": "Considérer comme anime",
       "ANALYZE_NOW": "Analyser maintenant"
-    }
+    },
+    "ANALYZE_ROLE_HINT": "Analyse réservée aux collections au rôle « Principal ». Définissez et enregistrez le rôle d'abord."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",

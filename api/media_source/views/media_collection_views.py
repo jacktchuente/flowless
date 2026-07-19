@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from media_source.constants import MediaProgrammingRole
 from media_source.models import MediaCollection
 from media_source.serializers.media_collection_serializers import (
     MediaCollectionSerializer,
@@ -40,6 +41,11 @@ class MediaCollectionViewSet(
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data={"detail": "La collection doit etre active avant analyse."},
+            )
+        if instance.programming_role != MediaProgrammingRole.MAIN:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"detail": "L'analyse est reservee aux collections au role de programmation principal."},
             )
         force = str(request.data.get("force", "")).lower() in {"1", "true", "yes", "on"}
         analyze_media_collection_data.delay(instance.id, force=force)

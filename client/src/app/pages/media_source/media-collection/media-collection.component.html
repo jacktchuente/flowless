@@ -59,7 +59,13 @@
                 type="button"
                 [disabled]="
                   !collection.is_active ||
+                  !isMainRole(collection) ||
                   syncingIds.has(collection.id.toString())
+                "
+                [title]="
+                  !isMainRole(collection)
+                    ? ('MEDIA_COLLECTION.ANALYZE_ROLE_HINT' | translate)
+                    : ''
                 "
                 (click)="analyze(collection, $event)"
               >

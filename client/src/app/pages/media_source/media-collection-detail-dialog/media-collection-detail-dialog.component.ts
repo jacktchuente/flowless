@@ -65,7 +65,13 @@ export class MediaCollectionDetailDialogComponent {
         if (r.isOk) this.ref.close(true);
       });
   }
+  // Base sur le role enregistre (pas la valeur du formulaire): l'API
+  // verifie le role sauvegarde — il faut enregistrer avant d'analyser.
+  get isMainRole() {
+    return this.data.collection.programming_role === 1;
+  }
   analyze() {
+    if (!this.isMainRole) return;
     const collection = this.data.collection;
     const alreadyAnalyzed = !!collection.analyzed_at;
     const isAnalyzing = collection.analyze_status === AnalyzeStatus.Running;

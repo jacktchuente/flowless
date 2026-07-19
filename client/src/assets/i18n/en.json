@@ -238,7 +238,8 @@
       "CLASSIFICATION": "Classification",
       "IS_ANIME": "Treat as anime",
       "ANALYZE_NOW": "Analyze now"
-    }
+    },
+    "ANALYZE_ROLE_HINT": "Analysis is limited to collections with the \"Main\" role. Set and save the role first."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",

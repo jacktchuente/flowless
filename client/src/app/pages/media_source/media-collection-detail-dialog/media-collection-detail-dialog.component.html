@@ -44,7 +44,15 @@
     </div>
   </form>
   <div modal-footer>
-    <button class="btn danger-ghost" type="button" (click)="analyze()">
+    <button
+      class="btn danger-ghost"
+      type="button"
+      [disabled]="!isMainRole"
+      [title]="
+        !isMainRole ? ('MEDIA_COLLECTION.ANALYZE_ROLE_HINT' | translate) : ''
+      "
+      (click)="analyze()"
+    >
       {{ "MEDIA_COLLECTION.DETAIL.ANALYZE_NOW" | translate }}
     </button>
     <div class="actions">
