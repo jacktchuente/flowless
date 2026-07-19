@@ -339,13 +339,24 @@ export class ChannelDetailComponent {
       });
   }
   openEditorialLine() {
-    if (!this.channel?.editorial_line_data) return;
+    if (!this.channel) return;
+    // Sans ligne existante, le dialogue part de valeurs par defaut: le PUT
+    // editorial-line fait un get_or_create cote API — pas besoin de passer
+    // par le blueprint pour creer la ligne.
+    const line: EditorialLineData = this.channel.editorial_line_data ?? {
+      allowed: {},
+      preferred: {},
+      forbidden: {},
+      start_at: "06:00:00",
+      end_at: "22:00:00",
+      allow_filler: true,
+    };
     this.withFormOptions((options) =>
       this.dialogs
         .open(EditorialLineDialogComponent, {
           data: {
             channelId: this.channel!.id,
-            line: this.channel!.editorial_line_data!,
+            line,
             formOptions: options,
           },
         })

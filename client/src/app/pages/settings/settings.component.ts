@@ -1,5 +1,4 @@
 import { Component, DestroyRef, inject } from "@angular/core";
-import { NgIf } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import {
@@ -11,17 +10,14 @@ import {
   FlwSelectComponent,
   FlwSelectOption,
 } from "../../ui/select/flw-select.component";
-import { FlwTab, FlwTabsComponent } from "../../ui/tabs/flw-tabs.component";
 @Component({
   standalone: true,
-  imports: [NgIf, TranslateModule, FlwSelectComponent, FlwTabsComponent],
+  imports: [TranslateModule, FlwSelectComponent],
   templateUrl: "./settings.component.html",
   styleUrl: "./settings.component.css",
 })
 export class SettingsComponent {
   private destroyRef = inject(DestroyRef);
-  tabs: FlwTab[] = [];
-  active = "general";
   language: UiLanguage;
   languageOptions: FlwSelectOption[] = [];
   constructor(
@@ -40,10 +36,6 @@ export class SettingsComponent {
     this.translate.use(language);
   }
   private buildLabels() {
-    this.tabs = ["general", "backend"].map((id) => ({
-      id,
-      label: this.translate.instant(`SETTINGS.TABS.${id.toUpperCase()}`),
-    }));
     this.languageOptions = UI_LANGUAGES.map((value) => ({
       value,
       label: this.translate.instant(`SETTINGS.LANGUAGE.${value.toUpperCase()}`),

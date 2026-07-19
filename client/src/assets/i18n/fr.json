@@ -17,21 +17,12 @@
   "SETTINGS": {
     "EYEBROW": "Configuration",
     "TITLE": "Paramètres",
-    "SUBTITLE": "Configurez le client et le comportement du serveur.",
-    "TABS": {
-      "GENERAL": "Général",
-      "BACKEND": "Backend"
-    },
+    "SUBTITLE": "Personnalisez l'interface de l'application.",
     "LANGUAGE": {
       "TITLE": "Langue de l'interface",
       "DESC": "Appliquée immédiatement et mémorisée sur ce navigateur.",
       "EN": "English",
       "FR": "Français"
-    },
-    "BACKEND": {
-      "TITLE": "Configuration du serveur",
-      "DESC": "Paramètres côté serveur.",
-      "PLACEHOLDER": "Aucun paramètre serveur n'est disponible pour le moment."
     }
   },
   "OVERVIEW": {
@@ -414,7 +405,8 @@
     "PREFERRED_NATURES": "Natures préférées",
     "ALLOWED_KINDS": "Types autorisés",
     "FORBIDDEN_KINDS": "Types interdits",
-    "PREFERRED_KINDS": "Types préférés"
+    "PREFERRED_KINDS": "Types préférés",
+    "CREATE_LINE": "Créer la ligne"
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",

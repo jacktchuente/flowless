@@ -17,21 +17,12 @@
   "SETTINGS": {
     "EYEBROW": "Configuration",
     "TITLE": "Settings",
-    "SUBTITLE": "Configure the client and backend behavior.",
-    "TABS": {
-      "GENERAL": "General",
-      "BACKEND": "Backend"
-    },
+    "SUBTITLE": "Customize the application interface.",
     "LANGUAGE": {
       "TITLE": "Interface language",
       "DESC": "Applied immediately and remembered on this browser.",
       "EN": "English",
       "FR": "Français"
-    },
-    "BACKEND": {
-      "TITLE": "Backend configuration",
-      "DESC": "Server-side settings.",
-      "PLACEHOLDER": "No backend setting is available yet."
     }
   },
   "OVERVIEW": {
@@ -414,7 +405,8 @@
     "PREFERRED_NATURES": "Preferred natures",
     "ALLOWED_KINDS": "Allowed types",
     "FORBIDDEN_KINDS": "Forbidden types",
-    "PREFERRED_KINDS": "Preferred types"
+    "PREFERRED_KINDS": "Preferred types",
+    "CREATE_LINE": "Create the line"
   },
   "CHANNELS": {
     "EYEBROW": "Channels",
