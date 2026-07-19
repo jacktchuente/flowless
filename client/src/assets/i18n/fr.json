@@ -591,7 +591,8 @@
         "SELECT_MEDIA": "Sélection des médias",
         "RESOLVE": "Résolution des conflits",
         "WRITE_PLAYOUT": "Écriture du planning"
-      }
+      },
+      "PLAYOUT_HINT": "Le programme respecte les heures d'ouverture de la ligne éditoriale et se termine toujours à la fermeture d'une journée. La fenêtre réellement diffusée dépend ensuite de la configuration de build d'ErsatzTV."
     },
     "LOGO": {
       "TITLE": "Logo de la chaîne",

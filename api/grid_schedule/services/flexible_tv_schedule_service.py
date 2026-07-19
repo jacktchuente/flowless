@@ -73,7 +73,7 @@ class FlexibleTvPlayoutGenerationService(BasePlayoutGenerationService):
             if adjusted_start > start_at:
                 start_at = adjusted_start
                 if not self.extend:
-                    end_at = start_at + timedelta(days=self.days)
+                    end_at = self._align_end_to_editorial_day(start_at + timedelta(days=self.days))
 
             history = self._build_history(tv_channel=tv_channel, start_at=start_at)
             generated_items = 0

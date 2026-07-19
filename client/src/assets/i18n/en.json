@@ -591,7 +591,8 @@
         "SELECT_MEDIA": "Select media",
         "RESOLVE": "Resolve conflicts",
         "WRITE_PLAYOUT": "Write schedule"
-      }
+      },
+      "PLAYOUT_HINT": "The schedule follows the editorial line's opening hours and always ends at a day's closing time. The window actually aired then depends on ErsatzTV's own build configuration."
     },
     "LOGO": {
       "TITLE": "Channel logo",

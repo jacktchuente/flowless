@@ -278,6 +278,20 @@ class MarathonRotationTests(MarathonFixtureMixin, TestCase):
         for scheduled, following in zip(items, items[1:]):
             self.assertGreaterEqual(following.starts_at, scheduled.ends_at)
 
+    def test_extend_window_ends_at_editorial_day_close_not_task_hour(self):
+        self._add_policy(MediaContainerKind.SERIES, min_run=2, max_run=2, quota=1)
+        self._create_series("serie-a", episodes=4, duration_seconds=1800)
+
+        self._generate(days=1)
+
+        # Extension lancee a 12:00: le programme doit couvrir la journee
+        # editoriale entiere (fermeture 22:00), pas s'arreter a 12:00.
+        extend_now = timezone.make_aware(datetime(2026, 1, 2, 12, 0))
+        self._generate(days=1, reset=False, extend=True, now=extend_now)
+
+        last_item = self._main_items()[-1]
+        self.assertEqual(last_item.ends_at, timezone.make_aware(datetime(2026, 1, 3, 22, 0)))
+
     def test_generate_requires_marathon_config(self):
         self.config.delete()
         with self.assertRaises(ValidationError):
