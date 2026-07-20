@@ -21,6 +21,16 @@ const VOCABULARY_AXES: Array<{
   isLanguage?: boolean;
 }> = [
   {
+    axis: "genres",
+    prefix: "genre",
+    labelKey: "CHANNEL_DIALOGS.COMMON.GENRE_VALUE",
+  },
+  {
+    axis: "tags",
+    prefix: "tag",
+    labelKey: "CHANNEL_DIALOGS.COMMON.TAG_VALUE",
+  },
+  {
     axis: "directors",
     prefix: "director",
     labelKey: "CHANNEL_DIALOGS.COMMON.DIRECTOR_VALUE",

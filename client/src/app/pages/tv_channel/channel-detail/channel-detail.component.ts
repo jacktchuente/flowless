@@ -159,6 +159,12 @@ export class ChannelDetailComponent {
   lineRules(line: EditorialLineData) {
     const tags = (rules: RuleValuesByAxis | undefined) => [
       ...(rules?.categories ?? []),
+      ...(rules?.genres ?? []).map((value) =>
+        this.translate.instant("CHANNEL_DIALOGS.COMMON.GENRE_VALUE", { value }),
+      ),
+      ...(rules?.tags ?? []).map((value) =>
+        this.translate.instant("CHANNEL_DIALOGS.COMMON.TAG_VALUE", { value }),
+      ),
       ...(rules?.natures ?? []).map((v) => this.translate.instant(natureLabel(v))),
       ...(rules?.container_kinds ?? []).map((v) =>
         this.translate.instant(containerKindLabel(v)),
@@ -450,6 +456,8 @@ export class ChannelDetailComponent {
       title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
         category:
           b.allowed?.categories?.[0] ??
+          b.allowed?.genres?.[0] ??
+          b.allowed?.tags?.[0] ??
           this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
       }),
       sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {
@@ -472,6 +480,12 @@ export class ChannelDetailComponent {
   blockTags(b: GridBlock) {
     return [
       ...(b.allowed?.categories ?? []),
+      ...(b.allowed?.genres ?? []).map((value) =>
+        this.translate.instant("CHANNEL_DIALOGS.COMMON.GENRE_VALUE", { value }),
+      ),
+      ...(b.allowed?.tags ?? []).map((value) =>
+        this.translate.instant("CHANNEL_DIALOGS.COMMON.TAG_VALUE", { value }),
+      ),
       ...(b.allowed?.natures ?? []).map((value) =>
         this.translate.instant(natureLabel(value)),
       ),

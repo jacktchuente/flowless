@@ -1,5 +1,7 @@
 export interface RuleValuesByAxis {
   categories?: string[]
+  genres?: string[]
+  tags?: string[]
   natures?: Array<string | number>
   container_kinds?: Array<string | number>
   directors?: string[]

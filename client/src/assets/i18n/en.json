@@ -549,6 +549,8 @@
       "PREFERRED": "Preferred",
       "FORBIDDEN": "Forbidden",
       "CATEGORY_VALUE": "Category={{value}}",
+      "GENRE_VALUE": "Genre={{value}}",
+      "TAG_VALUE": "Tag={{value}}",
       "NATURE_VALUE": "Nature={{value}}",
       "KIND_VALUE": "Type={{value}}",
       "DIRECTOR_VALUE": "Director={{value}}",
@@ -614,6 +616,8 @@
       "NATURES": "Natures",
       "KINDS": "Container types",
       "CATEGORIES": "Categories",
+      "GENRES": "Genres",
+      "TAGS": "Tags",
       "LEVEL": "Level",
       "ACTION": "Reset selection"
     },
