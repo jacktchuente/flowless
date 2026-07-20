@@ -19,6 +19,8 @@ from rule_engine.services import category_service
 # Axes a valeurs ouvertes stockes dans VocabularyEntry. Chaque axe porte le
 # nom du champ homonyme de MediaContainer.
 VOCABULARY_AXES = (
+    "genres",
+    "tags",
     "directors",
     "writers",
     "creators",

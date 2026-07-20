@@ -32,6 +32,8 @@ class MediaCollectionVocabularyTests(TestCase):
                 "countries": ["France"],
                 "audio_languages": ["fre"],
                 "subtitle_languages": ["eng"],
+                "genres": ["Film noir"],
+                "tags": ["Late night"],
                 # Champs non-axes : ne doivent pas fuiter dans le vocab.
                 "people": [{"name": "Tom Hanks", "type": "Actor"}],
                 "audio_languages_any": ["fre", "eng"],
@@ -49,6 +51,8 @@ class MediaCollectionVocabularyTests(TestCase):
         self.assertEqual(vocabulary_service.get_values("countries"), ["France"])
         self.assertEqual(vocabulary_service.get_values("audio_languages"), ["fre"])
         self.assertEqual(vocabulary_service.get_values("subtitle_languages"), ["eng"])
+        self.assertEqual(vocabulary_service.get_values("genres"), ["Film noir"])
+        self.assertEqual(vocabulary_service.get_values("tags"), ["Late night"])
 
     def test_manage_media_containers_upserts_without_duplicates(self):
         medias = [

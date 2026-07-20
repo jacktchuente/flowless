@@ -12,7 +12,7 @@ from rule_engine.services import category_service, vocabulary_service
 
 
 # Axes a valeurs texte, matches contre les listes homonymes de MediaContainer
-# (categories agrege categories+genres+tags).
+# Chaque axe correspond exclusivement au champ homonyme de MediaContainer.
 STRING_RULE_AXES = ("categories", *vocabulary_service.VOCABULARY_AXES)
 CHOICE_RULE_AXES = ("natures", "container_kinds")
 RULE_AXES = (*STRING_RULE_AXES, *CHOICE_RULE_AXES)
@@ -26,11 +26,17 @@ def _deduplicate(values):
 def validate_categories(values: list) -> list[str]:
     if not isinstance(values, list):
         raise ValidationError("Must be a list.")
-    known_categories = set(category_service.get_all_category_names())
-    invalid = [value for value in values if not isinstance(value, str) or value not in known_categories]
+    known_categories = {
+        _normalize_text(value): value
+        for value in category_service.get_all_category_names()
+    }
+    invalid = [
+        value for value in values
+        if not isinstance(value, str) or _normalize_text(value) not in known_categories
+    ]
     if invalid:
         raise ValidationError(f"Unknown categories: {invalid}.")
-    return _deduplicate(values)
+    return _deduplicate(known_categories[_normalize_text(value)] for value in values)
 
 
 def _validate_choices(values: list, choices, label: str) -> list[int]:
@@ -66,19 +72,35 @@ def make_vocabulary_validator(axis: str):
     def validate(values: list) -> list[str]:
         if not isinstance(values, list):
             raise ValidationError("Must be a list.")
-        known_values = set(vocabulary_service.get_values(axis))
-        invalid = [value for value in values if not isinstance(value, str) or value not in known_values]
+        known_values = {
+            _normalize_text(value): value
+            for value in vocabulary_service.get_values(axis)
+        }
+        invalid = [
+            value for value in values
+            if not isinstance(value, str) or _normalize_text(value) not in known_values
+        ]
         if invalid:
             raise ValidationError(f"Unknown {axis}: {invalid}.")
-        return _deduplicate(values)
+        return _deduplicate(known_values[_normalize_text(value)] for value in values)
 
     return validate
 
 
 def ensure_no_overlap(a: list, b: list, field_a: str, field_b: str) -> None:
-    overlap = set(a).intersection(b)
+    overlap = {_overlap_key(value) for value in a}.intersection(
+        _overlap_key(value) for value in b
+    )
     if overlap:
         raise ValidationError({field_a: f"Must not overlap with {field_b}: {sorted(overlap)}."})
+
+
+def _normalize_text(value: str) -> str:
+    return value.strip().casefold()
+
+
+def _overlap_key(value):
+    return _normalize_text(value) if isinstance(value, str) else value
 
 
 AXIS_VALIDATORS = {

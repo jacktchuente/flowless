@@ -68,6 +68,18 @@ class MatchingServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
             studios=["Indie"],
             audio_languages=["eng"],
         )
+        self.category_movie = self.create_container(
+            "category-horror",
+            categories=["Horror"],
+            genres=["Drama"],
+            tags=["Classic"],
+        )
+        self.genre_movie = self.create_container(
+            "genre-horror",
+            categories=["Drama"],
+            genres=["Horror"],
+            tags=["Late night"],
+        )
 
     def stats(self):
         service = TvScheduleMatchingService(tv_channel=self.tv_channel)
@@ -81,7 +93,7 @@ class MatchingServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
     def test_forbidden_on_new_axis_excludes_container(self):
         self.editorial_line.forbidden = {"studios": ["Warner Bros."]}
         self.editorial_line.save()
-        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+        self.assertEqual(self.stats()["matching_media_container_count"], 3)
 
     def test_editorial_line_allowed_combines_with_block(self):
         self.editorial_line.allowed = {"audio_languages": ["fre"]}
@@ -93,7 +105,21 @@ class MatchingServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
         self.assertEqual(self.stats()["matching_media_container_count"], 0)
 
     def test_empty_rules_match_everything(self):
-        self.assertEqual(self.stats()["matching_media_container_count"], 2)
+        self.assertEqual(self.stats()["matching_media_container_count"], 4)
+
+    def test_categories_genres_and_tags_are_independent(self):
+        self.block.allowed = {"categories": ["Horror"]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+        self.block.allowed = {"genres": ["Horror"]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+        self.block.allowed = {"tags": ["Late night"]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+    def test_string_matching_ignores_case_and_outer_whitespace(self):
+        self.block.allowed = {"genres": ["  horror "]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
 
 
 class GenerationServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
@@ -105,6 +131,8 @@ class GenerationServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
             actors=["Tom Hanks"],
             directors=["Tom Hooper"],
             countries=["France"],
+            genres=["Film noir"],
+            tags=["Late night"],
         )
         self.service = TvPlayoutGenerationService(tv_channel=self.tv_channel, days=1)
 
@@ -127,12 +155,19 @@ class GenerationServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
             tv_channel=self.tv_channel, block=self.block, container=self.container, history=history
         )
 
-        self.block.preferred = {"actors": ["Tom Hanks"], "directors": ["Tom Hooper"]}
+        self.block.preferred = {
+            "actors": ["Tom Hanks"],
+            "directors": ["Tom Hooper"],
+            "genres": ["film NOIR"],
+            "tags": ["Late night"],
+        }
         boosted = self.service._score_container(
             tv_channel=self.tv_channel, block=self.block, container=self.container, history=history
         )
 
-        self.assertEqual(boosted.score - baseline.score, 2.0)
+        self.assertEqual(boosted.score - baseline.score, 4.0)
         self.assertEqual(boosted.reasons["preferred_actors"], 1.0)
         self.assertEqual(boosted.reasons["preferred_directors"], 1.0)
+        self.assertEqual(boosted.reasons["preferred_genres"], 1.0)
+        self.assertEqual(boosted.reasons["preferred_tags"], 1.0)
         self.assertEqual(boosted.reasons["preferred_countries"], 0.0)

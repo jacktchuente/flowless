@@ -16,12 +16,11 @@ from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
 
 
 def container_categories(container: MediaContainer) -> set[str]:
-    values: set[str] = set()
-    for source in (container.categories or [], container.genres or [], container.tags or []):
-        for value in source:
-            if isinstance(value, str) and value:
-                values.add(value)
-    return values
+    return {
+        value
+        for value in (container.categories or [])
+        if isinstance(value, str) and value
+    }
 
 
 def container_axis_values(container: MediaContainer, axis: str) -> set[str]:
@@ -58,15 +57,17 @@ def choice_values(values: Iterable) -> set[str]:
 
 
 def passes_allowed_values(container_values: set[str], allowed_values: list[str]) -> bool:
-    allowed = {value for value in (allowed_values or []) if isinstance(value, str)}
+    values = {_normalize_text(value) for value in container_values if isinstance(value, str)}
+    allowed = {_normalize_text(value) for value in (allowed_values or []) if isinstance(value, str)}
     if not allowed:
         return True
-    return bool(container_values.intersection(allowed))
+    return bool(values.intersection(allowed))
 
 
 def intersects(left: set[str], right: list[str]) -> bool:
-    values = {value for value in (right or []) if isinstance(value, str)}
-    return bool(left.intersection(values))
+    left_values = {_normalize_text(value) for value in left if isinstance(value, str)}
+    right_values = {_normalize_text(value) for value in (right or []) if isinstance(value, str)}
+    return bool(left_values.intersection(right_values))
 
 
 def passes_allowed_choice(value, allowed_values: list) -> bool:
@@ -84,8 +85,13 @@ def matches_forbidden_choice(value, forbidden_values: list) -> bool:
 
 
 def preferred_values_bonus(values: set[str], preferred_values: list[str]) -> float:
-    preferred = {value for value in preferred_values if isinstance(value, str)}
-    return float(len(values.intersection(preferred)))
+    normalized_values = {_normalize_text(value) for value in values if isinstance(value, str)}
+    preferred = {_normalize_text(value) for value in preferred_values if isinstance(value, str)}
+    return float(len(normalized_values.intersection(preferred)))
+
+
+def _normalize_text(value: str) -> str:
+    return value.strip().casefold()
 
 
 def preferred_choice_bonus(value, preferred_values: list) -> float:

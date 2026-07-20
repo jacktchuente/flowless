@@ -22,6 +22,8 @@ class VocabularyServiceTests(TestCase):
 
     def test_upsert_values_is_idempotent_and_ignores_unknown_axes(self):
         mapping = {
+            "genres": ["Film noir"],
+            "tags": ["Late night"],
             "actors": ["Tom Hanks", "Meg Ryan"],
             "studios": ["Warner Bros."],
             "people": ["should be ignored"],
@@ -34,6 +36,8 @@ class VocabularyServiceTests(TestCase):
             vocabulary_service.get_values("actors"),
             ["Meg Ryan", "Tom Hanks"],
         )
+        self.assertEqual(vocabulary_service.get_values("genres"), ["Film noir"])
+        self.assertEqual(vocabulary_service.get_values("tags"), ["Late night"])
         self.assertEqual(vocabulary_service.get_values("studios"), ["Warner Bros."])
         self.assertEqual(vocabulary_service.get_values("countries"), ["France"])
         self.assertFalse(VocabularyEntry.objects.filter(axis="people").exists())
@@ -84,6 +88,8 @@ class VocabularyServiceTests(TestCase):
             media_collection=active_collection,
             analyze_status=AnalyzeStatus.COMPLETE,
             actors=["Tom Hanks"],
+            genres=["Film noir"],
+            tags=["Late night"],
             studios=["Warner Bros."],
             countries=["France"],
             audio_languages=["fre"],
@@ -104,6 +110,8 @@ class VocabularyServiceTests(TestCase):
         vocabulary_service.rebuild()
 
         self.assertEqual(vocabulary_service.get_values("actors"), ["Tom Hanks"])
+        self.assertEqual(vocabulary_service.get_values("genres"), ["Film noir"])
+        self.assertEqual(vocabulary_service.get_values("tags"), ["Late night"])
         self.assertEqual(vocabulary_service.get_values("studios"), ["Warner Bros."])
         self.assertEqual(vocabulary_service.get_values("countries"), ["France"])
         self.assertEqual(vocabulary_service.get_values("audio_languages"), ["fre"])

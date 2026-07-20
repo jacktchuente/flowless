@@ -14,6 +14,8 @@ from tv_channel.services.editorial_rules_validation import (
 def seed_vocabulary():
     Category.objects.create(category="horror")
     VocabularyEntry.objects.bulk_create([
+        VocabularyEntry(axis="genres", value="Film noir"),
+        VocabularyEntry(axis="tags", value="Late night"),
         VocabularyEntry(axis="actors", value="Tom Hanks"),
         VocabularyEntry(axis="directors", value="Tom Hooper"),
         VocabularyEntry(axis="studios", value="Warner Bros."),
@@ -29,7 +31,7 @@ class EditorialRulesAxesValidationTests(TestCase):
         seed_vocabulary()
 
     def test_rule_axes_include_vocabulary_axes(self):
-        for axis in ("directors", "writers", "creators", "actors", "studios",
+        for axis in ("genres", "tags", "directors", "writers", "creators", "actors", "studios",
                      "countries", "audio_languages", "subtitle_languages"):
             self.assertIn(axis, RULE_AXES)
 
@@ -40,6 +42,14 @@ class EditorialRulesAxesValidationTests(TestCase):
         )
         self.assertEqual(normalized["actors"], ["Tom Hanks"])
         self.assertEqual(normalized["audio_languages"], ["fre"])
+
+    def test_vocabulary_axis_canonicalizes_case_and_whitespace(self):
+        normalized = validate_rule_level(
+            {"genres": ["  film NOIR  "], "tags": ["late NIGHT"]},
+            "allowed",
+        )
+        self.assertEqual(normalized["genres"], ["Film noir"])
+        self.assertEqual(normalized["tags"], ["Late night"])
 
     def test_vocabulary_axis_rejects_unknown_value_strict(self):
         with self.assertRaises(ValidationError):
@@ -131,3 +141,20 @@ class EditorialLineApiAxesTests(APITestCase):
         block.refresh_from_db()
         self.assertEqual(block.allowed["actors"], [])
         self.assertEqual(block.allowed["studios"], ["Warner Bros."])
+
+    def test_reset_rules_clears_genres_and_tags(self):
+        EditorialLine.objects.create(
+            tv_channel=self.channel,
+            allowed={"genres": ["Film noir"], "tags": ["Late night"]},
+        )
+
+        response = self.client.post(
+            f"/api/tv-channel/{self.channel.id}/reset-rules/",
+            {"types": ["genre", "tag"], "levels": ["allowed"]},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 204)
+        line = EditorialLine.objects.get(tv_channel=self.channel)
+        self.assertEqual(line.allowed["genres"], [])
+        self.assertEqual(line.allowed["tags"], [])

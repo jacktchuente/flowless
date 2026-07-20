@@ -311,6 +311,8 @@ class TvChannelViewSet(
 
         type_to_axis = {
             "category": "categories",
+            "genre": "genres",
+            "tag": "tags",
             "nature": "natures",
             "kind": "container_kinds",
             "director": "directors",
