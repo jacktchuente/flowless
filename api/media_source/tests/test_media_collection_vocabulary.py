@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from media_source.models import MediaCollection, MediaContainer, MediaSource
 from media_source.services.media_collection_service import MediaCollectionService
+from project_ops.constants import AnalyzeStatus
 from rule_engine.services import vocabulary_service
 
 
@@ -62,3 +63,51 @@ class MediaCollectionVocabularyTests(TestCase):
         self.service.manage_media_containers(medias, self.media_source)
 
         self.assertEqual(vocabulary_service.get_values("actors"), ["Tom Hanks"])
+
+    def test_new_container_starts_without_source_categories(self):
+        self.service.manage_media_containers(
+            [{
+                "external_id": "m-1",
+                "title": "Movie",
+                "categories": ["Jellyfin category"],
+                "genres": ["Horror"],
+                "tags": ["Late night"],
+            }],
+            self.media_source,
+        )
+
+        container = MediaContainer.objects.get(external_id="m-1")
+        self.assertEqual(container.categories, [])
+        self.assertEqual(container.genres, ["Horror"])
+        self.assertEqual(container.tags, ["Late night"])
+        self.assertEqual(container.analyze_status, AnalyzeStatus.IDLE)
+
+    def test_changed_container_is_queued_for_category_normalization(self):
+        media = {"external_id": "m-1", "title": "Movie", "genres": ["Horror"]}
+        self.service.manage_media_containers([media], self.media_source)
+        container = MediaContainer.objects.get(external_id="m-1")
+        container.categories = ["horror"]
+        container.analyze_status = AnalyzeStatus.COMPLETE
+        container.save(update_fields=["categories", "analyze_status"])
+
+        changed = {**media, "title": "Movie remastered"}
+        self.service.manage_media_containers([changed], self.media_source)
+
+        container.refresh_from_db()
+        self.assertEqual(container.categories, [])
+        self.assertEqual(container.analyze_status, AnalyzeStatus.IDLE)
+        self.assertIsNone(container.analyzed_at)
+
+    def test_unchanged_container_keeps_normalized_categories(self):
+        media = {"external_id": "m-1", "title": "Movie", "genres": ["Horror"]}
+        self.service.manage_media_containers([media], self.media_source)
+        container = MediaContainer.objects.get(external_id="m-1")
+        container.categories = ["horror"]
+        container.analyze_status = AnalyzeStatus.COMPLETE
+        container.save(update_fields=["categories", "analyze_status"])
+
+        self.service.manage_media_containers([media], self.media_source)
+
+        container.refresh_from_db()
+        self.assertEqual(container.categories, ["horror"])
+        self.assertEqual(container.analyze_status, AnalyzeStatus.COMPLETE)
