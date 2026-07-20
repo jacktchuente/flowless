@@ -105,8 +105,14 @@ class BasePlayoutGenerationService:
 
     def _resolve_window_end(self, start_at: datetime) -> datetime:
         if self.extend and not self.reset:
-            return timezone.now() + timedelta(days=self.days)
+            return self._align_end_to_editorial_day(timezone.now() + timedelta(days=self.days))
         return start_at + timedelta(days=self.days)
+
+    def _align_end_to_editorial_day(self, end_at: datetime) -> datetime:
+        """La fenetre de generation se termine a la fermeture de la journee
+        editoriale, jamais en plein milieu: sans cela le programme s'arrete
+        a l'heure d'execution de la tache d'extension periodique."""
+        return max(end_at, self._resolve_day_end_at(end_at))
 
     def _get_playout_last_end(self, tv_playout: TvPlayout) -> datetime | None:
         bounds = ScheduleMediaItem.objects.filter(

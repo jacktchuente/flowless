@@ -17,21 +17,12 @@
   "SETTINGS": {
     "EYEBROW": "Configuration",
     "TITLE": "Paramètres",
-    "SUBTITLE": "Configurez le client et le comportement du serveur.",
-    "TABS": {
-      "GENERAL": "Général",
-      "BACKEND": "Backend"
-    },
+    "SUBTITLE": "Personnalisez l'interface de l'application.",
     "LANGUAGE": {
       "TITLE": "Langue de l'interface",
       "DESC": "Appliquée immédiatement et mémorisée sur ce navigateur.",
       "EN": "English",
       "FR": "Français"
-    },
-    "BACKEND": {
-      "TITLE": "Configuration du serveur",
-      "DESC": "Paramètres côté serveur.",
-      "PLACEHOLDER": "Aucun paramètre serveur n'est disponible pour le moment."
     }
   },
   "OVERVIEW": {
@@ -247,7 +238,8 @@
       "CLASSIFICATION": "Classification",
       "IS_ANIME": "Considérer comme anime",
       "ANALYZE_NOW": "Analyser maintenant"
-    }
+    },
+    "ANALYZE_ROLE_HINT": "Analyse réservée aux collections au rôle « Principal ». Définissez et enregistrez le rôle d'abord."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Médias",
@@ -414,7 +406,8 @@
     "PREFERRED_NATURES": "Natures préférées",
     "ALLOWED_KINDS": "Types autorisés",
     "FORBIDDEN_KINDS": "Types interdits",
-    "PREFERRED_KINDS": "Types préférés"
+    "PREFERRED_KINDS": "Types préférés",
+    "CREATE_LINE": "Créer la ligne"
   },
   "CHANNELS": {
     "EYEBROW": "Chaînes",
@@ -591,7 +584,8 @@
         "SELECT_MEDIA": "Sélection des médias",
         "RESOLVE": "Résolution des conflits",
         "WRITE_PLAYOUT": "Écriture du planning"
-      }
+      },
+      "PLAYOUT_HINT": "Le programme respecte les heures d'ouverture de la ligne éditoriale et se termine toujours à la fermeture d'une journée. La fenêtre réellement diffusée dépend ensuite de la configuration de build d'ErsatzTV."
     },
     "LOGO": {
       "TITLE": "Logo de la chaîne",

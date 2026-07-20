@@ -111,7 +111,7 @@ class MarathonPlayoutGenerationService(BasePlayoutGenerationService):
             if adjusted_start > start_at:
                 start_at = adjusted_start
                 if not self.extend:
-                    end_at = start_at + timedelta(days=self.days)
+                    end_at = self._align_end_to_editorial_day(start_at + timedelta(days=self.days))
 
             kind_states = self._build_pool(
                 tv_channel=tv_channel,

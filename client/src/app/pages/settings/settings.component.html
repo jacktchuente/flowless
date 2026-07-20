@@ -7,12 +7,7 @@
 </header>
 <div class="content">
   <section class="card">
-    <flw-tabs
-      [tabs]="tabs"
-      [active]="active"
-      (activeChange)="active = $event"
-    />
-    <div class="panel" *ngIf="active === 'general'">
+    <div class="panel">
       <div class="panel-head">
         <div>
           <h2>{{ "SETTINGS.LANGUAGE.TITLE" | translate }}</h2>
@@ -27,15 +22,6 @@
           (valueChange)="changeLanguage($any($event))"
         />
       </div>
-    </div>
-    <div class="panel" *ngIf="active === 'backend'">
-      <div class="panel-head">
-        <div>
-          <h2>{{ "SETTINGS.BACKEND.TITLE" | translate }}</h2>
-          <p>{{ "SETTINGS.BACKEND.DESC" | translate }}</p>
-        </div>
-      </div>
-      <div class="empty">{{ "SETTINGS.BACKEND.PLACEHOLDER" | translate }}</div>
     </div>
   </section>
 </div>

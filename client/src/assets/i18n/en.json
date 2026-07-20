@@ -17,21 +17,12 @@
   "SETTINGS": {
     "EYEBROW": "Configuration",
     "TITLE": "Settings",
-    "SUBTITLE": "Configure the client and backend behavior.",
-    "TABS": {
-      "GENERAL": "General",
-      "BACKEND": "Backend"
-    },
+    "SUBTITLE": "Customize the application interface.",
     "LANGUAGE": {
       "TITLE": "Interface language",
       "DESC": "Applied immediately and remembered on this browser.",
       "EN": "English",
       "FR": "Français"
-    },
-    "BACKEND": {
-      "TITLE": "Backend configuration",
-      "DESC": "Server-side settings.",
-      "PLACEHOLDER": "No backend setting is available yet."
     }
   },
   "OVERVIEW": {
@@ -247,7 +238,8 @@
       "CLASSIFICATION": "Classification",
       "IS_ANIME": "Treat as anime",
       "ANALYZE_NOW": "Analyze now"
-    }
+    },
+    "ANALYZE_ROLE_HINT": "Analysis is limited to collections with the \"Main\" role. Set and save the role first."
   },
   "MEDIA_CONTAINER": {
     "EYEBROW": "Medias",
@@ -414,7 +406,8 @@
     "PREFERRED_NATURES": "Preferred natures",
     "ALLOWED_KINDS": "Allowed types",
     "FORBIDDEN_KINDS": "Forbidden types",
-    "PREFERRED_KINDS": "Preferred types"
+    "PREFERRED_KINDS": "Preferred types",
+    "CREATE_LINE": "Create the line"
   },
   "CHANNELS": {
     "EYEBROW": "Channels",
@@ -591,7 +584,8 @@
         "SELECT_MEDIA": "Select media",
         "RESOLVE": "Resolve conflicts",
         "WRITE_PLAYOUT": "Write schedule"
-      }
+      },
+      "PLAYOUT_HINT": "The schedule follows the editorial line's opening hours and always ends at a day's closing time. The window actually aired then depends on ErsatzTV's own build configuration."
     },
     "LOGO": {
       "TITLE": "Channel logo",

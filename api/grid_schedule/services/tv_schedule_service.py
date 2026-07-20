@@ -107,7 +107,7 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
             if adjusted_start > start_at:
                 start_at = adjusted_start
                 if not self.extend:
-                    end_at = start_at + timedelta(days=self.days)
+                    end_at = self._align_end_to_editorial_day(start_at + timedelta(days=self.days))
             logger.info(
                 "TvPlayoutGenerationService.generate future items cleanup done playout_id=%s start_at=%s",
                 tv_playout.id,

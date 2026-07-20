@@ -63,6 +63,9 @@ export interface GenerationDialogData {
             [(ngModel)]="reset"
             [label]="'CHANNEL_DIALOGS.GENERATION.RESET' | translate"
           />
+          <p class="tooltip-note">
+            {{ "CHANNEL_DIALOGS.GENERATION.PLAYOUT_HINT" | translate }}
+          </p>
         </ng-template>
       </ng-container>
       <flw-gen-steps *ngIf="state !== 'idle'" [steps]="steps" [state]="state" />

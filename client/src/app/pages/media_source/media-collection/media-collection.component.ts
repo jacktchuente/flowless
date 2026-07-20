@@ -57,9 +57,13 @@ export class MediaCollectionComponent {
         }
       });
   }
+  // L'analyse (etiquetage LLM) est reservee aux collections au role principal.
+  isMainRole(collection: MediaCollection) {
+    return collection.programming_role === 1;
+  }
   analyze(collection: MediaCollection, e?: Event) {
     e?.stopPropagation();
-    if (!collection.is_active) return;
+    if (!collection.is_active || !this.isMainRole(collection)) return;
     const alreadyAnalyzed = !!collection.analyzed_at;
     const isAnalyzing = collection.analyze_status === AnalyzeStatus.Running;
     this.dialogs
