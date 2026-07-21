@@ -28,6 +28,7 @@ from media_source.models import MediaContainer, MediaItem
 from project_ops.constants import AnalyzeStatus
 from tv_channel.models import GridBlock, GridLayout, TvChannel
 from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
+from tv_channel.services import numeric_rules
 
 logger = logging.getLogger(__name__)
 
@@ -497,6 +498,14 @@ class TvPlayoutGenerationService(BasePlayoutGenerationService):
         )
         score += kind_bonus
         reasons["preferred_container_kinds"] = kind_bonus
+
+        numeric_bonus = numeric_rules.preferred_bonus(
+            container,
+            self.editorial_line.preferred.get(numeric_rules.COMPARISON_AXIS, [])
+            + block.preferred.get(numeric_rules.COMPARISON_AXIS, []),
+        )
+        score += numeric_bonus
+        reasons["preferred_comparisons"] = numeric_bonus
 
         priority_bonus = block.priority / 100.0
         score += priority_bonus

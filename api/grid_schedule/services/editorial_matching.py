@@ -13,6 +13,7 @@ from typing import Iterable, Sequence
 
 from media_source.models import MediaContainer
 from tv_channel.services.editorial_rules_validation import STRING_RULE_AXES
+from tv_channel.services import numeric_rules
 
 
 def container_categories(container: MediaContainer) -> set[str]:
@@ -113,6 +114,12 @@ def container_passes_rules(container: MediaContainer, rules_sources: Sequence) -
     nature = container_nature(container)
     kind = container_kind(container)
     for source in rules_sources:
+        allowed_comparisons = source.allowed.get(numeric_rules.COMPARISON_AXIS, [])
+        if not all(numeric_rules.matches(container, comparison) for comparison in allowed_comparisons):
+            return False
+        forbidden_comparisons = source.forbidden.get(numeric_rules.COMPARISON_AXIS, [])
+        if any(numeric_rules.matches(container, comparison) for comparison in forbidden_comparisons):
+            return False
         if not passes_allowed_choice(nature, source.allowed.get("natures", [])):
             return False
         if matches_forbidden_choice(nature, source.forbidden.get("natures", [])):
@@ -135,6 +142,10 @@ def preferred_bonus(container: MediaContainer, rules_sources: Sequence) -> float
     natures_preferred: list = []
     kinds_preferred: list = []
     for source in rules_sources:
+        total += numeric_rules.preferred_bonus(
+            container,
+            source.preferred.get(numeric_rules.COMPARISON_AXIS, []),
+        )
         natures_preferred += source.preferred.get("natures", [])
         kinds_preferred += source.preferred.get("container_kinds", [])
     total += preferred_choice_bonus(container_nature(container), natures_preferred)

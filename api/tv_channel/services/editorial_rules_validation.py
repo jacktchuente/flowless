@@ -9,13 +9,14 @@ from django.core.exceptions import ValidationError
 
 from media_source.constants import MediaContainerKind, MediaNature
 from rule_engine.services import category_service, vocabulary_service
+from tv_channel.services import numeric_rules
 
 
 # Axes a valeurs texte, matches contre les listes homonymes de MediaContainer
 # Chaque axe correspond exclusivement au champ homonyme de MediaContainer.
 STRING_RULE_AXES = ("categories", *vocabulary_service.VOCABULARY_AXES)
 CHOICE_RULE_AXES = ("natures", "container_kinds")
-RULE_AXES = (*STRING_RULE_AXES, *CHOICE_RULE_AXES)
+RULE_AXES = (*STRING_RULE_AXES, *CHOICE_RULE_AXES, numeric_rules.COMPARISON_AXIS)
 RULE_LEVELS = ("allowed", "forbidden", "preferred")
 
 
@@ -100,13 +101,34 @@ def _normalize_text(value: str) -> str:
 
 
 def _overlap_key(value):
+    if isinstance(value, dict):
+        return numeric_rules.comparison_key(value)
     return _normalize_text(value) if isinstance(value, str) else value
+
+
+def validate_comparisons(values: list) -> list[dict]:
+    if not isinstance(values, list):
+        raise ValidationError("Must be a list.")
+    normalized = []
+    invalid = []
+    for value in values:
+        try:
+            comparison = numeric_rules.normalize_comparison(value)
+        except ValueError as exc:
+            invalid.append(str(exc))
+            continue
+        if comparison not in normalized:
+            normalized.append(comparison)
+    if invalid:
+        raise ValidationError(invalid)
+    return normalized
 
 
 AXIS_VALIDATORS = {
     "categories": validate_categories,
     "natures": validate_natures,
     "container_kinds": validate_container_kinds,
+    numeric_rules.COMPARISON_AXIS: validate_comparisons,
     **{axis: make_vocabulary_validator(axis) for axis in vocabulary_service.VOCABULARY_AXES},
 }
 

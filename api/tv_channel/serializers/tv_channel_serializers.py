@@ -138,6 +138,7 @@ class TvChannelResetRulesSerializer(serializers.Serializer):
     TYPE_CATEGORY = "category"
     TYPE_GENRE = "genre"
     TYPE_TAG = "tag"
+    TYPE_COMPARISON = "comparison"
     TYPE_NATURE = "nature"
     TYPE_KIND = "kind"
     TYPE_DIRECTOR = "director"
@@ -156,6 +157,7 @@ class TvChannelResetRulesSerializer(serializers.Serializer):
             TYPE_CATEGORY,
             TYPE_GENRE,
             TYPE_TAG,
+            TYPE_COMPARISON,
             TYPE_NATURE,
             TYPE_KIND,
             TYPE_DIRECTOR,

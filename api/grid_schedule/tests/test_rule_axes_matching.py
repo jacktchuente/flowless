@@ -171,3 +171,73 @@ class GenerationServiceRuleAxesTests(RuleAxesFixtureMixin, TestCase):
         self.assertEqual(boosted.reasons["preferred_genres"], 1.0)
         self.assertEqual(boosted.reasons["preferred_tags"], 1.0)
         self.assertEqual(boosted.reasons["preferred_countries"], 0.0)
+
+
+class NumericRuleMatchingTests(RuleAxesFixtureMixin, TestCase):
+
+    def setUp(self):
+        self.build_fixtures()
+        self.modern = self.create_container(
+            "modern",
+            min_age=12,
+            release_year_min=2015,
+            release_year_max=2020,
+            overall_rating_score=8.0,
+            critic_rating_score=75,
+        )
+        self.old = self.create_container(
+            "old",
+            min_age=7,
+            release_year_min=1980,
+            release_year_max=1980,
+            overall_rating_score=6.0,
+            critic_rating_score=90,
+        )
+        self.unknown = self.create_container("unknown")
+
+    def stats(self):
+        return TvScheduleMatchingService(tv_channel=self.tv_channel).get_block_match_stats(self.block)
+
+    def test_allowed_comparisons_all_must_match_and_null_fails(self):
+        self.block.allowed = {"comparisons": [
+            {"field": "min_age", "operator": "gt", "value": 10},
+            {"field": "overall_rating_score", "operator": "gte", "value": 8},
+        ]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+    def test_forbidden_comparison_excludes_matches_but_not_nulls(self):
+        self.block.forbidden = {"comparisons": [
+            {"field": "critic_rating_score", "operator": "gt", "value": 80},
+        ]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 2)
+
+    def test_release_year_uses_conservative_container_bounds(self):
+        self.block.allowed = {"comparisons": [
+            {"field": "release_year", "operator": "gte", "value": 2010},
+        ]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+        self.block.allowed = {"comparisons": [
+            {"field": "release_year", "operator": "lte", "value": 2018},
+        ]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+    def test_star_rating_is_overall_rating_on_a_five_star_scale(self):
+        self.block.allowed = {"comparisons": [
+            {"field": "star_rating", "operator": "gte", "value": 4},
+        ]}
+        self.assertEqual(self.stats()["matching_media_container_count"], 1)
+
+    def test_preferred_comparisons_add_one_bonus_each(self):
+        service = TvPlayoutGenerationService(tv_channel=self.tv_channel, days=1)
+        history = {"container_counts": {}, "last_block_id_by_container": {}}
+        self.block.preferred = {"comparisons": [
+            {"field": "min_age", "operator": "gte", "value": 12},
+            {"field": "star_rating", "operator": "gte", "value": 4},
+        ]}
+        score = service._score_container(
+            tv_channel=self.tv_channel,
+            block=self.block,
+            container=self.modern,
+            history=history,
+        )
+        self.assertEqual(score.reasons["preferred_comparisons"], 2.0)

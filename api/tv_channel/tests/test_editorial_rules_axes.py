@@ -34,6 +34,38 @@ class EditorialRulesAxesValidationTests(TestCase):
         for axis in ("genres", "tags", "directors", "writers", "creators", "actors", "studios",
                      "countries", "audio_languages", "subtitle_languages"):
             self.assertIn(axis, RULE_AXES)
+        self.assertIn("comparisons", RULE_AXES)
+
+    def test_numeric_comparisons_are_normalized(self):
+        normalized = validate_rule_level(
+            {
+                "comparisons": [
+                    {"field": "min_age", "operator": "gt", "value": 10},
+                    {"field": "overall_rating_score", "operator": "gte", "value": 8.5},
+                ],
+            },
+            "allowed",
+        )
+        self.assertEqual(len(normalized["comparisons"]), 2)
+
+    def test_numeric_comparison_rejects_unknown_or_invalid_values(self):
+        invalid = (
+            {"field": "secret", "operator": "gt", "value": 10},
+            {"field": "min_age", "operator": "contains", "value": 10},
+            {"field": "min_age", "operator": "gt", "value": 10.5},
+            {"field": "star_rating", "operator": "gte", "value": 6},
+        )
+        for comparison in invalid:
+            with self.subTest(comparison=comparison), self.assertRaises(ValidationError):
+                validate_rule_level({"comparisons": [comparison]}, "allowed")
+
+    def test_identical_numeric_comparison_cannot_be_allowed_and_forbidden(self):
+        comparison = {"field": "min_age", "operator": "gt", "value": 10}
+        with self.assertRaises(ValidationError):
+            validate_editorial_rules_payload({
+                "allowed": {"comparisons": [comparison]},
+                "forbidden": {"comparisons": [comparison]},
+            })
 
     def test_vocabulary_axis_accepts_known_value(self):
         normalized = validate_rule_level(

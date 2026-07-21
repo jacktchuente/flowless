@@ -313,6 +313,7 @@ class TvChannelViewSet(
             "category": "categories",
             "genre": "genres",
             "tag": "tags",
+            "comparison": "comparisons",
             "nature": "natures",
             "kind": "container_kinds",
             "director": "directors",
