@@ -142,6 +142,23 @@ class EditorialLineApiAxesTests(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_put_editorial_line_rejects_invalid_numeric_comparison(self):
+        response = self.client.put(
+            f"/api/tv-channel/{self.channel.id}/editorial-line/",
+            {
+                "start_at": "06:00",
+                "end_at": "22:00",
+                "allow_filler": True,
+                "allowed": {
+                    "comparisons": [
+                        {"field": "star_rating", "operator": "gte", "value": 6},
+                    ],
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_reset_rules_clears_only_targeted_new_axis(self):
         EditorialLine.objects.create(
             tv_channel=self.channel,
@@ -190,3 +207,23 @@ class EditorialLineApiAxesTests(APITestCase):
         line = EditorialLine.objects.get(tv_channel=self.channel)
         self.assertEqual(line.allowed["genres"], [])
         self.assertEqual(line.allowed["tags"], [])
+
+    def test_reset_rules_clears_numeric_comparisons(self):
+        EditorialLine.objects.create(
+            tv_channel=self.channel,
+            allowed={
+                "comparisons": [
+                    {"field": "min_age", "operator": "gt", "value": 10},
+                ],
+            },
+        )
+
+        response = self.client.post(
+            f"/api/tv-channel/{self.channel.id}/reset-rules/",
+            {"types": ["comparison"], "levels": ["allowed"]},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 204)
+        line = EditorialLine.objects.get(tv_channel=self.channel)
+        self.assertEqual(line.allowed["comparisons"], [])
