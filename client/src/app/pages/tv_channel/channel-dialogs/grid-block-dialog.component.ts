@@ -27,6 +27,7 @@ import {
 } from "../../../ui/suggestion-preview/flw-suggestion-preview.component";
 import {
   readRuleValues,
+  parseNumericComparison,
   ruleOptions,
   ruleValueLabel,
   searchResultToOption,
@@ -129,6 +130,7 @@ import { GenerationDialogComponent } from "./generation-dialog.component";
           formControlName="allowed"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="prefer"
@@ -138,6 +140,7 @@ import { GenerationDialogComponent } from "./generation-dialog.component";
           formControlName="preferred"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="forbid"
@@ -147,8 +150,12 @@ import { GenerationDialogComponent } from "./generation-dialog.component";
           formControlName="forbidden"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter"
       /></flw-rule-group>
+      <p class="hint">
+        {{ "CHANNEL_DIALOGS.COMMON.NUMERIC_HINT" | translate }}
+      </p>
       <p class="hint" *ngIf="availableCount !== null">
         {{
           "CHANNEL_DIALOGS.GRID.MATCHING" | translate: { count: availableCount }
@@ -219,6 +226,7 @@ export class GridBlockDialogComponent {
     );
   labelFormatter = (value: string | number) =>
     ruleValueLabel(value, this.translateFn, this.translate.currentLang);
+  comparisonParser = parseNumericComparison;
   priorities = [80, 50, 20].map((value) => ({
     label: this.translate.instant(
       value === 80

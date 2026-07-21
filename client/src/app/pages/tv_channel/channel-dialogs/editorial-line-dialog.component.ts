@@ -13,6 +13,7 @@ import {
 } from "../../../ui/tag-input/flw-tag-input.component";
 import {
   readRuleValues,
+  parseNumericComparison,
   ruleOptions,
   ruleValueLabel,
   searchResultToOption,
@@ -55,6 +56,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="allowed"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="prefer"
@@ -64,6 +66,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="preferred"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="forbid"
@@ -73,8 +76,12 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="forbidden"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter"
       /></flw-rule-group>
+      <p class="hint">
+        {{ "CHANNEL_DIALOGS.COMMON.NUMERIC_HINT" | translate }}
+      </p>
     </form>
     <div modal-footer>
       <button class="btn ghost" (click)="ref.close(false)">
@@ -113,6 +120,7 @@ export class EditorialLineDialogComponent {
     );
   labelFormatter = (value: string | number) =>
     ruleValueLabel(value, this.translateFn, this.translate.currentLang);
+  comparisonParser = parseNumericComparison;
   form = new FormGroup({
     start_at: new FormControl(this.data.line.start_at.slice(0, 5), {
       nonNullable: true,

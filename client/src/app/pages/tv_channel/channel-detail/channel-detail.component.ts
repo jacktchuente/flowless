@@ -49,6 +49,7 @@ import { GridSettingsDialogComponent } from "../channel-dialogs/grid-settings-di
 import { MarathonConfigDialogComponent } from "../channel-dialogs/marathon-config-dialog.component";
 import { EditorialLineDialogComponent } from "../channel-dialogs/editorial-line-dialog.component";
 import { GridBlockDialogComponent } from "../channel-dialogs/grid-block-dialog.component";
+import { numericComparisonLabel } from "../channel-dialogs/rule-values";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 @Component({
   selector: "app-channel-detail",
@@ -165,7 +166,10 @@ export class ChannelDetailComponent {
       ...(rules?.tags ?? []).map((value) =>
         this.translate.instant("CHANNEL_DIALOGS.COMMON.TAG_VALUE", { value }),
       ),
-      ...(rules?.natures ?? []).map((v) => this.translate.instant(natureLabel(v))),
+      ...(rules?.comparisons ?? []).map(numericComparisonLabel),
+      ...(rules?.natures ?? []).map((v) =>
+        this.translate.instant(natureLabel(v)),
+      ),
       ...(rules?.container_kinds ?? []).map((v) =>
         this.translate.instant(containerKindLabel(v)),
       ),
@@ -486,6 +490,7 @@ export class ChannelDetailComponent {
       ...(b.allowed?.tags ?? []).map((value) =>
         this.translate.instant("CHANNEL_DIALOGS.COMMON.TAG_VALUE", { value }),
       ),
+      ...(b.allowed?.comparisons ?? []).map(numericComparisonLabel),
       ...(b.allowed?.natures ?? []).map((value) =>
         this.translate.instant(natureLabel(value)),
       ),

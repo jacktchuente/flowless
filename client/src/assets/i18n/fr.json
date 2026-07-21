@@ -551,6 +551,7 @@
       "CATEGORY_VALUE": "Catégorie={{value}}",
       "GENRE_VALUE": "Genre={{value}}",
       "TAG_VALUE": "Tag={{value}}",
+      "NUMERIC_HINT": "Filtres numériques : min-age>10, release-year>=2000, rating>=8, stars>=4…",
       "NATURE_VALUE": "Nature={{value}}",
       "KIND_VALUE": "Type={{value}}",
       "DIRECTOR_VALUE": "Réalisateur={{value}}",
@@ -618,6 +619,7 @@
       "CATEGORIES": "Catégories",
       "GENRES": "Genres",
       "TAGS": "Tags",
+      "COMPARISONS": "Filtres numériques",
       "LEVEL": "Quel niveau",
       "ACTION": "Réinitialiser la sélection"
     },

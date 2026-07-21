@@ -1,3 +1,17 @@
+export type NumericComparisonOperator =
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'eq'
+  | 'neq'
+
+export interface NumericComparison {
+  field: string
+  operator: NumericComparisonOperator
+  value: number
+}
+
 export interface RuleValuesByAxis {
   categories?: string[]
   genres?: string[]
@@ -12,6 +26,7 @@ export interface RuleValuesByAxis {
   countries?: string[]
   audio_languages?: string[]
   subtitle_languages?: string[]
+  comparisons?: NumericComparison[]
 }
 
 export interface RuleOptionSearchResult {

@@ -42,6 +42,7 @@ export interface TvChannelResetRulesPayload {
     | "category"
     | "genre"
     | "tag"
+    | "comparison"
     | "director"
     | "writer"
     | "creator"

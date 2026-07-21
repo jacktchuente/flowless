@@ -86,6 +86,9 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
   @Input() searchProvider?: (query: string) => Observable<FlwTagOption[]>;
   // Libelle de secours pour les valeurs hors options (axes recherches).
   @Input() labelFormatter?: (value: string | number) => string;
+  // Parseur local pour les syntaxes structurees qui ne viennent pas de
+  // l'autocompletion (par exemple min-age>10).
+  @Input() draftParser?: (draft: string) => FlwTagOption | null;
   @ViewChild("input") input?: ElementRef<HTMLInputElement>;
   values: Array<string | number> = [];
   draft = "";
@@ -139,7 +142,9 @@ export class FlwTagInputComponent implements ControlValueAccessor, OnDestroy {
   addDraft(event?: Event) {
     event?.preventDefault();
     const text = this.draft.trim();
-    const option = this.findOption(text);
+    const option =
+      this.findOption(text) ?? this.draftParser?.(text) ?? undefined;
+    if (option) this.seenSearchOptions.set(option.value, option);
     const canAdd =
       (option || (this.freeText && text)) &&
       !this.values.includes(option?.value ?? text);
