@@ -40,6 +40,9 @@ export interface TvChannelResetRulesPayload {
     | "nature"
     | "kind"
     | "category"
+    | "genre"
+    | "tag"
+    | "comparison"
     | "director"
     | "writer"
     | "creator"
@@ -158,10 +161,11 @@ export class TvChannelApiService extends BaseApiService {
   searchRuleOptions(
     query: string,
     limit = 20,
+    axis?: string,
   ): Observable<RuleOptionSearchResponse> {
     return this.http.get<RuleOptionSearchResponse>(
       `${this.getFullUrl()}rule-option-search/`,
-      { params: { q: query, limit } },
+      { params: { q: query, limit, ...(axis ? { axis } : {}) } },
     );
   }
   getEditorialLine(id: string | number): Observable<EditorialLineData> {
@@ -376,8 +380,8 @@ export class TvChannelService extends ObjectApiService {
     return this.wrap(this.api.getFormOptions());
   }
   // Flux brut (pas de wrap isOk) : consomme directement par l'autocomplete.
-  searchRuleOptions(query: string, limit = 20) {
-    return this.api.searchRuleOptions(query, limit);
+  searchRuleOptions(query: string, limit = 20, axis?: string) {
+    return this.api.searchRuleOptions(query, limit, axis);
   }
   getEditorialLine(id: string | number) {
     return this.wrap(this.api.getEditorialLine(id));

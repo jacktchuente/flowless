@@ -19,6 +19,8 @@ from rule_engine.services import category_service
 # Axes a valeurs ouvertes stockes dans VocabularyEntry. Chaque axe porte le
 # nom du champ homonyme de MediaContainer.
 VOCABULARY_AXES = (
+    "genres",
+    "tags",
     "directors",
     "writers",
     "creators",
@@ -45,12 +47,16 @@ def get_values(axis: str) -> list[str]:
     )
 
 
-def search(query: str, limit: int = 20) -> list[dict[str, str]]:
+def search(query: str, limit: int = 20, axis: str | None = None) -> list[dict[str, str]]:
+    entries = VocabularyEntry.objects.filter(value__icontains=query)
+    if axis is not None:
+        if axis not in VOCABULARY_AXES:
+            raise ValueError(f"Unknown vocabulary axis: {axis}.")
+        entries = entries.filter(axis=axis)
     return [
         {"axis": entry.axis, "value": entry.value}
         for entry in (
-            VocabularyEntry.objects
-            .filter(value__icontains=query)
+            entries
             .order_by("axis", "value")[:limit]
         )
     ]

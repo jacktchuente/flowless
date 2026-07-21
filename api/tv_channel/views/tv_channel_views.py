@@ -89,14 +89,17 @@ class TvChannelViewSet(
     @action(detail=False, methods=("get",), url_path="rule-option-search")
     def rule_option_search(self, request):
         query = (request.query_params.get("q") or "").strip()
-        if len(query) < 2:
+        axis = (request.query_params.get("axis") or "").strip() or None
+        if axis not in (None, *vocabulary_service.VOCABULARY_AXES):
+            return Response({"axis": ["Unknown vocabulary axis."]}, status=status.HTTP_400_BAD_REQUEST)
+        if axis is None and len(query) < 2:
             return Response({"results": []})
         try:
             limit = int(request.query_params.get("limit", 20))
         except (TypeError, ValueError):
             limit = 20
         limit = max(1, min(limit, 50))
-        return Response({"results": vocabulary_service.search(query, limit=limit)})
+        return Response({"results": vocabulary_service.search(query, limit=limit, axis=axis)})
 
     @action(detail=True, methods=("get", "put", "patch"), url_path="editorial-line")
     def editorial_line(self, request, pk=None):
@@ -311,6 +314,9 @@ class TvChannelViewSet(
 
         type_to_axis = {
             "category": "categories",
+            "genre": "genres",
+            "tag": "tags",
+            "comparison": "comparisons",
             "nature": "natures",
             "kind": "container_kinds",
             "director": "directors",

@@ -13,6 +13,8 @@ class RuleOptionSearchApiTests(APITestCase):
             VocabularyEntry(axis="actors", value="Tommy Lee Jones"),
             VocabularyEntry(axis="directors", value="Tom Hooper"),
             VocabularyEntry(axis="studios", value="Warner Bros."),
+            VocabularyEntry(axis="genres", value="Film noir"),
+            VocabularyEntry(axis="tags", value="Late night"),
         ])
 
     def test_short_query_returns_empty(self):
@@ -39,3 +41,28 @@ class RuleOptionSearchApiTests(APITestCase):
         response = self.client.get(self.URL, {"q": "tom", "limit": "abc"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 3)
+
+    def test_search_returns_genres_and_tags(self):
+        genre_response = self.client.get(self.URL, {"q": "noir"})
+        tag_response = self.client.get(self.URL, {"q": "night"})
+
+        self.assertEqual(
+            genre_response.data["results"],
+            [{"axis": "genres", "value": "Film noir"}],
+        )
+        self.assertEqual(
+            tag_response.data["results"],
+            [{"axis": "tags", "value": "Late night"}],
+        )
+
+    def test_axis_search_can_list_and_filter_genres(self):
+        listed = self.client.get(self.URL, {"q": "", "axis": "genres"})
+        filtered = self.client.get(self.URL, {"q": "noir", "axis": "genres"})
+
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual(listed.data["results"], [{"axis": "genres", "value": "Film noir"}])
+        self.assertEqual(filtered.data["results"], [{"axis": "genres", "value": "Film noir"}])
+
+    def test_unknown_axis_is_rejected(self):
+        response = self.client.get(self.URL, {"q": "", "axis": "unknown"})
+        self.assertEqual(response.status_code, 400)

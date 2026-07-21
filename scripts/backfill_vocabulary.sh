@@ -14,14 +14,4 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-docker compose exec api python manage.py shell -c "
-from rule_engine.services import vocabulary_service
-from rule_engine.models import VocabularyEntry
-
-vocabulary_service.rebuild()
-
-for axis in vocabulary_service.VOCABULARY_AXES:
-    print(f'{axis}: {VocabularyEntry.objects.filter(axis=axis).count()} entries')
-"
-
-echo "Vocabulary backfill done."
+docker compose exec api python manage.py backfill_vocabulary

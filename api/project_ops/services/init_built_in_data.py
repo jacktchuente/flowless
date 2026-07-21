@@ -23,21 +23,35 @@ class Initializer:
             return
 
         file_path = settings.BASE_DIR / "project_ops" / "built_in_data" / "categories.json"
-        entries = Initializer._load_category_seed(file_path)
+        seed = Initializer._load_category_seed(file_path)
+        category_names = list(dict.fromkeys(
+            category
+            for nature in seed["natures"]
+            for category in nature["categories"]
+        ))
+        rules_by_category = {name: [] for name in category_names}
+        for rule in seed["rules"]:
+            rules_by_category[rule["category"]].append({
+                "fields": rule["fields"],
+                "values": rule["values"],
+            })
 
         with transaction.atomic():
             categories = Category.objects.bulk_create(
-                [Category(category=entry["name"]) for entry in entries]
+                [Category(category=name) for name in category_names]
             )
             category_by_name = {category.category: category for category in categories}
             CategoryNature.objects.bulk_create([
-                CategoryNature(category=category_by_name[entry["name"]], nature=nature)
-                for entry in entries
-                for nature in entry["natures"]
+                CategoryNature(category=category_by_name[category], nature=nature["value"])
+                for nature in seed["natures"]
+                for category in nature["categories"]
             ])
             CategoryRule.objects.bulk_create([
-                CategoryRule(category=category_by_name[entry["name"]], rules=entry["rules"])
-                for entry in entries
+                CategoryRule(
+                    category=category_by_name[name],
+                    rules=rules_by_category[name],
+                )
+                for name in category_names
             ])
 
     @staticmethod
@@ -49,50 +63,82 @@ class Initializer:
 
         if not isinstance(payload, dict):
             raise ValueError(f"{file_path.name}: top-level payload must be an object.")
+        if set(payload) != {"natures", "rules"}:
+            raise ValueError(
+                f"{file_path.name}: top-level payload must contain exactly natures and rules."
+            )
 
         nature_by_label = {choice.label: choice.value for choice in MediaNature}
-        declared_natures = payload.get("natures")
-        if not isinstance(declared_natures, list) or set(declared_natures) != set(nature_by_label):
+        raw_natures = payload.get("natures")
+        if not isinstance(raw_natures, list):
+            raise ValueError(f"{file_path.name}: 'natures' must be a list.")
+
+        natures = []
+        seen_natures = set()
+        seen_categories = set()
+        for raw_nature in raw_natures:
+            if not isinstance(raw_nature, dict) or set(raw_nature) != {"name", "categories"}:
+                raise ValueError(
+                    f"{file_path.name}: each nature must contain exactly name and categories."
+                )
+            name = raw_nature.get("name")
+            if not isinstance(name, str) or name not in nature_by_label:
+                raise ValueError(f"{file_path.name}: unknown nature: {name}.")
+            if name in seen_natures:
+                raise ValueError(f"{file_path.name}: duplicate nature: {name}.")
+            seen_natures.add(name)
+
+            raw_categories = raw_nature.get("categories")
+            if not isinstance(raw_categories, list) or not all(
+                isinstance(category, str) and category.strip() for category in raw_categories
+            ):
+                raise ValueError(
+                    f"{file_path.name}: categories of {name} must be a list of strings."
+                )
+            categories = [category.strip().lower() for category in raw_categories]
+            if len(categories) != len(set(categories)):
+                raise ValueError(f"{file_path.name}: duplicate category in nature {name}.")
+            seen_categories.update(categories)
+            natures.append({
+                "name": name,
+                "value": nature_by_label[name],
+                "categories": categories,
+            })
+
+        if seen_natures != set(nature_by_label):
             raise ValueError(
-                f"{file_path.name}: 'natures' must list every MediaNature label: "
+                f"{file_path.name}: 'natures' must contain every MediaNature label: "
                 f"{sorted(nature_by_label)}."
             )
 
-        raw_entries = payload.get("categories")
-        if not isinstance(raw_entries, list):
-            raise ValueError(f"{file_path.name}: 'categories' must be a list.")
+        raw_rules = payload.get("rules")
+        if not isinstance(raw_rules, list):
+            raise ValueError(f"{file_path.name}: top-level 'rules' must be a list.")
 
-        entries = []
-        seen_names = set()
-        for raw_entry in raw_entries:
-            if not isinstance(raw_entry, dict):
-                raise ValueError(f"{file_path.name}: each category entry must be an object.")
-            name = raw_entry.get("name")
-            if not isinstance(name, str) or not name.strip():
-                raise ValueError(f"{file_path.name}: category entry without a valid name.")
-            name = name.strip().lower()
-            if name in seen_names:
-                raise ValueError(f"{file_path.name}: duplicate category name: {name}.")
-            seen_names.add(name)
-
-            natures = raw_entry.get("natures", [])
-            if not isinstance(natures, list):
-                raise ValueError(f"{file_path.name}: 'natures' of {name} must be a list.")
-            unknown = [label for label in natures if label not in nature_by_label]
-            if unknown:
-                raise ValueError(f"{file_path.name}: unknown natures for {name}: {unknown}.")
-
-            rules = raw_entry.get("rules", [])
-            if not isinstance(rules, list):
-                raise ValueError(f"{file_path.name}: 'rules' of {name} must be a list.")
-
-            entries.append({
-                "name": name,
-                # natures vides = valable pour toutes les natures (aucun lien cree).
-                "natures": [nature_by_label[label] for label in natures],
-                "rules": rules,
+        rules = []
+        for raw_rule in raw_rules:
+            if not isinstance(raw_rule, dict):
+                raise ValueError(f"{file_path.name}: each rule must be an object.")
+            category = raw_rule.get("category")
+            if not isinstance(category, str) or category.strip().lower() not in seen_categories:
+                raise ValueError(f"{file_path.name}: rule targets unknown category: {category}.")
+            fields = raw_rule.get("fields")
+            values = raw_rule.get("values")
+            if not isinstance(fields, list) or not all(
+                isinstance(field, str) and field.strip() for field in fields
+            ):
+                raise ValueError(f"{file_path.name}: rule fields must be a list of strings.")
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) and value.strip() for value in values
+            ):
+                raise ValueError(f"{file_path.name}: rule values must be a list of strings.")
+            rules.append({
+                "category": category.strip().lower(),
+                "fields": fields,
+                "values": values,
             })
-        return entries
+
+        return {"natures": natures, "rules": rules}
 
     @staticmethod
     def init_grid_layout_presets():

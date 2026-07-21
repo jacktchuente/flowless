@@ -167,6 +167,8 @@ export class ChannelManagementComponent {
         title: this.translate.instant("CHANNEL_DETAIL.BLOCK_TITLE", {
           category:
             b.allowed?.categories?.[0] ??
+            b.allowed?.genres?.[0] ??
+            b.allowed?.tags?.[0] ??
             this.translate.instant("CHANNEL_DETAIL.PROGRAMMING"),
         }),
         sub: this.translate.instant("CHANNEL_DETAIL.BLOCK_PRIORITY", {

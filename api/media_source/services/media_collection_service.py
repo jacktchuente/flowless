@@ -125,7 +125,9 @@ class MediaCollectionService:
                 "provider_ids": media.get("provider_ids", {}),
                 "title": (media.get("title") or "")[:255],
                 "description": media.get("description"),
-                "categories": media.get("categories", []),
+                # Source metadata never owns editorial categories. They are
+                # rebuilt by MediaContainerService after each changed sync.
+                "categories": [],
                 "item_count": media.get("item_count"),
                 "duration_min_seconds": media.get("duration_min_seconds"),
                 "duration_max_seconds": media.get("duration_max_seconds"),
@@ -188,6 +190,8 @@ class MediaCollectionService:
                 setattr(existing_media, field, value)
 
             existing_media.is_missing = False
+            existing_media.analyze_status = AnalyzeStatus.IDLE
+            existing_media.analyzed_at = None
             existing_media.original_data_hash = original_data_hash
             existing_media.raw_data = media.get("raw_metadata", payload)
 
@@ -233,6 +237,8 @@ class MediaCollectionService:
                     "studios",
                     "tags",
                     "genres",
+                    "analyze_status",
+                    "analyzed_at",
                     "is_missing",
                     "original_data_hash",
                     "raw_data",

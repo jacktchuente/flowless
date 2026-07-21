@@ -30,6 +30,15 @@ import { TranslateModule } from "@ngx-translate/core";
         ><label
           ><input type="checkbox" [(ngModel)]="category" />
           {{ "CHANNEL_DIALOGS.RESET.CATEGORIES" | translate }}</label
+        ><label
+          ><input type="checkbox" [(ngModel)]="genre" />
+          {{ "CHANNEL_DIALOGS.RESET.GENRES" | translate }}</label
+        ><label
+          ><input type="checkbox" [(ngModel)]="tag" />
+          {{ "CHANNEL_DIALOGS.RESET.TAGS" | translate }}</label
+        ><label
+          ><input type="checkbox" [(ngModel)]="comparison" />
+          {{ "CHANNEL_DIALOGS.RESET.COMPARISONS" | translate }}</label
         >
       </fieldset>
       <fieldset>
@@ -75,6 +84,9 @@ export class ResetRulesDialogComponent {
   nature = true;
   kind = true;
   category = true;
+  genre = true;
+  tag = true;
+  comparison = true;
   allowed = true;
   forbidden = true;
   constructor(
@@ -85,7 +97,12 @@ export class ResetRulesDialogComponent {
   ) {}
   get valid() {
     return (
-      (this.nature || this.kind || this.category) &&
+      (this.nature ||
+        this.kind ||
+        this.category ||
+        this.genre ||
+        this.tag ||
+        this.comparison) &&
       (this.allowed || this.forbidden)
     );
   }
@@ -94,6 +111,9 @@ export class ResetRulesDialogComponent {
     if (this.nature) payload.types.push("nature");
     if (this.kind) payload.types.push("kind");
     if (this.category) payload.types.push("category");
+    if (this.genre) payload.types.push("genre");
+    if (this.tag) payload.types.push("tag");
+    if (this.comparison) payload.types.push("comparison");
     if (this.allowed) payload.levels.push("allowed");
     if (this.forbidden) payload.levels.push("forbidden");
     this.service.resetRules(this.data.channelId, payload).subscribe((r) => {

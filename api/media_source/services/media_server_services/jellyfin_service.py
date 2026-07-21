@@ -890,8 +890,6 @@ class JellyfinService:
             ]
         )
 
-        categories = cls._dedupe_sorted(genres + tags)
-
         return {
             "external_id": external_id,
             "provider_ids": cls._extract_provider_ids(container_item),
@@ -902,7 +900,9 @@ class JellyfinService:
 
             "container_kind": cls._container_kind(container_item.get("Type")),
 
-            "categories": categories,
+            # Categories are owned by Flowless and populated by the
+            # normalization pass. Jellyfin only supplies genres and tags.
+            "categories": [],
             "genres": genres,
             "tags": tags,
 

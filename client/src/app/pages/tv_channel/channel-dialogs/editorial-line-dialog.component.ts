@@ -13,6 +13,8 @@ import {
 } from "../../../ui/tag-input/flw-tag-input.component";
 import {
   readRuleValues,
+  parseNumericComparison,
+  parseRuleOptionSearch,
   ruleOptions,
   ruleValueLabel,
   searchResultToOption,
@@ -55,6 +57,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="allowed"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="prefer"
@@ -64,6 +67,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="preferred"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter" /></flw-rule-group
       ><flw-rule-group
         kind="forbid"
@@ -73,8 +77,12 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
           formControlName="forbidden"
           [options]="options"
           [searchProvider]="searchOptions"
+          [draftParser]="comparisonParser"
           [labelFormatter]="labelFormatter"
       /></flw-rule-group>
+      <p class="hint">
+        {{ "CHANNEL_DIALOGS.COMMON.NUMERIC_HINT" | translate }}
+      </p>
     </form>
     <div modal-footer>
       <button class="btn ghost" (click)="ref.close(false)">
@@ -97,8 +105,9 @@ export class EditorialLineDialogComponent {
   private translateFn = (key: string, params?: Record<string, unknown>) =>
     this.translate.instant(key, params);
   options = ruleOptions(this.data.formOptions, this.translateFn);
-  searchOptions = (query: string) =>
-    this.service.searchRuleOptions(query).pipe(
+  searchOptions = (query: string) => {
+    const search = parseRuleOptionSearch(query);
+    return this.service.searchRuleOptions(search.query, 20, search.axis).pipe(
       map((response) =>
         response.results
           .map((result) =>
@@ -111,8 +120,10 @@ export class EditorialLineDialogComponent {
           .filter((option): option is FlwTagOption => option !== null),
       ),
     );
+  };
   labelFormatter = (value: string | number) =>
     ruleValueLabel(value, this.translateFn, this.translate.currentLang);
+  comparisonParser = parseNumericComparison;
   form = new FormGroup({
     start_at: new FormControl(this.data.line.start_at.slice(0, 5), {
       nonNullable: true,
