@@ -79,6 +79,21 @@ const VOCABULARY_AXES: Array<{
 const AXIS_BY_NAME = new Map<string, (typeof VOCABULARY_AXES)[number]>(
   VOCABULARY_AXES.map((spec) => [spec.axis, spec]),
 );
+const AXIS_BY_PREFIX = new Map<string, (typeof VOCABULARY_AXES)[number]>(
+  VOCABULARY_AXES.map((spec) => [spec.prefix, spec]),
+);
+
+export function parseRuleOptionSearch(query: string): {
+  query: string;
+  axis?: string;
+} {
+  const separator = query.indexOf("=");
+  if (separator < 0) return { query: query.trim() };
+  const prefix = query.slice(0, separator).trim().toLowerCase();
+  const spec = AXIS_BY_PREFIX.get(prefix);
+  if (!spec) return { query: query.trim() };
+  return { axis: spec.axis, query: query.slice(separator + 1).trim() };
+}
 
 interface NumericFieldSpec {
   field: string;

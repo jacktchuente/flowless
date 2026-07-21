@@ -54,3 +54,15 @@ class RuleOptionSearchApiTests(APITestCase):
             tag_response.data["results"],
             [{"axis": "tags", "value": "Late night"}],
         )
+
+    def test_axis_search_can_list_and_filter_genres(self):
+        listed = self.client.get(self.URL, {"q": "", "axis": "genres"})
+        filtered = self.client.get(self.URL, {"q": "noir", "axis": "genres"})
+
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual(listed.data["results"], [{"axis": "genres", "value": "Film noir"}])
+        self.assertEqual(filtered.data["results"], [{"axis": "genres", "value": "Film noir"}])
+
+    def test_unknown_axis_is_rejected(self):
+        response = self.client.get(self.URL, {"q": "", "axis": "unknown"})
+        self.assertEqual(response.status_code, 400)

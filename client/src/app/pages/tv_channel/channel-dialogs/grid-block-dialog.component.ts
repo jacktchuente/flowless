@@ -28,6 +28,7 @@ import {
 import {
   readRuleValues,
   parseNumericComparison,
+  parseRuleOptionSearch,
   ruleOptions,
   ruleValueLabel,
   searchResultToOption,
@@ -210,8 +211,9 @@ export class GridBlockDialogComponent {
   private translateFn = (key: string, params?: Record<string, unknown>) =>
     this.translate.instant(key, params);
   options = ruleOptions(this.data.formOptions, this.translateFn);
-  searchOptions = (query: string) =>
-    this.channels.searchRuleOptions(query).pipe(
+  searchOptions = (query: string) => {
+    const search = parseRuleOptionSearch(query);
+    return this.channels.searchRuleOptions(search.query, 20, search.axis).pipe(
       map((response) =>
         response.results
           .map((result) =>
@@ -224,6 +226,7 @@ export class GridBlockDialogComponent {
           .filter((option): option is FlwTagOption => option !== null),
       ),
     );
+  };
   labelFormatter = (value: string | number) =>
     ruleValueLabel(value, this.translateFn, this.translate.currentLang);
   comparisonParser = parseNumericComparison;

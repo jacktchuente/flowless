@@ -2,6 +2,7 @@ import { EditorialLineData, FormOptions } from "@project-interfaces/tv-channel";
 import {
   readRuleValues,
   parseNumericComparison,
+  parseRuleOptionSearch,
   ruleOptions,
   ruleValueLabel,
   searchResultToOption,
@@ -105,5 +106,12 @@ describe("unified rule values", () => {
     expect(parseNumericComparison("min-age>10.5")).toBeNull();
     expect(parseNumericComparison("stars>6")).toBeNull();
     expect(parseNumericComparison("unknown>10")).toBeNull();
+  });
+
+  it("routes prefixed autocomplete searches to their vocabulary axis", () => {
+    expect(parseRuleOptionSearch("genre=")).toEqual({ axis: "genres", query: "" });
+    expect(parseRuleOptionSearch("Genre= noir ")).toEqual({ axis: "genres", query: "noir" });
+    expect(parseRuleOptionSearch("tag=night")).toEqual({ axis: "tags", query: "night" });
+    expect(parseRuleOptionSearch("tom")).toEqual({ query: "tom" });
   });
 });
